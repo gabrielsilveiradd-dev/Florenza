@@ -23,3 +23,6 @@ next-env.d.ts
 # todo clone e todo deploy com o mesmo pixel duas vezes.
 /aneisFormatura/
 /produtos/
+
+# Capturas de tela dos testes de navegador
+/*.png
