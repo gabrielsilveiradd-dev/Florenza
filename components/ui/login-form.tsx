@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { ArrowRight, Loader2, Lock, User } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { ArrowRight, Loader2, Lock, Mail, Phone, User } from "lucide-react";
+import {
+  criarConta,
+  entrarComGoogle,
+  entrarComSenha,
+  enviarLinkDeRecuperacao,
+} from "@/lib/supabase/auth";
 
 /* ------------------------------------------------------------------ *
  * Fundo de fumaça em WebGL
@@ -251,23 +255,34 @@ export function SmokeyBackground({
  * Formulário
  * ------------------------------------------------------------------ */
 
+type Modo = "entrar" | "criar";
+
 /**
- * Entrada de sessão, ligada ao Supabase Auth.
+ * Entrar e criar conta, na mesma tela.
  *
  * É a mesma autenticação de /conta — mesmo banco, mesma tabela `auth.users`,
- * mesma trigger que cria o perfil. Esta tela é só outra porta de entrada, com
- * um desenho próprio; quem entra por aqui aparece na aba Clientes do painel
- * exatamente como quem entra por lá.
+ * mesma trigger que cria o perfil. Quem cria a conta por aqui aparece na aba
+ * Clientes do painel exatamente como quem cria por lá; nada é sincronizado
+ * depois.
  *
- * A criação de conta continua em /conta, que já pede nome e telefone — os dois
- * campos que a trigger lê de `raw_user_meta_data` para montar o perfil.
+ * As chamadas ao Supabase moram em lib/supabase/auth.ts e não aqui: são as
+ * mesmas de ContaFormulario, e o `emailRedirectTo` escrito em dois lugares é o
+ * tipo de coisa que diverge em silêncio e só aparece quando um cliente recebe
+ * um link para localhost.
  */
 export function LoginForm({ redirect = "/", demo = false }: { redirect?: string; demo?: boolean }) {
+  const [modo, setModo] = useState<Modo>("entrar");
   const [enviando, setEnviando] = useState<"senha" | "google" | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [recado, setRecado] = useState<string | null>(null);
 
-  async function entrar(evento: React.FormEvent<HTMLFormElement>) {
+  function trocarModo(novo: Modo) {
+    setModo(novo);
+    setErro(null);
+    setRecado(null);
+  }
+
+  async function enviar(evento: React.FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (demo) return;
     setErro(null);
@@ -278,12 +293,30 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
     const senha = String(dados.get("senha") ?? "");
 
     setEnviando("senha");
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
 
-    if (error) {
+    if (modo === "criar") {
+      const { erro } = await criarConta({
+        email,
+        senha,
+        nome: String(dados.get("nome") ?? "").trim(),
+        telefone: String(dados.get("telefone") ?? "").trim(),
+      });
       setEnviando(null);
-      setErro("E-mail ou senha incorretos.");
+      if (erro) {
+        setErro(erro);
+        return;
+      }
+      // Volta para "entrar" porque é o próximo passo de verdade: a conta só
+      // funciona depois de confirmar o e-mail.
+      setModo("entrar");
+      setRecado("Conta criada. Confira seu e-mail para confirmar o cadastro e depois entre por aqui.");
+      return;
+    }
+
+    const { erro } = await entrarComSenha(email, senha);
+    if (erro) {
+      setEnviando(null);
+      setErro(erro);
       return;
     }
 
@@ -294,28 +327,16 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
     window.location.assign(redirect);
   }
 
-  async function entrarComGoogle() {
+  async function comGoogle() {
     if (demo) return;
     setErro(null);
     setRecado(null);
     setEnviando("google");
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${redirect}` },
-    });
-
-    if (error) {
+    const { erro } = await entrarComGoogle(redirect);
+    if (erro) {
       setEnviando(null);
-      // O provedor Google precisa ser ligado no painel do Supabase
-      // (Authentication -> Providers). Enquanto não estiver, dizer "erro" seco
-      // manda a pessoa tentar de novo à toa.
-      setErro(
-        error.message.toLowerCase().includes("provider")
-          ? "Entrada com Google ainda não está disponível. Use e-mail e senha."
-          : "Não foi possível abrir a entrada com Google. Tente por e-mail e senha."
-      );
+      setErro(erro);
     }
   }
 
@@ -328,29 +349,86 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
       return;
     }
     setErro(null);
-    const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/conta`,
-    });
-    // Resposta igual dando certo ou errado, de propósito: dizer "esse e-mail
-    // não existe" transforma o formulário num verificador de quem é cliente.
+    await enviarLinkDeRecuperacao(email);
     setRecado("Se houver uma conta com esse e-mail, o link de recuperação chegou na caixa de entrada.");
   }
 
   return (
     <div className="entrar__caixa">
       <p className="entrar__eyebrow">Florenza</p>
-      <h1 className="entrar__titulo">Bem-vindo de volta</h1>
-      <p className="entrar__sub">Entre para acompanhar seus pedidos e suas peças favoritas.</p>
+      <h1 className="entrar__titulo">
+        {modo === "entrar" ? "Bem-vindo de volta" : "Criar conta"}
+      </h1>
+      <p className="entrar__sub">
+        {modo === "entrar"
+          ? "Entre para acompanhar seus pedidos e suas peças favoritas."
+          : "Leva um minuto. Depois é só confirmar o e-mail."}
+      </p>
+
+      <div className="entrar__abas" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={modo === "entrar"}
+          className={`entrar__aba${modo === "entrar" ? " is-active" : ""}`}
+          onClick={() => trocarModo("entrar")}
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={modo === "criar"}
+          className={`entrar__aba${modo === "criar" ? " is-active" : ""}`}
+          onClick={() => trocarModo("criar")}
+        >
+          Criar conta
+        </button>
+      </div>
 
       {demo && (
         <p className="entrar__aviso">
           <strong>Modo demonstração.</strong> O Supabase não está conectado nesta cópia, então
-          não é possível entrar.
+          não é possível entrar nem criar conta.
         </p>
       )}
 
-      <form className="entrar__form" onSubmit={entrar}>
+      <form className="entrar__form" onSubmit={enviar}>
+        {modo === "criar" && (
+          <>
+            <div className="entrar__campo">
+              <input
+                className="entrar__input"
+                type="text"
+                id="entrar-nome"
+                name="nome"
+                placeholder=" "
+                autoComplete="name"
+                required
+              />
+              <label className="entrar__rotulo" htmlFor="entrar-nome">
+                <User aria-hidden size={14} />
+                Nome
+              </label>
+            </div>
+
+            <div className="entrar__campo">
+              <input
+                className="entrar__input"
+                type="tel"
+                id="entrar-telefone"
+                name="telefone"
+                placeholder=" "
+                autoComplete="tel"
+              />
+              <label className="entrar__rotulo" htmlFor="entrar-telefone">
+                <Phone aria-hidden size={14} />
+                Telefone
+              </label>
+            </div>
+          </>
+        )}
+
         <div className="entrar__campo">
           <input
             className="entrar__input"
@@ -362,7 +440,7 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
             required
           />
           <label className="entrar__rotulo" htmlFor="entrar-email">
-            <User aria-hidden size={14} />
+            <Mail aria-hidden size={14} />
             E-mail
           </label>
         </div>
@@ -374,24 +452,27 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
             id="entrar-senha"
             name="senha"
             placeholder=" "
-            autoComplete="current-password"
+            autoComplete={modo === "entrar" ? "current-password" : "new-password"}
+            minLength={modo === "criar" ? 8 : undefined}
             required
           />
           <label className="entrar__rotulo" htmlFor="entrar-senha">
             <Lock aria-hidden size={14} />
-            Senha
+            {modo === "criar" ? "Senha (ao menos 8 caracteres)" : "Senha"}
           </label>
         </div>
 
-        <button type="button" className="entrar__esqueci" onClick={recuperarSenha} disabled={demo}>
-          Esqueci minha senha
-        </button>
+        {modo === "entrar" && (
+          <button type="button" className="entrar__esqueci" onClick={recuperarSenha} disabled={demo}>
+            Esqueci minha senha
+          </button>
+        )}
 
         <button className="entrar__botao" type="submit" disabled={enviando !== null || demo}>
           {enviando === "senha" ? (
             <Loader2 aria-hidden size={15} className="animate-spin" />
           ) : null}
-          Entrar
+          {modo === "entrar" ? "Entrar" : "Criar conta"}
           <ArrowRight aria-hidden size={16} className="entrar__seta" />
         </button>
 
@@ -402,7 +483,7 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
         <button
           type="button"
           className="entrar__google"
-          onClick={entrarComGoogle}
+          onClick={comGoogle}
           disabled={enviando !== null || demo}
         >
           <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
@@ -423,7 +504,7 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
               d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l5.839 5.841C44.196 35.123 45.5 29.837 45.5 24c0-1.538-.135-3.022-.389-4.417z"
             />
           </svg>
-          Entrar com Google
+          {modo === "entrar" ? "Entrar com Google" : "Criar conta com Google"}
         </button>
       </form>
 
@@ -431,7 +512,21 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
       {erro && <p className="entrar__erro" role="alert">{erro}</p>}
 
       <p className="entrar__rodape">
-        Ainda não tem conta? <Link className="entrar__link" href="/conta">Criar conta</Link>
+        {modo === "entrar" ? (
+          <>
+            Ainda não tem conta?{" "}
+            <button type="button" className="entrar__link" onClick={() => trocarModo("criar")}>
+              Criar conta
+            </button>
+          </>
+        ) : (
+          <>
+            Já tem conta?{" "}
+            <button type="button" className="entrar__link" onClick={() => trocarModo("entrar")}>
+              Entrar
+            </button>
+          </>
+        )}
       </p>
     </div>
   );

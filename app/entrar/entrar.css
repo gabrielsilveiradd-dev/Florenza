@@ -92,13 +92,34 @@
   color: var(--text-dim);
 }
 
+/* ---------- Alternador Entrar / Criar conta ---------- */
+
+.entrar__abas {
+  display: flex;
+  gap: 26px;
+  justify-content: center;
+  margin-top: 26px;
+  border-bottom: 1px solid rgba(243, 239, 232, .16);
+}
+.entrar__aba {
+  padding: 0 0 10px;
+  border-bottom: 1px solid transparent;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: color .25s, border-color .25s;
+}
+.entrar__aba:hover { color: var(--text); }
+.entrar__aba.is-active { color: var(--gold-bright); border-color: var(--gold); }
+
 /* ---------- Formulário ---------- */
 
 .entrar__form {
   display: flex;
   flex-direction: column;
   gap: 26px;
-  margin-top: 34px;
+  margin-top: 30px;
 }
 
 .entrar__campo { position: relative; }
@@ -246,11 +267,13 @@
   text-align: center;
   color: var(--text-dim);
 }
-/* A cor precisa vir de uma classe, não de utility: `a { color: inherit }` de
-   estilos/style.css não está em camada nenhuma e venceria o Tailwind. */
+/* É um <button> e não um <a>: ele troca o modo do formulário na mesma tela, e
+   não navega para lugar nenhum. Marcar de link o que não leva a outro endereço
+   quebra a navegação por teclado e engana quem usa leitor de tela.
+   A cor precisa vir de uma classe, não de utility do Tailwind: as utilities
+   ficam em `@layer utilities` e perdem para qualquer regra sem camada. */
 .entrar__link {
   color: var(--gold-bright);
-  text-decoration: none;
   border-bottom: 1px solid rgba(227, 198, 146, .4);
   padding-bottom: 1px;
   transition: color .25s, border-color .25s;

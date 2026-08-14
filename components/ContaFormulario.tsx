@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { criarConta, entrarComSenha, enviarLinkDeRecuperacao } from "@/lib/supabase/auth";
 
 type Modo = "entrar" | "criar";
 
@@ -33,13 +33,12 @@ export function ContaFormulario({ redirect, demo }: { redirect: string; demo: bo
     const senha = String(dados.get("senha") ?? "");
 
     setEnviando(true);
-    const supabase = createClient();
 
     if (modo === "entrar") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+      const { erro } = await entrarComSenha(email, senha);
       setEnviando(false);
-      if (error) {
-        setErro("E-mail ou senha incorretos.");
+      if (erro) {
+        setErro(erro);
         return;
       }
       // `window.location.assign` e não `router.push`: a navegação do Next não
@@ -49,31 +48,16 @@ export function ContaFormulario({ redirect, demo }: { redirect: string; demo: bo
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { erro } = await criarConta({
       email,
-      password: senha,
-      options: {
-        // Sem isto o Supabase manda o link de confirmação para a "Site URL"
-        // configurada no projeto — uma só, fixa. Quem se cadastrasse no site
-        // publicado receberia um link apontando para localhost, que não abre.
-        // `window.location.origin` devolve a pessoa para o mesmo endereço onde
-        // ela se cadastrou, seja ele qual for. É o mesmo caminho que a
-        // recuperação de senha já usava aqui embaixo.
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/conta`,
-        data: {
-          nome: String(dados.get("nome") ?? "").trim(),
-          telefone: String(dados.get("telefone") ?? "").trim(),
-        },
-      },
+      senha,
+      nome: String(dados.get("nome") ?? "").trim(),
+      telefone: String(dados.get("telefone") ?? "").trim(),
     });
     setEnviando(false);
 
-    if (error) {
-      setErro(
-        error.message.includes("already")
-          ? "Já existe uma conta com esse e-mail. Tente entrar."
-          : "Não foi possível criar a conta. Confira os dados e tente de novo."
-      );
+    if (erro) {
+      setErro(erro);
       return;
     }
     setRecado("Conta criada. Confira seu e-mail para confirmar o cadastro e depois entre por aqui.");
@@ -89,10 +73,7 @@ export function ContaFormulario({ redirect, demo }: { redirect: string; demo: bo
       return;
     }
     setErro(null);
-    const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/conta`,
-    });
+    await enviarLinkDeRecuperacao(email);
     // Resposta igual dando certo ou errado, de propósito: dizer "esse e-mail
     // não existe" transforma o formulário num verificador de quem é cliente.
     setRecado("Se houver uma conta com esse e-mail, o link de recuperação chegou na caixa de entrada.");
