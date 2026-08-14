@@ -152,6 +152,14 @@ as chaves. Sem essa trava, o pior caso é silencioso — build verde, site no ar
 a loja de verdade servindo o catálogo do repositório com o painel cheio de
 pedidos de exemplo. Preview segue permissivo, que é onde se confere layout.
 
+`vercel.json` fixa `framework: "nextjs"` e não é enfeite. Com o preset em
+**Other**, a Vercel roda o build inteiro — o Next compila e gera as páginas —
+e depois **descarta o `.next` e publica `public/`** como site estático. O deploy
+fica verde, os arquivos de `public/` respondem 200, e **toda página dá 404**
+com o texto cru `NOT_FOUND` da plataforma, não com a página de erro do site.
+Foi exatamente isso que segurou a primeira publicação. O `vercel.json` tem
+precedência sobre o painel, então o preset viaja com o código.
+
 **Nenhuma service-role key entra neste projeto.** Quem protege os dados é a RLS.
 A carga inicial do catálogo é SQL colado no SQL Editor (`npm run seed`),
 justamente para não precisar dessa chave.

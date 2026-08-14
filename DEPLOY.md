@@ -52,8 +52,17 @@ banco. Este projeto foi escrito para nunca precisar dela.
    App Permissions** e libere o acesso a ele. É o tropeço mais comum aqui.
 4. **Import**.
 
-Não mexa em Framework Preset, Build Command nem Output Directory. A Vercel
-reconhece Next.js sozinha, e qualquer ajuste manual aí costuma quebrar.
+Não mexa em Framework Preset, Build Command nem Output Directory — o
+`vercel.json` na raiz já fixa os três.
+
+> **Por que esse arquivo existe.** Se o Framework Preset ficar em **Other**, a
+> Vercel roda o build normalmente (o Next compila, conecta no banco, gera as 23
+> páginas) e depois **descarta o `.next` e publica a pasta `public/`** como se
+> fosse um site estático — é o padrão dela quando não sabe qual framework é.
+> O resultado engana: deploy verde, `/herome.png` e `/favicon.svg` abrindo
+> normalmente, e **toda página dando 404**, porque não existe `index.html` em
+> `public/`. Já aconteceu neste projeto. O `vercel.json` tem precedência sobre o
+> painel, então agora o preset certo vem junto com o código.
 
 ## 2. Colar as chaves — antes do primeiro deploy
 
@@ -110,6 +119,24 @@ Abra a URL da Vercel e passe por estes cinco pontos, nesta ordem:
    certo.
 5. **Volte em `/admin?aba=clientes`**: a conta de teste tem que estar lá,
    marcada "Conta no site". Ninguém sincronizou nada — é a trigger do banco.
+
+### Se der 404, veja qual dos dois é
+
+São dois erros diferentes com a mesma cara no navegador, e a distinção diz onde
+está o problema:
+
+| O que aparece | O que significa |
+|---|---|
+| Página 404 **com o layout da Florenza** | O site está no ar. A rota é que não existe |
+| Texto cru **"The page could not be found / NOT_FOUND"** | O site **não** está no ar. Quem respondeu foi a Vercel, não o Next |
+
+No segundo caso, teste um arquivo de `public/` — por exemplo
+`SUA-URL.vercel.app/favicon.svg`. Se ele abrir e as páginas não, é o Framework
+Preset em "Other": a Vercel está publicando `public/` no lugar do Next. O
+`vercel.json` resolve; confira em **Settings → Build and Deployment** se o
+Framework Preset aparece como **Next.js** e o Output Directory está no padrão
+(vazio). Depois **Redeploy**, com a caixa *Use existing Build Cache*
+desmarcada.
 
 ---
 
