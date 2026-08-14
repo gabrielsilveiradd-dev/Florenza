@@ -61,15 +61,27 @@
  * protótipo sem uma linha alterada e continua assim. Este é o único CSS global
  * que o projeto escreveu, então é onde uma adição à nav cabe.
  *
- * O seletor precisa dos dois níveis: `.nav__links a` de style.css é (0,1,1) e
- * venceria `.nav__entrar` sozinho (0,1,0) — a cor dourada nunca apareceria.
+ * Os dois níveis do seletor são de propósito. Não é mais por causa de
+ * `.nav__links a` (o botão saiu de dentro dos links), e sim porque este arquivo
+ * é importado ANTES de estilos/style.css: no empate de especificidade vence
+ * quem vem depois, então uma classe sozinha ficaria à mercê da ordem.
  *
  * Também não pode ser utility do Tailwind: as utilities vivem em
  * `@layer utilities`, e regra sem camada vence regra em camada sempre.
  *
  * Nenhuma cor nova: --gold-bright já é do site. */
-.nav__links .nav__entrar {
-  padding: 7px 16px;
+.nav__acoes .nav__entrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  /* Fora de `.nav__links`, o botão perdeu o `text-decoration: none` e o
+     `text-transform` que vinham de lá. Passam a ser dele. */
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: .06em;
+  padding: 7px 14px;
   border: 1px solid rgba(227, 198, 146, .38);
   border-radius: 999px;
   color: var(--gold-bright);
@@ -78,28 +90,142 @@
   transition: background-color .2s ease, border-color .2s ease;
 }
 
-.nav__links .nav__entrar:hover {
+.nav__acoes .nav__entrar:hover {
   background: rgba(227, 198, 146, .14);
   border-color: rgba(227, 198, 146, .7);
 }
 
-/* No celular o botão sai da nav. Não é desistência, é aritmética.
+/* Bloco de ações: carrinho e conta.
  *
- * Medido em 390px: a nav tem 311px úteis (375 menos 32+32 de padding), o logo
- * ocupa 102 e os quatro links 232 — 334 no total. Ela já estoura 23px SEM
- * nenhuma adição, e é isso que produz o logo sobreposto ao "Alianças" que
- * consta em CLAUDE.md como bug conhecido.
- *
- * Como o espaço já está negativo, não existe tamanho de botão que caiba: mesmo
- * reduzido a 29px de ícone, ele nasce em x=377 — fora da tela de 390. Deixá-lo
- * ali seria empurrar o excesso de 23px para 63px e piorar o bug para ganhar um
- * elemento que ninguém consegue tocar.
- *
- * Abrir espaço de verdade (reduzir o padding de 32px, encolher a marca) é
- * mexer na estética pronta, e isso depende de aprovação explícita — a regra
- * está em CLAUDE.md. Até lá, no celular a conta se acessa pelo rodapé. */
+ * `.nav__inner` é `space-between`. Com dois filhos, logo à esquerda e links à
+ * direita — que é como o site sempre foi. Ao ganhar um terceiro, os links
+ * cairiam no centro, e mexer na posição do que já existe é o que este projeto
+ * não faz. O `margin-left: auto` nos links empurra links e ações juntos para a
+ * direita e devolve exatamente o desenho anterior. */
+.nav .nav__links { margin-left: auto; }
+
+.nav__acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 26px;
+}
+
+.nav__carrinho {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text);
+  opacity: .85;
+  transition: opacity .2s ease;
+}
+.nav__carrinho:hover { opacity: 1; }
+.nav__carrinho svg { width: 19px; height: 19px; }
+
+/* A bolinha da contagem: dourado sobre o marrom da barra, sem cor nova. */
+.nav__carrinho-conta {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #fffaf2;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* No desktop vale a palavra; o ícone só entra nas telas estreitas. */
+.nav__entrar-icone { display: none; }
+
+/* ---------------------------------------------------------------------------
+   CONSERTO DO NAV NO CELULAR
+   ---------------------------------------------------------------------------
+   O bug era anterior a este botão: em 390px a nav tinha 311px úteis (375 menos
+   32+32 de padding) e o logo mais os quatro links ocupavam 335. Ela estourava
+   24px sozinha, e era isso que fazia o logo invadir o "Alianças".
+
+   Como o espaço já estava negativo, nenhum tamanho de botão cabia — o de ícone,
+   com 29px, nascia em x=377 numa tela de 390. Por isso o botão ficou escondido
+   até aqui.
+
+   O espaço vem de três lugares, nesta ordem de preferência (do que menos
+   incomoda para o que mais):
+     padding da barra   32px → 14px por lado   = +36px
+     losango da marca   20px → 17px            =  +3px
+     palavra "Florenza" 24px → 20px            = +15px
+
+   Somam ~54px, que cobrem os 24 que faltavam e ainda pagam o botão.
+
+   SOBRE A ESPECIFICIDADE, que aqui não é detalhe: layout.tsx importa este
+   arquivo ANTES de estilos/style.css, e as regras dos dois são CSS comum sem
+   camada. No empate de especificidade vence quem vem depois — o style.css.
+   Como ele também tem um `@media (max-width: 640px)` mexendo em .nav__word e
+   .nav__links, um seletor de um nível só perderia em silêncio. Por isso todos
+   abaixo têm dois níveis: (0,2,0) ganha de (0,1,0) independentemente de ordem.
+
+   Nada disso toca app/estilos/, que segue verbatim do protótipo.
+   --------------------------------------------------------------------------- */
 @media (max-width: 640px) {
-  .nav__links .nav__entrar { display: none; }
+  .nav .nav__inner { padding: 0 14px; }
+  .nav .nav__gem { width: 17px; }
+  .nav__logo .nav__word { font-size: 20px; }
+  .nav .nav__links { gap: 12px; }
+  .nav__acoes { gap: 10px; margin-left: 16px; }
+  .nav__acoes .nav__entrar { padding: 5px 11px; }
+}
+
+/* ---------------------------------------------------------------------------
+   CELULAR: duas linhas
+   ---------------------------------------------------------------------------
+   Com carrinho e conta sempre à vista, a conta de largura deixa de fechar em
+   qualquer arranjo de uma linha só. Medido em 390px: sobram 362px úteis, e
+   marca (87) + quatro links (194) + duas ações (66) dão 347 — cabe no papel e
+   estoura na prática, porque o texto do link muda de largura com a fonte que o
+   sistema carregar. Espremer mais significaria fonte de 8px, ilegível.
+
+   Então a barra passa a ter duas linhas: marca e ações em cima, sempre
+   visíveis; os quatro links de seção embaixo, centrados. Nada é escondido atrás
+   de menu — a loja tem quatro seções, e um menu sanfona para quatro itens é
+   esconder o que caberia à mostra.
+
+   `--nav-h` cresce junto porque o site inteiro reserva esse espaço no topo (a
+   barra é `position: fixed`). Sem atualizar o token, a segunda linha cobriria o
+   começo de cada página. O `:root:root` é para vencer o `:root` de
+   estilos/style.css, que vem depois na ordem de importação — os dois têm a
+   mesma especificidade, e no empate ganha o último.
+   --------------------------------------------------------------------------- */
+@media (max-width: 560px) {
+  :root:root { --nav-h: 112px; }
+
+  .nav .nav__inner {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: center;
+    row-gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .nav .nav__links {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: center;
+    margin-left: 0;
+    gap: 16px;
+    font-size: 10.5px;
+  }
+
+  .nav__acoes { margin-left: auto; }
+
+  /* Na primeira linha sobra espaço, então a marca volta ao tamanho cheio e o
+     botão de conta mantém a palavra — não há mais aperto que justifique o
+     ícone sozinho. */
+  .nav__logo .nav__word { font-size: 24px; }
+  .nav .nav__gem { width: 19px; }
 }
 
 /* Estoque na vitrine.

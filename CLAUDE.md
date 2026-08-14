@@ -111,6 +111,26 @@ Sem isso o HTML congelaria no build e o site ofereceria "Comprar" numa peça
 esgotada até o próximo deploy. Dinâmico seria pior: são conteúdo público, igual
 para todos — ver o motivo de `lib/supabase/publico.ts`.
 
+## Cupons
+
+Mesma regra do preço e do estoque: **o navegador manda o código, nunca o
+valor.** `public.conferir_cupom(codigo, subtotal)` responde o desconto para a
+tela mostrar; `criar_pedido()` recalcula do zero ao fechar, com o subtotal que
+ele mesmo somou do catálogo. O que a tela exibe é previsão, não a conta.
+
+A tabela `cupons` não é legível por visitante — nem o grant de `anon` existe.
+Lista de cupons é lista de desconto para quem souber pedir. Quem precisa saber
+se um código vale pergunta pela função, que só responde sobre o código
+perguntado. Código inexistente e código desativado dão a **mesma** resposta, de
+propósito.
+
+`usos` sobe dentro da transação, com `for update` na linha do cupom — sem a
+trava, dois pedidos simultâneos furam o limite do mesmo jeito que furariam o
+estoque.
+
+Não há CRUD de cupom no painel ainda: cadastra-se pelo SQL Editor. O
+`BEMVINDO10` que existe é exemplo, para apagar.
+
 ## Área da conta
 
 `/conta` tem dois estados no mesmo endereço: formulário para quem chega de fora,

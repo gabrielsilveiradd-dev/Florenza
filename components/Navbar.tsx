@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BotaoCarrinho } from "@/components/BotaoCarrinho";
 import { BotaoConta } from "@/components/BotaoConta";
 import { Gem } from "@/components/GemDefs";
 
@@ -20,13 +21,19 @@ export function Navbar() {
           <Link href="/#categoryShowcase">Coleção</Link>
           <Link href="/#categorias">Categorias</Link>
           <Link href="/#contato">Contato</Link>
-          {/* Dentro de .nav__links de propósito, e não como terceiro filho de
-              .nav__inner: ali o `space-between` redistribuiria os links que já
-              existem, e mexer na posição deles seria mexer na estética pronta.
-              Aqui a nav só ganha mais um item no fim.
-              A nav segue sendo componente de servidor: só o botão hidrata. */}
-          <BotaoConta />
         </nav>
+
+        {/* Terceiro filho de .nav__inner, separado dos links de seção porque as
+            duas coisas se comportam diferente no celular: os links descem para
+            uma segunda linha e estes dois ficam sempre à vista, junto da marca.
+            No desktop nada muda de lugar — `.nav__links` ganha `margin-left:auto`
+            no globals.css para links e ações continuarem encostados à direita,
+            exatamente como antes de existirem.
+            A nav segue sendo componente de servidor: só os dois botões hidratam. */}
+        <div className="nav__acoes">
+          <BotaoCarrinho />
+          <BotaoConta />
+        </div>
       </div>
     </header>
   );

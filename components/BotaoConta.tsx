@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 
@@ -49,9 +50,14 @@ export function BotaoConta() {
     };
   }, []);
 
+  const rotulo = logado ? "Minha conta" : "Entrar";
+
   return (
-    <Link className="nav__entrar" href={logado ? "/conta" : "/entrar"}>
-      {logado ? "Minha conta" : "Entrar"}
+    // O `aria-label` é o que mantém o rótulo para leitor de tela nas telas mais
+    // estreitas, onde o CSS troca a palavra pelo ícone.
+    <Link className="nav__entrar" href={logado ? "/conta" : "/entrar"} aria-label={rotulo}>
+      <User className="nav__entrar-icone" aria-hidden size={15} />
+      <span className="nav__entrar-texto">{rotulo}</span>
     </Link>
   );
 }

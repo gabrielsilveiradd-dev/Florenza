@@ -177,16 +177,92 @@
 .carrinho__qtd button:hover { color: var(--ink); background: var(--ivory); }
 .carrinho__qtd span { min-width: 34px; text-align: center; font-size: 14px; }
 
-.carrinho__total {
+/* ---------- Resumo: cupom, subtotal, desconto e total ---------- */
+
+.carrinho__resumo {
   margin-top: 26px;
-  padding-top: 20px;
+  padding-top: 22px;
   border-top: 1px solid var(--gold-line);
+}
+
+.carrinho__cupom { max-width: 380px; }
+.carrinho__cupom-linha { display: flex; gap: 9px; margin-top: 7px; }
+.carrinho__cupom-linha .checkout__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Código de cupom é sempre em maiúsculas no banco; mostrar assim enquanto se
+     digita evita a sensação de que "bemvindo10" e "BEMVINDO10" são diferentes.
+     A comparação continua sendo feita no servidor, com upper(). */
+  text-transform: uppercase;
+}
+.carrinho__cupom-botao {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0 18px;
+  border: 1px solid var(--gold);
+  color: var(--gold-ink);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: background-color .25s, opacity .25s;
+}
+.carrinho__cupom-botao:hover { background: rgba(227, 198, 146, .22); }
+.carrinho__cupom-botao:disabled { opacity: .5; cursor: not-allowed; }
+
+.carrinho__cupom-erro { margin-top: 8px; font-size: 12.5px; color: #8c2a26; }
+
+.carrinho__cupom-tirar {
+  margin-left: 8px;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.carrinho__cupom-tirar:hover { color: var(--ink); }
+
+.carrinho__contas { margin: 26px 0 0; }
+.carrinho__contas div {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: 16px;
+  padding: 7px 0;
 }
-.carrinho__total-rotulo { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
-.carrinho__total-valor { font-family: var(--font-serif); font-size: 30px; color: var(--gold-ink); }
+.carrinho__contas dt,
+.carrinho__contas dd {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-dim);
+}
+.carrinho__contas dd { font-variant-numeric: tabular-nums; }
+
+.carrinho__contas-desconto dt,
+.carrinho__contas-desconto dd { color: var(--gold-ink); }
+
+/* Dois níveis, e não `!important`: `.carrinho__contas div` acima é (0,1,1) e
+   venceria a classe sozinha (0,1,0). Com (0,2,0) a conta fecha na regra certa. */
+.carrinho__contas .carrinho__contas-total {
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+.carrinho__contas-total dt {
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.carrinho__contas-total dd {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  color: var(--gold-ink);
+}
+
+.carrinho__frete { margin-top: 10px; font-size: 12px; color: var(--ink-dim); }
 
 .carrinho__vazio {
   margin-top: 40px;

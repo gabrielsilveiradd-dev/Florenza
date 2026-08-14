@@ -30,6 +30,24 @@ export function Checkout({ demo }: { demo: boolean }) {
   const [cidade, setCidade] = useState("");
   const [uf, setUf] = useState("");
 
+  // O código digitado e o que foi de fato aceito são coisas diferentes: a
+  // pessoa pode estar no meio de digitar outro código com um cupom já aplicado.
+  const [codigoDigitado, setCodigoDigitado] = useState("");
+  const [codigoAplicado, setCodigoAplicado] = useState<string | null>(null);
+  const [cupom, setCupom] = useState<{ codigo: string; desconto: number; descricao: string | null } | null>(null);
+  const [erroCupom, setErroCupom] = useState<string | null>(null);
+  const [conferindoCupom, setConferindoCupom] = useState(false);
+
+  const subtotalCentavos = totalCentavos;
+  /* Carrinho vazio (ou todo esgotado) não tem desconto a aplicar. Isto é
+   * derivado, e não um `setCupom(null)` dentro de um efeito: zerar estado em
+   * efeito provoca um segundo render só para desfazer o primeiro, e o código
+   * fica com duas fontes de verdade para a mesma pergunta. Se a pessoa devolver
+   * uma peça ao carrinho, o cupom que ela digitou volta a valer sozinho. */
+  const cupomAtivo = subtotalCentavos > 0 ? cupom : null;
+  const descontoCentavos = cupomAtivo?.desconto ?? 0;
+  const totalAPagar = Math.max(0, subtotalCentavos - descontoCentavos);
+
   /* O carrinho vive no localStorage e pode ter semanas: a aba fica aberta, a
    * pessoa volta depois, e nesse meio-tempo a peça pode ter acabado. Ao abrir o
    * carrinho, o estoque é relido do banco e a quantidade é aparada.
@@ -66,6 +84,71 @@ export function Checkout({ demo }: { demo: boolean }) {
       ativo = false;
     };
   }, [skusNoCarrinho, pronto, demo, sincronizarEstoque]);
+
+  /* Um caminho só para o cupom: o botão apenas anota QUAL código vale, e este
+   * efeito faz a pergunta ao banco. Duas entradas para a mesma coisa (aplicar e
+   * reconferir) davam duas cópias da mesma lógica, e o `setState` síncrono da
+   * função compartilhada ainda desrespeitava a regra de não mexer em estado no
+   * corpo do efeito. Aqui tudo acontece depois do `await`.
+   *
+   * Reconferir a cada mudança de subtotal não é zelo excessivo: cupom
+   * percentual muda de valor com o carrinho. Quem aplicasse 10% sobre R$ 2.420
+   * e depois tirasse a peça ficaria vendo R$ 242 de desconto sobre um subtotal
+   * menor — e só descobriria o erro ao fechar, com o endereço já digitado.
+   *
+   * O desconto NUNCA é calculado aqui. A tela mostra o que o banco respondeu, e
+   * `criar_pedido` recalcula do zero na hora de fechar. Este número é para ver
+   * antes, não para virar o valor cobrado. */
+  useEffect(() => {
+    if (!codigoAplicado || subtotalCentavos <= 0) return;
+    let ativo = true;
+
+    (async () => {
+      const { data, error } = await createClient().rpc("conferir_cupom", {
+        p_codigo: codigoAplicado,
+        p_subtotal: subtotalCentavos,
+      });
+      if (!ativo) return;
+
+      const resposta = Array.isArray(data) ? data[0] : data;
+      setConferindoCupom(false);
+
+      if (error || !resposta) {
+        setErroCupom("Não foi possível conferir o cupom agora.");
+        return;
+      }
+      if (!resposta.valido) {
+        setCupom(null);
+        setErroCupom(resposta.motivo);
+        return;
+      }
+      setErroCupom(null);
+      setCupom({
+        codigo: codigoAplicado,
+        desconto: resposta.desconto_centavos,
+        descricao: resposta.descricao,
+      });
+    })();
+
+    return () => {
+      ativo = false;
+    };
+  }, [codigoAplicado, subtotalCentavos]);
+
+  function aplicarCupom() {
+    const limpo = codigoDigitado.trim().toUpperCase();
+    if (!limpo) return;
+    setErroCupom(null);
+    setConferindoCupom(true);
+    setCodigoAplicado(limpo);
+  }
+
+  function tirarCupom() {
+    setCodigoAplicado(null);
+    setCupom(null);
+    setCodigoDigitado("");
+    setErroCupom(null);
+  }
 
   /** ViaCEP: preenche cidade e estado sozinho, para ninguém digitar errado. */
   async function consultarCep(valor: string) {
@@ -120,6 +203,9 @@ export function Checkout({ demo }: { demo: boolean }) {
       p_cidade: cidade || null,
       p_uf: uf || null,
       p_observacoes: String(dados.get("observacoes") ?? "").trim() || null,
+      // Vai o CÓDIGO, nunca o valor do desconto. Quem calcula é a função, com o
+      // subtotal que ela mesma somou do catálogo.
+      p_cupom: cupomAtivo?.codigo ?? null,
     });
     setEnviando(false);
 
@@ -219,10 +305,71 @@ export function Checkout({ demo }: { demo: boolean }) {
         ))}
       </ul>
 
-      <div className="carrinho__total">
-        <span className="carrinho__total-rotulo">Total</span>
-        <span className="carrinho__total-valor">{formatar(totalCentavos)}</span>
-      </div>
+      <section className="carrinho__resumo">
+        <div className="carrinho__cupom">
+          <label className="checkout__rotulo" htmlFor="ck-cupom">Cupom de desconto</label>
+          <div className="carrinho__cupom-linha">
+            <input
+              className="checkout__input"
+              id="ck-cupom"
+              value={codigoDigitado}
+              onChange={(e) => { setCodigoDigitado(e.target.value); setErroCupom(null); }}
+              // Enter dentro do formulário de checkout enviaria o pedido. Aqui o
+              // campo está fora dele, mas a tecla continua sendo o gesto natural
+              // para "aplicar", então é tratada explicitamente.
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  aplicarCupom();
+                }
+              }}
+              placeholder="Tem um código?"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              className="carrinho__cupom-botao"
+              onClick={aplicarCupom}
+              disabled={conferindoCupom || demo || codigoDigitado.trim() === ""}
+            >
+              {conferindoCupom ? <Loader2 aria-hidden size={14} className="animate-spin" /> : "Aplicar"}
+            </button>
+          </div>
+          {erroCupom && <p className="carrinho__cupom-erro" role="alert">{erroCupom}</p>}
+        </div>
+
+        <dl className="carrinho__contas">
+          <div>
+            <dt>Subtotal</dt>
+            <dd>{formatar(subtotalCentavos)}</dd>
+          </div>
+
+          {cupomAtivo && (
+            <div className="carrinho__contas-desconto">
+              <dt>
+                Desconto · {cupomAtivo.codigo}
+                <button
+                  type="button"
+                  className="carrinho__cupom-tirar"
+                  onClick={tirarCupom}
+                >
+                  remover
+                </button>
+              </dt>
+              <dd>− {formatar(descontoCentavos)}</dd>
+            </div>
+          )}
+
+          <div className="carrinho__contas-total">
+            <dt>Total</dt>
+            <dd>{formatar(totalAPagar)}</dd>
+          </div>
+        </dl>
+
+        <p className="carrinho__frete">
+          O frete é combinado junto com o pagamento, pelo WhatsApp.
+        </p>
+      </section>
 
       <section className="checkout">
         <p className="pdp__eyebrow">Seus dados</p>
@@ -294,14 +441,14 @@ export function Checkout({ demo }: { demo: boolean }) {
           <button
             className="pdp__comprar"
             type="submit"
-            disabled={enviando || demo || totalCentavos === 0}
+            disabled={enviando || demo || subtotalCentavos === 0}
             style={{ marginTop: 28, width: "100%" }}
           >
             {enviando && <Loader2 aria-hidden size={15} className="animate-spin" />}
-            Enviar pedido · {formatar(totalCentavos)}
+            Enviar pedido · {formatar(totalAPagar)}
           </button>
 
-          {totalCentavos === 0 && (
+          {subtotalCentavos === 0 && (
             <p className="pdp__nota" style={{ marginTop: 14 }}>
               As peças do seu carrinho estão sem unidades no momento. Remova-as ou fale com a
               Florenza pelo WhatsApp para encomendar.
