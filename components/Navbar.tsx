@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BotaoConta } from "@/components/BotaoConta";
 import { Gem } from "@/components/GemDefs";
 
 /**
@@ -19,6 +20,12 @@ export function Navbar() {
           <Link href="/#categoryShowcase">Coleção</Link>
           <Link href="/#categorias">Categorias</Link>
           <Link href="/#contato">Contato</Link>
+          {/* Dentro de .nav__links de propósito, e não como terceiro filho de
+              .nav__inner: ali o `space-between` redistribuiria os links que já
+              existem, e mexer na posição deles seria mexer na estética pronta.
+              Aqui a nav só ganha mais um item no fim.
+              A nav segue sendo componente de servidor: só o botão hidrata. */}
+          <BotaoConta />
         </nav>
       </div>
     </header>

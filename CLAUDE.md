@@ -41,15 +41,44 @@ O visual do site é trabalho concluído e não está em discussão. Toda mudanç
   de qualquer regra** dos CSS acima, que são CSS comum sem camada. Isso é a
   garantia, não um efeito colateral: as utilities existem para as telas novas e
   não alcançam a vitrine nem por acidente.
-- Telas novas (`/admin`, `/conta`) têm CSS próprio — `app/admin/admin.css`,
-  `app/conta/conta.css` — usando **as variáveis que já existem**. Nenhuma cor
-  nova entra no projeto.
+- Telas novas (`/admin`, `/conta`, `/entrar`) têm CSS próprio —
+  `app/admin/admin.css`, `app/conta/conta.css`, `app/entrar/entrar.css` — usando
+  **as variáveis que já existem**. Nenhuma cor nova entra no projeto.
+- A única exceção mora em `app/globals.css`: o botão "Entrar" da nav. É o único
+  CSS global que o projeto escreveu, e é onde uma adição à nav cabe sem tocar
+  `app/estilos/`. O seletor precisa ser `.nav__links .nav__entrar`, com os dois
+  níveis — `.nav__links a` de `style.css` é (0,1,1) e venceria a classe sozinha.
 - No CSS dessas telas, o reset escopado usa `:where()` para ter especificidade
   zero. Sem isso `.adm button` venceria `.adm-botao` e o botão perde o fundo —
   já aconteceu uma vez.
 
 Bugs visuais conhecidos (o nav sobreposto em ~390px) só se corrigem com
 aprovação explícita: consertar é mudar estética.
+
+## Entrada de conta
+
+Duas portas para a mesma autenticação: `/entrar` é a tela cheia com o fundo de
+fumaça em WebGL; `/conta` é a página de conta, que também cria cadastro (nome e
+telefone, que a trigger lê de `raw_user_meta_data`) e lista pedidos. Mesmo
+Supabase, mesma `auth.users`, mesma trigger — quem entra por qualquer uma
+aparece igual na aba Clientes do painel.
+
+`components/ui/` existe porque é a convenção que o componente de origem pedia.
+**O shadcn não foi inicializado, e não deve ser:** o `init` dele escreve um
+`@layer base` com `*` e `body` no CSS global, que é o preflight por outro nome —
+desmontaria a vitrine. A pasta é só uma pasta.
+
+O botão da nav (`components/BotaoConta.tsx`) é cliente e isolado de propósito. A
+nav em si segue sendo componente de servidor: descobrir a sessão no servidor
+exige ler cookie, e ler cookie tornaria dinâmicas as 23 páginas pré-renderizadas
+— pelo rótulo de um botão. Mesmo raciocínio de `lib/supabase/publico.ts`.
+
+**No celular o botão não aparece, e isso é medido, não desleixo.** Em 390px a
+nav tem 311px úteis e já ocupa 335 só com o logo e os quatro links: ela estoura
+24px *antes* de qualquer adição — é a mesma conta que produz o bug conhecido do
+logo sobreposto. Não há tamanho de botão que caiba. No celular a conta se acessa
+pelo link no rodapé, até o nav ser corrigido (o que exige aprovação, por ser
+estética).
 
 ## Catálogo dirigido a dados
 
@@ -196,6 +225,10 @@ Tudo respeita `prefers-reduced-motion`.
 - **Upload de foto pelo painel** não está ligado. O formulário existe, o bucket
   e as policies também; falta o envio do arquivo. Hoje a foto entra pelo script
   Python.
+- **Entrar com Google** existe no formulário de `/entrar` e ainda não funciona:
+  o provedor precisa ser ligado em Authentication → Providers no painel do
+  Supabase. Enquanto não estiver, o botão devolve um recado explicando, em vez
+  de erro seco.
 - Mercado Pago (gateway escolhido) fica para o Módulo 2.
 - Sem os tipos gerados do banco (`supabase gen types --project-id
   jydcgsxzinrguounnmpi`), há um cast em `lib/admin/listas.ts`. Exige
@@ -203,6 +236,8 @@ Tudo respeita `prefers-reduced-motion`.
 - O projeto nasceu em **us-east-2**, não em São Paulo: ~120 ms a mais por
   consulta. Trocar exige projeto novo — o schema está todo versionado, então é
   colar `aplicar-tudo.sql` e trocar duas variáveis.
-- No celular (~390px) o logo e os links do nav se sobrepõem.
+- No celular (~390px) o logo e os links do nav se sobrepõem. Medido: 335px de
+  conteúdo para 311px úteis. Enquanto durar, o botão "Entrar" fica escondido
+  abaixo de 640px e a conta se acessa pelo rodapé.
 - `aneisFormatura/` (33 MB de fotos originais) e `public/produtos/` seguem fora
   e dentro do git respectivamente; pense duas vezes antes de commitar mídia.

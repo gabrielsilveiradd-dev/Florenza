@@ -145,6 +145,12 @@ desmarcada.
 Nenhum destes bloqueia o lançamento, mas é melhor você saber antes de mostrar
 para alguém:
 
+- **Entrar com Google.** O botão está na tela `/entrar`, mas o provedor ainda
+  não foi ligado. Para ativar: Supabase → **Authentication → Providers →
+  Google**, com o Client ID e o Secret de um projeto no Google Cloud, e a URL de
+  retorno `https://jydcgsxzinrguounnmpi.supabase.co/auth/v1/callback`. Enquanto
+  não estiver ligado, o botão avisa e manda usar e-mail e senha — ninguém fica
+  travado.
 - **Pagamento.** O pedido nasce em "aguardando pagamento" e o combinado é por
   WhatsApp. O Mercado Pago é o Módulo 2 — o banco já está no formato certo para
   recebê-lo, é plugar o webhook.

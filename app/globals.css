@@ -54,3 +54,50 @@
   --font-serif: var(--font-serif);
   --font-sans: var(--font-sans);
 }
+
+/* Botão "Entrar" da nav.
+ *
+ * Mora aqui, e não em estilos/style.css, porque aquele arquivo veio do
+ * protótipo sem uma linha alterada e continua assim. Este é o único CSS global
+ * que o projeto escreveu, então é onde uma adição à nav cabe.
+ *
+ * O seletor precisa dos dois níveis: `.nav__links a` de style.css é (0,1,1) e
+ * venceria `.nav__entrar` sozinho (0,1,0) — a cor dourada nunca apareceria.
+ *
+ * Também não pode ser utility do Tailwind: as utilities vivem em
+ * `@layer utilities`, e regra sem camada vence regra em camada sempre.
+ *
+ * Nenhuma cor nova: --gold-bright já é do site. */
+.nav__links .nav__entrar {
+  padding: 7px 16px;
+  border: 1px solid rgba(227, 198, 146, .38);
+  border-radius: 999px;
+  color: var(--gold-bright);
+  opacity: 1;
+  white-space: nowrap;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.nav__links .nav__entrar:hover {
+  background: rgba(227, 198, 146, .14);
+  border-color: rgba(227, 198, 146, .7);
+}
+
+/* No celular o botão sai da nav. Não é desistência, é aritmética.
+ *
+ * Medido em 390px: a nav tem 311px úteis (375 menos 32+32 de padding), o logo
+ * ocupa 102 e os quatro links 232 — 334 no total. Ela já estoura 23px SEM
+ * nenhuma adição, e é isso que produz o logo sobreposto ao "Alianças" que
+ * consta em CLAUDE.md como bug conhecido.
+ *
+ * Como o espaço já está negativo, não existe tamanho de botão que caiba: mesmo
+ * reduzido a 29px de ícone, ele nasce em x=377 — fora da tela de 390. Deixá-lo
+ * ali seria empurrar o excesso de 23px para 63px e piorar o bug para ganhar um
+ * elemento que ninguém consegue tocar.
+ *
+ * Abrir espaço de verdade (reduzir o padding de 32px, encolher a marca) é
+ * mexer na estética pronta, e isso depende de aprovação explícita — a regra
+ * está em CLAUDE.md. Até lá, no celular a conta se acessa pelo rodapé. */
+@media (max-width: 640px) {
+  .nav__links .nav__entrar { display: none; }
+}

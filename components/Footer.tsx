@@ -63,6 +63,11 @@ export function Footer({ colecoes = "home" }: { colecoes?: keyof typeof COLECOES
             <li><a href="#">WhatsApp</a></li>
             <li><a href="#">E-mail</a></li>
             <li><a href="#">Perguntas frequentes</a></li>
+            {/* Único caminho para a conta no celular, onde o botão da nav não
+                cabe — ver o cálculo em globals.css. Aqui é acréscimo puro: um
+                item a mais numa lista que já se empilha, sem mexer no que
+                existe. */}
+            <li><Link href="/entrar">Minha conta</Link></li>
           </ul>
         </div>
       </div>

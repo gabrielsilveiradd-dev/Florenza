@@ -1,0 +1,263 @@
+/* TELA DE ENTRADA — cartão de vidro sobre a fumaça em WebGL.
+ *
+ * Por que CSS de verdade e não só as utilities do Tailwind, como no painel:
+ * as camadas do Tailwind entram em `@layer utilities`, e no CSS qualquer regra
+ * sem camada vence qualquer regra em camada. Como estilos/style.css é CSS comum
+ * e define `a { color: inherit }`, uma classe de cor do Tailwind num link desta
+ * tela perderia. Cor e tipografia vêm daqui; o Tailwind segue em uso para o que
+ * não colide (o backdrop-blur do véu, o spin do ícone de carregando).
+ *
+ * Nenhuma cor nova entra: --bg, --gold, --gold-bright, --text e --text-dim já
+ * são do site. O desenho é o do componente original — vidro, cantos
+ * arredondados, rótulo que sobe — só que na paleta da Florenza, e é por isso
+ * que ele não parece um formulário genérico colado no meio do site.
+ *
+ * Tudo escopado em `.entrar`, e nada aqui escapa para a vitrine.
+ */
+
+/* ---------- Reset escopado ----------
+ * Sem o preflight do Tailwind (deixado de fora de propósito, ver globals.css),
+ * dentro desta tela valem os padrões do navegador: h1 com margem, button cinza
+ * de sistema, input com a fonte do sistema.
+ *
+ * O `:where()` zera a especificidade do que está dentro, então o reset conta
+ * como se fosse `.entrar` sozinho. Sem ele, `.entrar button` (0,1,1) venceria
+ * `.entrar__botao` (0,1,0) e o botão dourado ficaria sem fundo — o mesmo
+ * tropeço que já aconteceu uma vez em admin.css. */
+.entrar :where(h1, p) { margin: 0; }
+.entrar :where(button) { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+.entrar :where(input) { font: inherit; color: inherit; }
+
+/* ---------- Palco ---------- */
+
+.entrar {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-h) + 40px) 20px 60px;
+  overflow: hidden;
+  /* Também é o plano B: sem WebGL o canvas fica em branco e esta cor sustenta
+     a tela sozinha, no mesmo marrom da nav. */
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+.entrar__fundo { position: absolute; inset: 0; overflow: hidden; }
+.entrar__canvas { display: block; width: 100%; height: 100%; }
+.entrar__veu { position: absolute; inset: 0; }
+
+/* ---------- Cartão ---------- */
+
+.entrar__caixa {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  padding: 38px 34px 30px;
+  border: 1px solid rgba(227, 198, 146, .22);
+  border-radius: 18px;
+  background: rgba(27, 17, 8, .52);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+}
+
+.entrar__eyebrow {
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gold-bright);
+}
+
+.entrar__titulo {
+  margin-top: 12px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--text);
+}
+
+.entrar__sub {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+/* ---------- Formulário ---------- */
+
+.entrar__form {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  margin-top: 34px;
+}
+
+.entrar__campo { position: relative; }
+
+/* Campo com linha embaixo, sem caixa: é o desenho do componente de origem, e
+   combina com a leveza do vidro melhor que o input emoldurado de /conta. */
+.entrar__input {
+  display: block;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid rgba(243, 239, 232, .28);
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color .25s;
+}
+.entrar__input:focus { outline: none; border-bottom-color: var(--gold); }
+/* O preenchimento automático do Chrome pinta o campo de azul-claro e reintroduz
+   uma cor que não é do site. Não há como sobrescrever o fundo direto; a sombra
+   interna gigante é o caminho conhecido. */
+.entrar__input:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 40px #241608 inset;
+  caret-color: var(--text);
+}
+
+.entrar__rotulo {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transform: translateY(-22px) scale(.82);
+  transform-origin: 0 0;
+  font-size: 13px;
+  color: var(--text-dim);
+  pointer-events: none;
+  transition: transform .3s, color .3s;
+}
+/* Enquanto o campo está vazio o rótulo desce e faz as vezes de placeholder —
+   por isso o input carrega placeholder=" ", um espaço: é ele que liga o
+   `:placeholder-shown`. */
+.entrar__input:placeholder-shown + .entrar__rotulo { transform: translateY(0) scale(1); }
+.entrar__input:focus + .entrar__rotulo {
+  transform: translateY(-22px) scale(.82);
+  color: var(--gold-bright);
+}
+
+.entrar__esqueci {
+  align-self: flex-start;
+  margin-top: -12px;
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color .25s;
+}
+.entrar__esqueci:hover { color: var(--text); }
+
+/* ---------- Botões ---------- */
+
+.entrar__botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  border-radius: 10px;
+  background: var(--gold);
+  color: #fffaf2;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  transition: background-color .25s, opacity .25s;
+}
+.entrar__botao:hover { background: var(--gold-bright); color: var(--ink); }
+.entrar__botao:disabled { opacity: .55; cursor: not-allowed; }
+.entrar__seta { transition: transform .25s; }
+.entrar__botao:hover .entrar__seta { transform: translateX(3px); }
+
+.entrar__google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  border-radius: 10px;
+  border: 1px solid rgba(243, 239, 232, .22);
+  background: rgba(243, 239, 232, .92);
+  color: var(--ink);
+  font-size: 12.5px;
+  transition: background-color .25s, opacity .25s;
+}
+.entrar__google:hover { background: #fff; }
+.entrar__google:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ---------- Divisor ---------- */
+
+.entrar__divisor {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.entrar__divisor::before,
+.entrar__divisor::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(243, 239, 232, .18);
+}
+
+/* ---------- Recados ---------- */
+
+.entrar__aviso,
+.entrar__recado,
+.entrar__erro {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.entrar__aviso,
+.entrar__recado {
+  border: 1px solid rgba(227, 198, 146, .3);
+  background: rgba(227, 198, 146, .12);
+  color: var(--text);
+}
+.entrar__aviso strong { color: var(--gold-bright); }
+.entrar__erro {
+  border: 1px solid rgba(214, 122, 116, .38);
+  background: rgba(214, 122, 116, .12);
+  color: #f0c3c0;
+}
+
+.entrar__rodape {
+  margin-top: 24px;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--text-dim);
+}
+/* A cor precisa vir de uma classe, não de utility: `a { color: inherit }` de
+   estilos/style.css não está em camada nenhuma e venceria o Tailwind. */
+.entrar__link {
+  color: var(--gold-bright);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(227, 198, 146, .4);
+  padding-bottom: 1px;
+  transition: color .25s, border-color .25s;
+}
+.entrar__link:hover { color: #fff; border-color: rgba(255, 255, 255, .6); }
+
+@media (max-width: 420px) {
+  .entrar__caixa { padding: 30px 22px 26px; border-radius: 14px; }
+  .entrar__titulo { font-size: 29px; }
+}
