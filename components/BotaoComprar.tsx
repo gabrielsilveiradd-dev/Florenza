@@ -18,8 +18,24 @@ export function BotaoComprar({
   produto: Omit<ItemCarrinho, "quantidade">;
   className?: string;
 }) {
-  const { adicionar } = useCarrinho();
+  const { adicionar, itens } = useCarrinho();
   const [adicionado, setAdicionado] = useState(false);
+
+  const noCarrinho = itens.find((i) => i.sku === produto.sku)?.quantidade ?? 0;
+  const esgotado = produto.estoque <= 0;
+  // Já pegou tudo que existe: continuar clicando não faria nada e o botão
+  // dizendo "Comprar" seria promessa falsa.
+  const noLimite = !esgotado && noCarrinho >= produto.estoque;
+
+  if (esgotado) {
+    // Continua sendo um <a> para o card não mudar de forma, mas sem href não
+    // navega e sai da ordem de tabulação — é o jeito de "desabilitar" um link.
+    return (
+      <span className={`${className} is-esgotado`} aria-disabled="true">
+        Esgotado
+      </span>
+    );
+  }
 
   return (
     // O <Link> do Next é o certo para navegar, mas aqui o clique normal NÃO
@@ -36,6 +52,11 @@ export function BotaoComprar({
         // carrinho em outra aba, como qualquer link.
         if (evento.metaKey || evento.ctrlKey || evento.button !== 0) return;
         evento.preventDefault();
+        if (noLimite) {
+          // Sem adicionar: o carrinho já tem todas as unidades que existem.
+          window.location.assign("/carrinho");
+          return;
+        }
         adicionar(produto);
         setAdicionado(true);
         window.setTimeout(() => setAdicionado(false), 1800);
@@ -44,7 +65,7 @@ export function BotaoComprar({
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
         <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6zM3 6h18M16 10a4 4 0 0 1-8 0" />
       </svg>
-      {adicionado ? "Adicionado ✓" : "Comprar"}
+      {noLimite ? "No carrinho" : adicionado ? "Adicionado ✓" : "Comprar"}
     </a>
   );
 }

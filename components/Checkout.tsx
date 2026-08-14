@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { useCarrinho } from "@/lib/carrinho";
@@ -21,13 +21,51 @@ const formatar = (centavos: number) => moeda.format(centavos / 100);
  * por WhatsApp. Quando o Mercado Pago entrar, é ele que promove o status.
  */
 export function Checkout({ demo }: { demo: boolean }) {
-  const { itens, totalCentavos, mudarQuantidade, remover, esvaziar, pronto } = useCarrinho();
+  const { itens, totalCentavos, mudarQuantidade, remover, esvaziar, sincronizarEstoque, pronto } =
+    useCarrinho();
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [numero, setNumero] = useState<number | null>(null);
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [cidade, setCidade] = useState("");
   const [uf, setUf] = useState("");
+
+  /* O carrinho vive no localStorage e pode ter semanas: a aba fica aberta, a
+   * pessoa volta depois, e nesse meio-tempo a peça pode ter acabado. Ao abrir o
+   * carrinho, o estoque é relido do banco e a quantidade é aparada.
+   *
+   * Isso não substitui a conferência de `criar_pedido` — entre esta leitura e o
+   * clique em "Enviar pedido" ainda cabe outra pessoa comprando. Serve para a
+   * pessoa descobrir o problema aqui, olhando a lista, e não depois de digitar
+   * o endereço inteiro.
+   *
+   * A dependência é a lista de SKUs em texto, e não `itens`: `itens` muda de
+   * referência a cada alteração do carrinho e o efeito rodaria em laço. */
+  const skusNoCarrinho = itens.map((i) => i.sku).sort().join(",");
+  useEffect(() => {
+    if (demo || !pronto || skusNoCarrinho === "") return;
+    let ativo = true;
+
+    (async () => {
+      const { data, error } = await createClient()
+        .from("produtos")
+        .select("sku, estoque")
+        .in("sku", skusNoCarrinho.split(","))
+        .eq("ativo", true);
+
+      // Falhou a rede: melhor manter o que está na tela do que zerar tudo e
+      // assustar. `criar_pedido` continua sendo a rede de segurança.
+      if (!ativo || error || !data) return;
+
+      sincronizarEstoque(
+        Object.fromEntries(data.map((p) => [p.sku as string, p.estoque as number]))
+      );
+    })();
+
+    return () => {
+      ativo = false;
+    };
+  }, [skusNoCarrinho, pronto, demo, sincronizarEstoque]);
 
   /** ViaCEP: preenche cidade e estado sozinho, para ninguém digitar errado. */
   async function consultarCep(valor: string) {
@@ -58,53 +96,53 @@ export function Checkout({ demo }: { demo: boolean }) {
     setEnviando(true);
     const supabase = createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
+    /* Uma chamada só, e é o banco que decide tudo.
+     *
+     * Antes eram dois inserts daqui: `pedidos` e depois `pedido_itens`. Se o
+     * segundo falhasse sobrava pedido sem peça nenhuma — e a mensagem de erro
+     * daquela versão dizia isso com todas as letras. Duas escritas separadas do
+     * navegador não são uma transação.
+     *
+     * Repare no que NÃO é mandado: preço e total. `criar_pedido` copia o preço
+     * de `produtos` e a trigger soma. Mandar daqui era deixar o valor da joia na
+     * mão de quem abrisse o DevTools.
+     *
+     * O estoque também é conferido lá dentro, com a linha do produto travada.
+     * O limite que o carrinho aplica é aviso; a palavra final é esta. */
+    const { data, error } = await supabase.rpc("criar_pedido", {
+      p_itens: itens
+        .filter((i) => i.quantidade > 0)
+        .map((i) => ({ sku: i.sku, quantidade: i.quantidade })),
+      p_nome: String(dados.get("nome") ?? "").trim(),
+      p_telefone: String(dados.get("telefone") ?? "").trim() || null,
+      p_email: String(dados.get("email") ?? "").trim() || null,
+      p_cep: String(dados.get("cep") ?? "").trim() || null,
+      p_cidade: cidade || null,
+      p_uf: uf || null,
+      p_observacoes: String(dados.get("observacoes") ?? "").trim() || null,
+    });
+    setEnviando(false);
 
-    const { data: pedido, error } = await supabase
-      .from("pedidos")
-      .insert({
-        user_id: user?.id ?? null,
-        nome: String(dados.get("nome") ?? "").trim(),
-        email: String(dados.get("email") ?? "").trim() || null,
-        telefone: String(dados.get("telefone") ?? "").trim() || null,
-        cep: String(dados.get("cep") ?? "").trim() || null,
-        cidade: cidade || null,
-        uf: uf || null,
-        origem: "site",
-        status: "aguardando_pagamento",
-        total_centavos: totalCentavos,
-        observacoes: String(dados.get("observacoes") ?? "").trim() || null,
-      })
-      .select("id, numero")
-      .single();
-
-    if (error || !pedido) {
-      setEnviando(false);
+    if (error) {
+      // P0001 é o código das mensagens escritas na própria função — já em
+      // português e já falando de peça e quantidade ("Restam 2 unidade(s) de
+      // Anel Safira Oval."). Repassar é melhor que traduzir de novo e pior.
       setErro(
-        "Não foi possível registrar o pedido. Se você não tem conta, crie uma primeiro — " +
-          "é ela que permite acompanhar o andamento."
+        error.code === "P0001"
+          ? error.message
+          : "Não foi possível registrar o pedido. Tente de novo em instantes."
       );
       return;
     }
 
-    const { error: erroItens } = await supabase.from("pedido_itens").insert(
-      itens.map((i) => ({
-        pedido_id: pedido.id,
-        sku: i.sku,
-        nome: i.nome,
-        preco_centavos: i.precoCentavos,
-        quantidade: i.quantidade,
-      }))
-    );
-    setEnviando(false);
-
-    if (erroItens) {
-      setErro("O pedido foi criado, mas as peças não foram salvas. Entre em contato pelo WhatsApp.");
+    const pedido = Array.isArray(data) ? data[0] : data;
+    if (!pedido) {
+      setErro("Não foi possível registrar o pedido. Tente de novo em instantes.");
       return;
     }
 
     esvaziar();
-    setNumero(pedido.numero);
+    setNumero(pedido.pedido_numero);
   }
 
   if (numero !== null) {
@@ -147,7 +185,12 @@ export function Checkout({ demo }: { demo: boolean }) {
             <img className="carrinho__foto" src={item.imagemUrl} alt="" />
             <div style={{ flexGrow: 1, minWidth: 180 }}>
               <Link href={`/produto/${item.slug}`} className="carrinho__nome">{item.nome}</Link>
-              <p className="carrinho__sku">Cód. {item.sku}</p>
+              <p className="carrinho__sku">
+                Cód. {item.sku}
+                {item.estoque <= 0 && " · esgotada, não entra no pedido"}
+                {item.estoque > 0 && item.quantidade >= item.estoque &&
+                  ` · você levou ${item.estoque === 1 ? "a única" : `todas as ${item.estoque}`}`}
+              </p>
             </div>
 
             <div className="carrinho__qtd">
@@ -155,7 +198,14 @@ export function Checkout({ demo }: { demo: boolean }) {
                 <Minus aria-hidden size={13} />
               </button>
               <span>{item.quantidade}</span>
-              <button type="button" aria-label={`Mais um ${item.nome}`} onClick={() => mudarQuantidade(item.sku, item.quantidade + 1)}>
+              {/* Sem estoque para mais, o botão sai de cena: deixá-lo clicável
+                  sem efeito faz a pessoa achar que a página travou. */}
+              <button
+                type="button"
+                aria-label={`Mais um ${item.nome}`}
+                disabled={item.quantidade >= item.estoque}
+                onClick={() => mudarQuantidade(item.sku, item.quantidade + 1)}
+              >
                 <Plus aria-hidden size={13} />
               </button>
             </div>
@@ -241,10 +291,22 @@ export function Checkout({ demo }: { demo: boolean }) {
             </div>
           </div>
 
-          <button className="pdp__comprar" type="submit" disabled={enviando || demo} style={{ marginTop: 28, width: "100%" }}>
+          <button
+            className="pdp__comprar"
+            type="submit"
+            disabled={enviando || demo || totalCentavos === 0}
+            style={{ marginTop: 28, width: "100%" }}
+          >
             {enviando && <Loader2 aria-hidden size={15} className="animate-spin" />}
             Enviar pedido · {formatar(totalCentavos)}
           </button>
+
+          {totalCentavos === 0 && (
+            <p className="pdp__nota" style={{ marginTop: 14 }}>
+              As peças do seu carrinho estão sem unidades no momento. Remova-as ou fale com a
+              Florenza pelo WhatsApp para encomendar.
+            </p>
+          )}
         </form>
 
         {erro && <p className="checkout__erro" role="alert">{erro}</p>}

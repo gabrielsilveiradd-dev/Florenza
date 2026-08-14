@@ -158,7 +158,7 @@ const formatura = (
   precoCentavos,
   ...fotoFormatura(sku),
   alt: null,
-  estoque: 0,
+  estoque: 5,
   ativo: true,
 });
 
@@ -216,7 +216,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/3mm.png",
     imagemSmUrl: null,
     alt: "Aliança Essence, ouro 18K, 3mm, acabamento polido",
-    estoque: 0,
+    estoque: 5,
     ativo: true,
   },
   {
@@ -235,7 +235,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/5mm.png",
     imagemSmUrl: null,
     alt: "Aliança Aurea, ouro 18K, 5mm, detalhe de coração cravejado",
-    estoque: 0,
+    estoque: 5,
     ativo: true,
   },
   {
@@ -254,7 +254,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/3mmprata.png",
     imagemSmUrl: null,
     alt: "Aliança Elo, prata 925, 3mm, acabamento diagonal texturizado",
-    estoque: 0,
+    estoque: 5,
     ativo: true,
   },
   {
@@ -273,7 +273,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/6mmprata.png",
     imagemSmUrl: null,
     alt: "Aliança Éter, prata 925, 6mm, friso dourado e detalhe de coração",
-    estoque: 0,
+    estoque: 5,
     ativo: true,
   },
 ];

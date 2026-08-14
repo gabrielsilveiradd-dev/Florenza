@@ -80,6 +80,57 @@ logo sobreposto. Não há tamanho de botão que caiba. No celular a conta se ace
 pelo link no rodapé, até o nav ser corrigido (o que exige aprovação, por ser
 estética).
 
+## Estoque e fechamento do pedido
+
+`produtos.estoque` deixou de ser enfeite. A regra em uma frase: **quem decide se
+a venda pode acontecer é o banco, não a tela.**
+
+`public.criar_pedido()` faz tudo numa transação — confere o estoque com a linha
+do produto travada (`for update`), insere `pedidos` e `pedido_itens`, e desconta.
+Ou nasce tudo, ou não nasce nada. Antes eram dois inserts do navegador, e o
+próprio código admitia que podia sobrar pedido sem itens.
+
+**A função não aceita preço.** Ela copia `preco_centavos` de `produtos`. Na
+versão anterior o preço do item vinha do navegador e a trigger de total só somava
+o que recebia — dava para fechar um anel de R$ 2.420 por R$ 1 mexendo na
+requisição.
+
+O laço percorre as peças **em ordem de SKU**. Dois pedidos com as mesmas peças em
+ordens opostas travariam um no outro; ordem igual para todos elimina o impasse.
+
+Cancelar devolve o estoque, e sair de 'cancelado' tira de novo — senão
+cancelar/descancelar vira máquina de inventar unidade. Reativar sem estoque é
+barrado com recado.
+
+As três camadas do lado do site são **aviso, não autorização**: a vitrine esconde
+o esgotado, o carrinho apara a quantidade ao abrir, e `criar_pedido` decide. As
+duas primeiras existem para a pessoa descobrir cedo, não para liberar a venda.
+
+Por isso as páginas de categoria e produto têm `export const revalidate = 60`.
+Sem isso o HTML congelaria no build e o site ofereceria "Comprar" numa peça
+esgotada até o próximo deploy. Dinâmico seria pior: são conteúdo público, igual
+para todos — ver o motivo de `lib/supabase/publico.ts`.
+
+## Área da conta
+
+`/conta` tem dois estados no mesmo endereço: formulário para quem chega de fora,
+área da conta para quem entrou. Fica junto de propósito — é o link que o cliente
+guarda e que chega no e-mail; trocar o significado do endereço conforme o estado
+seria pior.
+
+As consultas ficam em `lib/conta-servidor.ts`, separadas de `lib/conta.ts`
+porque este é importado também por componente de cliente e aquele puxa
+`next/headers`. Juntos, o build quebra.
+
+**Nenhuma consulta da conta filtra por `user_id`.** Quem filtra é a RLS. Repetir
+o filtro no cliente daria a impressão de que ele é a proteção, e esquecê-lo um
+dia vazaria em silêncio.
+
+**Cartão não entra neste banco.** "Formas de pagamento" é preferência declarada
+(`profiles.forma_pagamento_preferida`), para a Florenza saber o que oferecer no
+contato. Guardar cartão exige cofre de PSP e certificação PCI; quando o Mercado
+Pago entrar, o que se guarda é o token dele.
+
 ## Catálogo dirigido a dados
 
 Fluxo: Supabase → `lib/catalogo.ts` → páginas.
@@ -161,6 +212,14 @@ Revogar não desliga a trigger: o Postgres confere essa permissão ao criar a
 trigger, não a cada disparo.
 
 **Índice em toda coluna de chave estrangeira.** O Postgres não cria sozinho.
+
+**RLS decide linha, não coluna.** A policy "Cada um edita o próprio perfil"
+liberava UPDATE na própria linha de `profiles`, e o Supabase concede UPDATE da
+tabela inteira a `authenticated` — somando as duas coisas, qualquer cliente
+cadastrado virava admin com um `PATCH {"role":"admin"}` na própria linha. O
+conserto é privilégio de coluna (`grant update (nome, telefone, …)`), não uma
+policy nova. Ao abrir qualquer coluna sensível para o dono da linha, pergunte
+qual coluna, não qual linha.
 
 Depois de mexer no schema, rode os Advisors (segurança e performance). Foi o
 que apontou os três achados corrigidos na migration `..._endurecimento`.

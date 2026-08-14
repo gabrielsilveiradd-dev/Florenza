@@ -27,6 +27,17 @@ export type ItemCarrinho = {
   precoCentavos: number;
   imagemUrl: string;
   quantidade: number;
+  /**
+   * Estoque como estava quando a peça entrou no carrinho.
+   *
+   * Serve para o carrinho não deixar somar 8 de uma peça que tem 5 — mas é
+   * conforto, não garantia. O localStorage é editável, a aba pode ficar aberta
+   * a semana inteira, e outra pessoa pode levar a última unidade nesse meio
+   * tempo. Quem decide de verdade é `criar_pedido()` no banco, que confere com
+   * a linha do produto travada. Este número serve para avisar antes, não para
+   * autorizar.
+   */
+  estoque: number;
 };
 
 type Carrinho = {
@@ -37,6 +48,11 @@ type Carrinho = {
   mudarQuantidade: (sku: string, quantidade: number) => void;
   remover: (sku: string) => void;
   esvaziar: () => void;
+  /**
+   * Reconfere o estoque contra o banco e apara o que passou do teto.
+   * SKU ausente do mapa é peça que saiu do catálogo: vira estoque 0.
+   */
+  sincronizarEstoque: (estoquePorSku: Record<string, number>) => void;
   /** Falso no servidor e durante a hidratação; evita a lista piscar "vazio". */
   pronto: boolean;
 };
@@ -66,13 +82,24 @@ function lerSnapshot(): ItemCarrinho[] {
     // localStorage é editável por quem usa e sobrevive a mudanças de formato
     // entre versões do site: só passa o que tem a forma esperada.
     cacheValor = Array.isArray(dados)
-      ? dados.filter(
-          (i) =>
-            i &&
-            typeof i.sku === "string" &&
-            typeof i.precoCentavos === "number" &&
-            typeof i.quantidade === "number"
-        )
+      ? dados
+          .filter(
+            (i) =>
+              i &&
+              typeof i.sku === "string" &&
+              typeof i.precoCentavos === "number" &&
+              typeof i.quantidade === "number"
+          )
+          // `estoque` não existia nas versões anteriores do carrinho, e quem
+          // tinha peça guardada continua com o JSON antigo no navegador. Sem
+          // este ajuste, `Math.min(quantidade, undefined)` daria NaN e a
+          // quantidade sumiria da tela. Na dúvida, o teto é o que já está no
+          // carrinho: não tira nada de ninguém e impede somar mais até a
+          // página de carrinho reconferir com o banco.
+          .map((i) => ({
+            ...i,
+            estoque: typeof i.estoque === "number" ? i.estoque : i.quantidade,
+          }))
       : VAZIO;
   } catch {
     cacheValor = VAZIO;
@@ -103,21 +130,36 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
 
   const alterar = useCallback(
     (transformar: (atuais: ItemCarrinho[]) => ItemCarrinho[]) => {
-      gravar(transformar(lerSnapshot()));
+      const atuais = lerSnapshot();
+      const novos = transformar(atuais);
+      // Mesma referência significa "nada mudou". Gravar assim mesmo dispararia
+      // o evento e faria toda tela que ouve o carrinho rerrenderizar à toa —
+      // e a sincronização de estoque roda a cada visita ao carrinho.
+      if (novos === atuais) return;
+      gravar(novos);
     },
     []
   );
 
   const adicionar = useCallback(
     (item: Omit<ItemCarrinho, "quantidade">, quantidade = 1) => {
+      if (item.estoque <= 0) return;
       alterar((atuais) => {
         const existente = atuais.find((i) => i.sku === item.sku);
         if (existente) {
           return atuais.map((i) =>
-            i.sku === item.sku ? { ...i, quantidade: i.quantidade + quantidade } : i
+            i.sku === item.sku
+              ? {
+                  ...i,
+                  // O estoque também se atualiza: a página que chamou acabou de
+                  // ler do banco, e esse número é mais novo que o guardado.
+                  estoque: item.estoque,
+                  quantidade: Math.min(i.quantidade + quantidade, item.estoque),
+                }
+              : i
           );
         }
-        return [...atuais, { ...item, quantidade }];
+        return [...atuais, { ...item, quantidade: Math.min(quantidade, item.estoque) }];
       });
     },
     [alterar]
@@ -128,7 +170,9 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
       alterar((atuais) =>
         quantidade <= 0
           ? atuais.filter((i) => i.sku !== sku)
-          : atuais.map((i) => (i.sku === sku ? { ...i, quantidade } : i))
+          : atuais.map((i) =>
+              i.sku === sku ? { ...i, quantidade: Math.min(quantidade, i.estoque) } : i
+            )
       );
     },
     [alterar]
@@ -141,6 +185,26 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
 
   const esvaziar = useCallback(() => alterar(() => []), [alterar]);
 
+  const sincronizarEstoque = useCallback(
+    (estoquePorSku: Record<string, number>) => {
+      alterar((atuais) => {
+        let mudou = false;
+        const novos = atuais.map((i) => {
+          const estoque = estoquePorSku[i.sku] ?? 0;
+          const quantidade = Math.min(i.quantidade, estoque);
+          if (estoque === i.estoque && quantidade === i.quantidade) return i;
+          mudou = true;
+          return { ...i, estoque, quantidade };
+        });
+        // Devolver o array original quando nada mudou evita gravar no
+        // localStorage e disparar o evento a cada visita ao carrinho — o que
+        // faria a lista rerrenderizar à toa.
+        return mudou ? novos : atuais;
+      });
+    },
+    [alterar]
+  );
+
   const valor = useMemo<Carrinho>(
     () => ({
       itens,
@@ -150,9 +214,10 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
       mudarQuantidade,
       remover,
       esvaziar,
+      sincronizarEstoque,
       pronto,
     }),
-    [itens, pronto, adicionar, mudarQuantidade, remover, esvaziar]
+    [itens, pronto, adicionar, mudarQuantidade, remover, esvaziar, sincronizarEstoque]
   );
 
   return <ContextoCarrinho.Provider value={valor}>{children}</ContextoCarrinho.Provider>;

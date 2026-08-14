@@ -15,6 +15,13 @@ import "../estilos/categoria.css";
  * os mesmos nomes, sem a extensão, e são também as chaves da tabela
  * `categorias` — o mesmo identificador do começo ao fim.
  */
+/**
+ * Pré-renderizada, mas com validade — mesmo motivo da página de produto: sem
+ * isto a grade congelaria no build e seguiria oferecendo "Comprar" numa peça
+ * que já esgotou no banco, até o próximo deploy.
+ */
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const categorias = await listarCategorias();
   return categorias.map((categoria) => ({ categoria: categoria.slug }));

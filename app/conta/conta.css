@@ -10,7 +10,9 @@
 .conta :where(h1, h2, p, ul) { margin: 0; padding: 0; }
 .conta :where(ul) { list-style: none; }
 .conta :where(button) { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-.conta :where(input) { font: inherit; color: inherit; }
+.conta :where(input, select) { font: inherit; color: inherit; }
+.conta :where(fieldset) { margin: 0; padding: 0; border: 0; }
+.conta :where(legend) { padding: 0; }
 
 .conta {
   min-height: 100vh;
@@ -149,3 +151,165 @@
 }
 .conta__aviso strong { color: var(--gold-ink); }
 .conta__aviso code { font-size: 12px; background: rgba(42, 30, 19, .07); padding: 1px 5px; }
+
+
+/* ==========================================================================
+   ÁREA DA CONTA — o que aparece depois de entrar.
+   Tudo abaixo é acréscimo: o formulário de entrada acima não muda uma linha,
+   e as duas telas dividem `.conta`, `.conta__form`, `.conta__input` e
+   `.conta__botao`. Nenhuma cor nova.
+   ========================================================================== */
+
+/* A caixa de 430px serve ao formulário de entrada; a área da conta precisa de
+   largura para a lista de pedidos respirar. */
+.conta--painel { justify-content: flex-start; }
+.conta__painel { width: 100%; max-width: 780px; margin: 0 auto; }
+
+.conta__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--hairline);
+}
+.conta__eyebrow { text-align: left; }
+.conta__titulo--painel { text-align: left; font-size: 34px; }
+.conta__sub--painel { text-align: left; margin-top: 6px; font-size: 13px; }
+
+.conta__sair {
+  padding: 9px 18px;
+  border: 1px solid var(--hairline);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  transition: color .25s, border-color .25s;
+}
+.conta__sair:hover { color: var(--ink); border-color: var(--gold-line); }
+
+.conta__bloco { margin-top: 44px; }
+.conta__bloco-titulo {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+/* ---------- Pedidos ---------- */
+
+.conta__pedidos { display: flex; flex-direction: column; gap: 16px; }
+
+.conta__pedido {
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  padding: 18px 20px;
+}
+
+.conta__pedido-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.conta__pedido-numero {
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+
+/* O selo de status usa só duas famílias de cor de propósito: dourado para o que
+   está em andamento e cinza para o que terminou ou morreu. Verde e vermelho
+   dariam ao "aguardando pagamento" um peso de alarme que ele não tem — é o
+   estado normal de todo pedido nesta loja, já que o acerto é por WhatsApp. */
+.conta__selo {
+  padding: 4px 11px;
+  border: 1px solid var(--gold-line);
+  background: rgba(227, 198, 146, .22);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.conta__selo--entregue,
+.conta__selo--cancelado {
+  border-color: var(--hairline);
+  background: transparent;
+  color: var(--ink-dim);
+}
+
+.conta__pedido-data { margin-top: 8px; font-size: 12px; color: var(--ink-dim); }
+
+.conta__pedido-itens {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.conta__pedido-itens li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13.5px;
+}
+
+.conta__pedido-total {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+}
+.conta__pedido-total strong { font-weight: 500; color: var(--gold-ink); }
+
+.conta__vazio {
+  border: 1px solid var(--hairline);
+  padding: 34px 20px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-dim);
+}
+
+/* ---------- Dados ---------- */
+
+.conta__linha { display: flex; gap: 14px; flex-wrap: wrap; }
+.conta__linha .conta__campo { flex: 1 1 150px; }
+
+.conta__pagamento { margin-top: 8px; }
+.conta__opcoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+
+.conta__opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color .25s, color .25s;
+}
+.conta__opcao:hover { border-color: var(--gold-line); }
+.conta__opcao.is-active { border-color: var(--gold); color: var(--gold-ink); }
+.conta__opcao input { accent-color: var(--gold); }
+
+.conta__nota {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-dim);
+}
+
+.conta__botao--link { text-decoration: none; margin-top: 20px; padding: 0 26px; }
+
+@media (max-width: 560px) {
+  .conta__titulo--painel { font-size: 28px; }
+  .conta__pedido-itens li { flex-direction: column; gap: 2px; }
+}

@@ -10,6 +10,24 @@ import {
 import "../produto.css";
 
 /**
+ * A página continua pré-renderizada, mas com validade.
+ *
+ * Sem isto o HTML congelaria no build: a peça esgotaria no banco e o site
+ * seguiria oferecendo "Comprar" até o próximo deploy. Com estoque de verdade em
+ * jogo, isso é justamente o bug que não pode existir.
+ *
+ * Um minuto é bastante: o carrinho reconfere o estoque ao abrir e
+ * `criar_pedido()` confere de novo com a linha travada. Esta camada existe para
+ * a pessoa não se apegar a uma peça que já foi — não para autorizar a venda.
+ *
+ * Dinâmico seria a saída errada. Estas 20 páginas mais as 3 de categoria são
+ * conteúdo público, igual para todo mundo, e torná-las dinâmicas cobraria uma
+ * ida ao banco por visita — o oposto do que lib/supabase/publico.ts foi escrito
+ * para conseguir.
+ */
+export const revalidate = 60;
+
+/**
  * Página de produto — o destino de "Ver detalhes", que no protótipo era
  * `href="#"` porque a página não existia.
  */
@@ -107,8 +125,21 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                   nome: produto.nome,
                   precoCentavos: produto.precoCentavos,
                   imagemUrl: produto.imagemUrl,
+                  estoque: produto.estoque,
                 }}
               />
+              {produto.estoque <= 0 ? (
+                <p className="pdp__estoque">
+                  Esta peça está sem unidades no momento. Fale com a Florenza pelo WhatsApp
+                  para saber do próximo lote ou encomendar uma igual.
+                </p>
+              ) : produto.estoque <= 2 ? (
+                <p className="pdp__estoque">
+                  {produto.estoque === 1
+                    ? "Última peça disponível."
+                    : "Restam 2 peças disponíveis."}
+                </p>
+              ) : null}
             </div>
 
             <p className="pdp__nota">

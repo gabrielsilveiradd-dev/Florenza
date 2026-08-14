@@ -94,7 +94,17 @@ export function RingCard({
           </p>
         )}
         <div className="ringCard__foot">
-          <span className="ringCard__price">{formatarPreco(produto.precoCentavos)}</span>
+          <span className="ringCard__price">
+            {formatarPreco(produto.precoCentavos)}
+            {/* Avisa antes de a pessoa se apegar à peça. Só nas últimas
+                unidades: em estoque cheio isso viraria pressão de venda, que
+                não é o tom da casa. */}
+            {produto.estoque > 0 && produto.estoque <= 2 && (
+              <span className="ringCard__restam">
+                {produto.estoque === 1 ? "última peça" : "restam 2"}
+              </span>
+            )}
+          </span>
           <Link
             className="ringCard__view"
             href={`/produto/${produto.slug}`}
@@ -110,6 +120,7 @@ export function RingCard({
             nome: produto.nome,
             precoCentavos: produto.precoCentavos,
             imagemUrl: produto.imagemUrl,
+            estoque: produto.estoque,
           }}
         />
       </div>

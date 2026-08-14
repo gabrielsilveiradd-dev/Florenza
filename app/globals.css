@@ -101,3 +101,41 @@
 @media (max-width: 640px) {
   .nav__links .nav__entrar { display: none; }
 }
+
+/* Estoque na vitrine.
+ *
+ * Também mora aqui pelo mesmo motivo do botão da nav: `.ringCard__*` e
+ * `.pdp__*` são vocabulário de estilos/categoria.css e app/produto/produto.css,
+ * que vieram prontos e não se mexe. Estas são classes NOVAS, que só somam.
+ *
+ * `.is-esgotado` precisa dos dois seletores juntos — `.ringCard__buy` sozinho é
+ * (0,1,0) e empataria, e no empate vence quem vem depois no arquivo, o que
+ * dependeria da ordem de importação. Com (0,2,0) não depende de nada.
+ *
+ * Nenhuma cor nova: --ink-dim, --gold-ink e --hairline já são do site. */
+.ringCard__restam {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+
+.ringCard__buy.is-esgotado,
+.pdp__comprar.is-esgotado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  background: none;
+  color: var(--ink-dim);
+  cursor: not-allowed;
+}
+
+.pdp__estoque {
+  margin-top: 14px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
