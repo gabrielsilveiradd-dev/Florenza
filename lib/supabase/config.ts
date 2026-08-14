@@ -17,3 +17,26 @@ export const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? 
 export function supabaseConfigurado(): boolean {
   return SUPABASE_URL.length > 0 && SUPABASE_KEY.length > 0;
 }
+
+/**
+ * Em produção, faltar chave é erro — não é modo de demonstração.
+ *
+ * Sem esta trava o pior caso é silencioso: o build passa, o site sobe verde, e
+ * a loja de verdade fica servindo o catálogo do repositório com o painel cheio
+ * de pedidos de exemplo. Ninguém percebe olhando, porque parece funcionando.
+ * Numa joalheria isso é preço errado na vitrine.
+ *
+ * A trava vale só para o deploy de produção da Vercel. Preview continua
+ * permissivo de propósito: é onde se confere layout, e ali a demonstração
+ * ajuda em vez de atrapalhar.
+ */
+if (process.env.VERCEL_ENV === "production" && !supabaseConfigurado()) {
+  throw new Error(
+    "Faltam as chaves do Supabase no deploy de produção.\n\n" +
+      "Em Settings -> Environment Variables, para o ambiente Production:\n" +
+      "  NEXT_PUBLIC_SUPABASE_URL\n" +
+      "  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY\n\n" +
+      "Depois refaça o deploy: a Vercel não reaproveita variáveis num build já feito.\n" +
+      "Sem elas o site subiria com dados de exemplo, parecendo correto."
+  );
+}

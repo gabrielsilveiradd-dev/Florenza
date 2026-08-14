@@ -147,6 +147,11 @@ sem banco, e para quem clonar o repositório sem as chaves.
 Com o banco ligado — que é o estado atual — esse caminho não roda. Ele não é
 plano B de produção: ver a regra em "Catálogo dirigido a dados".
 
+E não pode virar: `config.ts` **estoura** se `VERCEL_ENV === "production"` sem
+as chaves. Sem essa trava, o pior caso é silencioso — build verde, site no ar, e
+a loja de verdade servindo o catálogo do repositório com o painel cheio de
+pedidos de exemplo. Preview segue permissivo, que é onde se confere layout.
+
 **Nenhuma service-role key entra neste projeto.** Quem protege os dados é a RLS.
 A carga inicial do catálogo é SQL colado no SQL Editor (`npm run seed`),
 justamente para não precisar dessa chave.
