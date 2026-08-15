@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
+import { IconeSacola } from "@/components/IconesNav";
 import { useCarrinho } from "@/lib/carrinho";
 
 /**
@@ -27,7 +27,7 @@ export function BotaoCarrinho() {
       href="/carrinho"
       aria-label={tem ? `Carrinho com ${quantidadeTotal} peça(s)` : "Carrinho"}
     >
-      <ShoppingCart aria-hidden size={18} strokeWidth={1.5} />
+      <IconeSacola size={18} />
 
       <AnimatePresence>
         {tem && (

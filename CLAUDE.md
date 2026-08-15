@@ -44,10 +44,30 @@ O visual do site é trabalho concluído e não está em discussão. Toda mudanç
 - Telas novas (`/admin`, `/conta`, `/entrar`) têm CSS próprio —
   `app/admin/admin.css`, `app/conta/conta.css`, `app/entrar/entrar.css` — usando
   **as variáveis que já existem**. Nenhuma cor nova entra no projeto.
-- A única exceção mora em `app/globals.css`: o botão "Entrar" da nav. É o único
-  CSS global que o projeto escreveu, e é onde uma adição à nav cabe sem tocar
-  `app/estilos/`. O seletor precisa ser `.nav__links .nav__entrar`, com os dois
-  níveis — `.nav__links a` de `style.css` é (0,1,1) e venceria a classe sozinha.
+- A única exceção mora em `app/globals.css`: a barra do topo. É o único CSS
+  global que o projeto escreveu, e é onde a nav cabe sem tocar `app/estilos/`.
+  Todo seletor que disputa com o `style.css` ali tem **dois níveis**
+  (`.nav .nav__pilula`, `.nav__acoes .nav__entrar`): este arquivo é importado
+  ANTES, e no empate de especificidade vence quem vem depois.
+
+## A barra do topo
+
+Um vocabulário só: pílula com ícone e rótulo, agrupada em cápsulas de borda
+fina e canto redondo — o desenho dos cartões do carrinho aplicado à navegação.
+Antes eram duas linguagens na mesma faixa (links de texto puro à esquerda,
+cápsula de ícones à direita).
+
+Os ícones de `components/IconesNav.tsx` são desenhados aqui, não importados de
+biblioteca. O losango da marca tem traço fino e canto reto; colar ao lado dele
+ícones genéricos de traço grosso deixaria a barra com duas caligrafias. Todos
+seguem a mesma régua: viewBox 24, traço 1.3, `currentColor`,
+`vector-effect: non-scaling-stroke` para a espessura não mudar quando encolhem.
+
+**Abaixo de 860px o rótulo sai e fica o ícone**, e é isso que devolveu a barra a
+uma linha só no celular — `--nav-h` voltou de 112px para 76px. O número saiu de
+medição: com rótulo o conjunto ocupa 777px, sobram 72px em 900 e faltariam 180
+em 600. O texto continua no HTML, escondido por `clip-path` e não por
+`display: none`, para o leitor de tela continuar lendo.
 - No CSS dessas telas, o reset escopado usa `:where()` para ter especificidade
   zero. Sem isso `.adm button` venceria `.adm-botao` e o botão perde o fundo —
   já aconteceu uma vez.
@@ -355,8 +375,8 @@ Tudo respeita `prefers-reduced-motion`.
 - O projeto nasceu em **us-east-2**, não em São Paulo: ~120 ms a mais por
   consulta. Trocar exige projeto novo — o schema está todo versionado, então é
   colar `aplicar-tudo.sql` e trocar duas variáveis.
-- No celular (~390px) o logo e os links do nav se sobrepõem. Medido: 335px de
-  conteúdo para 311px úteis. Enquanto durar, o botão "Entrar" fica escondido
-  abaixo de 640px e a conta se acessa pelo rodapé.
+- ~~No celular o logo e os links do nav se sobrepõem.~~ **Resolvido**: com
+  ícone no lugar do rótulo abaixo de 860px, a barra cabe em uma linha com 53px
+  de folga em 390px, e nada precisou ser escondido atrás de menu.
 - `aneisFormatura/` (33 MB de fotos originais) e `public/produtos/` seguem fora
   e dentro do git respectivamente; pense duas vezes antes de commitar mídia.

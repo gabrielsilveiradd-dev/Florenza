@@ -55,21 +55,87 @@
   --font-sans: var(--font-sans);
 }
 
-/* Botão "Entrar" da nav.
- *
- * Mora aqui, e não em estilos/style.css, porque aquele arquivo veio do
- * protótipo sem uma linha alterada e continua assim. Este é o único CSS global
- * que o projeto escreveu, então é onde uma adição à nav cabe.
- *
- * Os dois níveis do seletor são de propósito. Não é mais por causa de
- * `.nav__links a` (o botão saiu de dentro dos links), e sim porque este arquivo
- * é importado ANTES de estilos/style.css: no empate de especificidade vence
- * quem vem depois, então uma classe sozinha ficaria à mercê da ordem.
- *
- * Também não pode ser utility do Tailwind: as utilities vivem em
- * `@layer utilities`, e regra sem camada vence regra em camada sempre.
- *
- * Nenhuma cor nova: --gold-bright já é do site. */
+/* ===========================================================================
+   BARRA DO TOPO
+   ===========================================================================
+   Um vocabulário só para a barra inteira: pílula com ícone e rótulo, agrupada
+   em cápsulas de borda fina e canto redondo. É o desenho dos cartões do
+   carrinho aplicado à navegação, no lugar dos links de texto solto que
+   conviviam com os ícones à direita.
+
+   Mora aqui, e não em estilos/style.css, porque aquele arquivo veio do
+   protótipo sem uma linha alterada e continua assim. Este é o único CSS global
+   que o projeto escreveu.
+
+   SOBRE A ESPECIFICIDADE, que aqui não é detalhe: layout.tsx importa este
+   arquivo ANTES de estilos/style.css, e as regras dos dois são CSS comum sem
+   camada. No empate vence quem vem depois — o style.css. Como ele estiliza
+   `.nav__links`, `.nav__links a` e `.nav__word`, todo seletor abaixo que
+   disputa com ele tem dois níveis: (0,2,0) ganha de (0,1,1) e de (0,1,0)
+   independentemente da ordem de importação.
+
+   Também não pode ser utility do Tailwind: as utilities vivem em
+   `@layer utilities`, e regra sem camada vence regra em camada sempre.
+
+   Nenhuma cor nova entra: tudo sai de --gold, --gold-bright, --text e --bg.
+   =========================================================================== */
+
+/* Os dois grupos compartilham a mesma cápsula. Uma variável para não repetir a
+   borda em dois lugares e elas divergirem na primeira mudança. */
+.nav__links,
+.nav__acoes {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid rgba(227, 198, 146, .16);
+  border-radius: 999px;
+  background: rgba(243, 239, 232, .04);
+  transition: border-color .25s ease;
+}
+.nav__links:hover,
+.nav__acoes:hover { border-color: rgba(227, 198, 146, .3); }
+
+/* `.nav__inner` é `space-between`. Com três filhos os links cairiam no centro;
+   o `margin-left: auto` mantém links e ações encostados à direita, que é a
+   composição do site desde o protótipo. */
+.nav .nav__links {
+  margin-left: auto;
+  /* style.css define text-transform e letter-spacing em `.nav__links`; as
+     pílulas cuidam da própria tipografia. */
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.nav__acoes { margin-left: 10px; }
+
+/* ---------- A pílula de seção ---------- */
+
+.nav .nav__pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text);
+  opacity: .82;
+  white-space: nowrap;
+  transition: opacity .2s ease, background-color .2s ease, color .2s ease;
+}
+.nav .nav__pilula:hover {
+  opacity: 1;
+  background: rgba(243, 239, 232, .08);
+  color: var(--gold-bright);
+}
+.nav__pilula-icone { flex: none; }
+
+/* ---------- Botão de conta ---------- */
+
 .nav__acoes .nav__entrar {
   display: inline-flex;
   align-items: center;
@@ -96,31 +162,6 @@
   background: var(--gold);
   color: #fffaf2;
 }
-
-/* Bloco de ações: carrinho e conta.
- *
- * `.nav__inner` é `space-between`. Com dois filhos, logo à esquerda e links à
- * direita — que é como o site sempre foi. Ao ganhar um terceiro, os links
- * cairiam no centro, e mexer na posição do que já existe é o que este projeto
- * não faz. O `margin-left: auto` nos links empurra links e ações juntos para a
- * direita e devolve exatamente o desenho anterior. */
-.nav .nav__links { margin-left: auto; }
-
-/* As ações viram uma cápsula, na mesma linguagem dos cartões do carrinho:
-   canto arredondado, borda fina, fundo levemente destacado do fundo da barra.
-   Junta carrinho e conta num bloco só, em vez de dois ícones soltos. */
-.nav__acoes {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 26px;
-  padding: 4px;
-  border: 1px solid rgba(227, 198, 146, .18);
-  border-radius: 999px;
-  background: rgba(243, 239, 232, .05);
-  transition: border-color .25s ease;
-}
-.nav__acoes:hover { border-color: rgba(227, 198, 146, .34); }
 
 .nav__carrinho {
   position: relative;
@@ -157,90 +198,64 @@
 /* No desktop vale a palavra; o ícone só entra nas telas estreitas. */
 .nav__entrar-icone { display: none; }
 
+/* O losango da marca perdeu o `margin-left` que o `space-between` dava de
+   graça quando a barra tinha dois filhos. Com três, o logo precisa de um
+   respiro próprio antes da primeira cápsula. */
+.nav .nav__logo { margin-right: 16px; }
+
 /* ---------------------------------------------------------------------------
-   CONSERTO DO NAV NO CELULAR
+   TELAS ESTREITAS: o rótulo sai, o ícone fica
    ---------------------------------------------------------------------------
-   O bug era anterior a este botão: em 390px a nav tinha 311px úteis (375 menos
-   32+32 de padding) e o logo mais os quatro links ocupavam 335. Ela estourava
-   24px sozinha, e era isso que fazia o logo invadir o "Alianças".
+   Aqui está o ganho real de ter desenhado os ícones. Antes, os quatro links
+   eram só texto: em 390px ocupavam 194px e não cabiam junto com a marca e as
+   ações — a barra precisou virar duas linhas, e `--nav-h` foi de 76px para 112.
 
-   Como o espaço já estava negativo, nenhum tamanho de botão cabia — o de ícone,
-   com 29px, nascia em x=377 numa tela de 390. Por isso o botão ficou escondido
-   até aqui.
+   Com ícone, a pílula continua reconhecível sem a palavra e cai para ~34px.
+   Quatro delas somam ~136 em vez de 194, e a barra volta a caber em UMA linha.
+   `--nav-h` volta para 76px, e as páginas recuperam 36px de altura no topo.
 
-   O espaço vem de três lugares, nesta ordem de preferência (do que menos
-   incomoda para o que mais):
-     padding da barra   32px → 14px por lado   = +36px
-     losango da marca   20px → 17px            =  +3px
-     palavra "Florenza" 24px → 20px            = +15px
-
-   Somam ~54px, que cobrem os 24 que faltavam e ainda pagam o botão.
-
-   SOBRE A ESPECIFICIDADE, que aqui não é detalhe: layout.tsx importa este
-   arquivo ANTES de estilos/style.css, e as regras dos dois são CSS comum sem
-   camada. No empate de especificidade vence quem vem depois — o style.css.
-   Como ele também tem um `@media (max-width: 640px)` mexendo em .nav__word e
-   .nav__links, um seletor de um nível só perderia em silêncio. Por isso todos
-   abaixo têm dois níveis: (0,2,0) ganha de (0,1,0) independentemente de ordem.
-
-   Nada disso toca app/estilos/, que segue verbatim do protótipo.
+   O rótulo não some de todo: continua no HTML e é lido por leitor de tela,
+   escondido pela técnica de recorte (`clip-path`) em vez de `display: none`,
+   que o tiraria da árvore de acessibilidade junto.
    --------------------------------------------------------------------------- */
-@media (max-width: 640px) {
-  .nav .nav__inner { padding: 0 14px; }
-  .nav .nav__gem { width: 17px; }
-  .nav__logo .nav__word { font-size: 20px; }
-  .nav .nav__links { gap: 12px; }
-  .nav__acoes { gap: 10px; margin-left: 16px; }
-  .nav__acoes .nav__entrar { padding: 5px 11px; }
+/* Faixa intermediária: aperta a pílula antes de desistir do rótulo. */
+@media (max-width: 1080px) {
+  .nav .nav__inner { padding: 0 18px; }
+  .nav .nav__pilula { padding: 8px 10px; gap: 6px; letter-spacing: .06em; }
+  .nav__acoes { margin-left: 8px; }
+  .nav .nav__logo { margin-right: 10px; }
 }
 
-/* ---------------------------------------------------------------------------
-   CELULAR: duas linhas
-   ---------------------------------------------------------------------------
-   Com carrinho e conta sempre à vista, a conta de largura deixa de fechar em
-   qualquer arranjo de uma linha só. Medido em 390px: sobram 362px úteis, e
-   marca (87) + quatro links (194) + duas ações (66) dão 347 — cabe no papel e
-   estoura na prática, porque o texto do link muda de largura com a fonte que o
-   sistema carregar. Espremer mais significaria fonte de 8px, ilegível.
+/* O corte fica em 860px, e o número saiu de medição, não de estimativa.
+   Com os rótulos, marca + links + ações somam 777px: em 900px sobram 72px, em
+   830 sobrariam 17 — margem fina demais para a largura do texto variar com a
+   fonte que o sistema carregar. Em 600px o conjunto estourava 180px, que foi o
+   que a régua mostrou depois de eu ter chutado que caberia. */
+@media (max-width: 860px) {
+  .nav .nav__gem { width: 17px; }
+  .nav__logo .nav__word { font-size: 21px; }
+  .nav .nav__inner { padding: 0 12px; }
 
-   Então a barra passa a ter duas linhas: marca e ações em cima, sempre
-   visíveis; os quatro links de seção embaixo, centrados. Nada é escondido atrás
-   de menu — a loja tem quatro seções, e um menu sanfona para quatro itens é
-   esconder o que caberia à mostra.
-
-   `--nav-h` cresce junto porque o site inteiro reserva esse espaço no topo (a
-   barra é `position: fixed`). Sem atualizar o token, a segunda linha cobriria o
-   começo de cada página. O `:root:root` é para vencer o `:root` de
-   estilos/style.css, que vem depois na ordem de importação — os dois têm a
-   mesma especificidade, e no empate ganha o último.
-   --------------------------------------------------------------------------- */
-@media (max-width: 560px) {
-  :root:root { --nav-h: 112px; }
-
-  .nav .nav__inner {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-content: center;
-    row-gap: 10px;
-    padding: 10px 14px;
+  .nav .nav__pilula { padding: 8px; }
+  .nav__pilula-texto,
+  .nav__entrar-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
+  .nav__entrar-icone { display: block; }
+  .nav__acoes .nav__entrar { padding: 9px; }
+}
 
-  .nav .nav__links {
-    order: 3;
-    flex-basis: 100%;
-    justify-content: center;
-    margin-left: 0;
-    gap: 16px;
-    font-size: 10.5px;
-  }
-
-  .nav__acoes { margin-left: auto; }
-
-  /* Na primeira linha sobra espaço, então a marca volta ao tamanho cheio e o
-     botão de conta mantém a palavra — não há mais aperto que justifique o
-     ícone sozinho. */
-  .nav__logo .nav__word { font-size: 24px; }
-  .nav .nav__gem { width: 19px; }
+/* Abaixo de 400px o vão entre as pílulas some — cada 1px de `gap` custa 3px
+   aqui, e é a última coisa que se percebe. */
+@media (max-width: 400px) {
+  .nav .nav__links,
+  .nav__acoes { gap: 1px; padding: 3px; }
+  .nav .nav__pilula { padding: 7px; }
 }
 
 /* Estoque na vitrine.
