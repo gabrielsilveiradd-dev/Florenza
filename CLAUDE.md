@@ -155,8 +155,21 @@ a data na quarta.
 ou "e-mail de confirmação enviado" — o pedido nasce em aguardando pagamento, o
 acerto é por WhatsApp, e não existe envio de e-mail de pedido neste sistema.
 
+**Logado, a identidade do pedido vem da conta e não do formulário.** Nome,
+telefone e e-mail não são editáveis no checkout — são os campos pelos quais a
+Florenza reconhece o cliente e junta os pedidos dele, e deixá-los livres ali
+produz o mesmo cliente com três grafias de nome, sem ninguém perceber até a aba
+Clientes virar uma lista de quase-duplicatas. Endereço é o contrário: muda a
+cada pedido, e é o único campo livre. Corrigir nome ou telefone é em `/conta`.
+
+**O SKU não aparece para o público.** Saiu do card, do atributo `data-sku` e da
+linha do carrinho — é chave de logística (vem do nome do arquivo da foto) e não
+diz nada a quem compra. Ele continua no painel, e continua na URL da foto, que é
+consequência da convenção de nomes; tirá-lo de lá exigiria renomear os arquivos.
+
 Falta a contrapartida no painel: os campos de código de rastreio e transportadora
 ainda não existem em `PedidosSection`, então hoje só se preenche pelo SQL Editor.
+Presente e mensagem do cartão também ainda não aparecem lá.
 
 ## Área da conta
 

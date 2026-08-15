@@ -85,15 +85,20 @@ export function ListaDoCarrinho({
                   </button>
                 </div>
 
-                <p className="chk-item__sku">
-                  Cód. {item.sku}
-                  {esgotado && <span className="chk-selo">esgotada</span>}
-                  {!esgotado && noLimite && (
-                    <span className="chk-selo">
-                      {item.estoque === 1 ? "última peça" : `só há ${item.estoque}`}
-                    </span>
-                  )}
-                </p>
+                {/* Sem o código da peça: ele é chave de logística interna e não
+                    diz nada a quem está comprando. Quem precisa de referência
+                    usa o número do pedido. A linha só existe quando há aviso de
+                    estoque para dar. */}
+                {(esgotado || noLimite) && (
+                  <p className="chk-item__sku">
+                    {esgotado && <span className="chk-selo">esgotada</span>}
+                    {!esgotado && noLimite && (
+                      <span className="chk-selo">
+                        {item.estoque === 1 ? "última peça" : `só há ${item.estoque}`}
+                      </span>
+                    )}
+                  </p>
+                )}
 
                 <div className="chk-item__base">
                   <div className="chk-qtd">

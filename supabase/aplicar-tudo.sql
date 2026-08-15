@@ -1272,7 +1272,7 @@ insert into public.categorias
 values
   ('aneis-formatura', 'Anéis de Formatura', 'Celebre uma conquista com uma joia que marca o início de uma nova história. Cada anel carrega o símbolo da sua profissão e os anos que levaram até ele.', '/categorias/anelformatura.png',
    'cor_pedra', 'produto',
-   'Filtrar por cor da pedra', ARRAY['O pagamento ainda é combinado por WhatsApp: o pedido feito aqui chega para a Florenza e a forma de pagar é acertada em seguida.', 'Todas as peças são ouro 18K (750); o filtro é pela cor da pedra, que é o que identifica o curso na tradição do anel de formatura.'], 1, true)
+   'Filtrar por cor da pedra', ARRAY['Todas as peças são ouro 18K (750); o filtro é pela cor da pedra, que é o que identifica o curso na tradição do anel de formatura.'], 1, true)
 on conflict (slug) do update set
   nome = excluded.nome, descricao = excluded.descricao, imagem_url = excluded.imagem_url,
   filtro_campo = excluded.filtro_campo, variante = excluded.variante,
@@ -1283,7 +1283,7 @@ insert into public.categorias
 values
   ('aliancas-ouro', 'Alianças de Ouro', 'Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações. O ouro 18K é sinônimo de nobreza, beleza e eternidade.', '/categorias/aliançaouro.png',
    NULL, 'foto',
-   'Filtrar por material', ARRAY['O pagamento ainda é combinado por WhatsApp: o pedido feito aqui chega para a Florenza e a forma de pagar é acertada em seguida.'], 2, true)
+   'Filtrar por material', ARRAY[]::text[], 2, true)
 on conflict (slug) do update set
   nome = excluded.nome, descricao = excluded.descricao, imagem_url = excluded.imagem_url,
   filtro_campo = excluded.filtro_campo, variante = excluded.variante,
@@ -1294,7 +1294,7 @@ insert into public.categorias
 values
   ('aliancas-prata', 'Alianças de Prata', 'Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.', '/categorias/alliançaprata.png',
    NULL, 'foto',
-   'Filtrar por material', ARRAY['O pagamento ainda é combinado por WhatsApp: o pedido feito aqui chega para a Florenza e a forma de pagar é acertada em seguida.'], 3, true)
+   'Filtrar por material', ARRAY[]::text[], 3, true)
 on conflict (slug) do update set
   nome = excluded.nome, descricao = excluded.descricao, imagem_url = excluded.imagem_url,
   filtro_campo = excluded.filtro_campo, variante = excluded.variante,

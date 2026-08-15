@@ -59,7 +59,10 @@ export function RingCard({
       style={colapsado ? { display: "none" } : undefined}
       data-tags={tag ?? undefined}
       data-material={produto.material ?? undefined}
-      data-sku={produto.sku}
+      /* `data-sku` também saiu. Tirar o texto e deixar o código no atributo
+         seria esconder da vista e manter no HTML — qualquer um que abrisse o
+         inspetor continuaria lendo. Nada no site lia esse atributo: os filtros
+         são React e usam os dados direto. */
     >
       <button className="ringCard__fav" type="button" aria-label={`Favoritar ${produto.nome}`}>
         <CoracaoFav />
@@ -86,12 +89,12 @@ export function RingCard({
         <h3 className="ringCard__name">{produto.nome}</h3>
         <p className="ringCard__material">{linhaDoMaterial(produto)}</p>
         <p className="ringCard__desc">{produto.descricao}</p>
-        {/* A linha do código só existia nos anéis de formatura, onde o SKU vem
-            do nome do arquivo da foto e é usado na logística do cliente. */}
+        {/* O SKU saiu daqui. Ele é chave de logística — vem do nome do arquivo
+            da foto e é por ele que a peça é achada na gaveta — e não diz nada a
+            quem está comprando. A lapidação, essa sim, é informação da joia e
+            fica. O código continua no painel, onde é usado. */}
         {produto.lapidacao && (
-          <p className="ringCard__sku">
-            Cód. {produto.sku} · Lapidação {produto.lapidacao}
-          </p>
+          <p className="ringCard__sku">Lapidação {produto.lapidacao}</p>
         )}
         <div className="ringCard__foot">
           <span className="ringCard__price">

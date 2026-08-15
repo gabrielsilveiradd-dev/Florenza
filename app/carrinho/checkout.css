@@ -21,7 +21,7 @@
 .chk :where(h1, h2, p, ul, ol, dl, dd) { margin: 0; padding: 0; }
 .chk :where(ul, ol) { list-style: none; }
 .chk :where(button) { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-.chk :where(input) { font: inherit; color: inherit; }
+.chk :where(input, select, textarea) { font: inherit; color: inherit; }
 
 .chk {
   min-height: 60vh;
@@ -217,6 +217,88 @@
 }
 .chk-contas__total dt { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
 .chk-contas__total dd { font-family: var(--font-serif); font-size: 27px; color: var(--gold-ink); }
+
+/* ---------- Identidade vinda da conta ---------- */
+
+.chk-identidade {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--gold-line);
+  border-radius: 12px;
+  background: rgba(227, 198, 146, .16);
+}
+.chk-identidade p { margin: 0; }
+.chk-identidade__rotulo {
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.chk-identidade__nome { margin-top: 4px; font-size: 15px; color: var(--ink); }
+.chk-identidade__linha { margin-top: 2px; font-size: 12.5px; color: var(--ink-dim); }
+.chk-identidade__editar {
+  flex: none;
+  padding: 8px 16px;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  text-decoration: none;
+  transition: background-color .2s;
+}
+.chk-identidade__editar:hover { background: rgba(227, 198, 146, .35); }
+
+/* ---------- Presente ---------- */
+
+.chk-presente {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--ivory-soft);
+  transition: border-color .2s, background-color .2s;
+}
+.chk-presente.is-ativo { border-color: var(--gold-line); background: rgba(227, 198, 146, .16); }
+
+.chk-presente__troca {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.chk-presente__troca input { margin-top: 2px; accent-color: var(--gold); }
+.chk-presente__troca > svg { flex: none; margin-top: 1px; color: var(--gold-ink); }
+.chk-presente__dica {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+/* Coluna, como os campos do endereço. Sem isto o rótulo, a área de texto e o
+   contador ficam lado a lado e se sobrepõem — os `.checkout__campo` do
+   formulário já trazem esse flex, e este bloco não é um deles. */
+.chk-presente__mensagem {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+}
+.chk-presente__mensagem textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 74px;
+  line-height: 1.5;
+}
 
 /* ---------- Cupom ---------- */
 

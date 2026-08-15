@@ -1,19 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ShoppingCart } from "lucide-react";
 import { useCarrinho } from "@/lib/carrinho";
 
 /**
  * O carrinho na nav, com a contagem de peças.
  *
- * `pronto` é falso no servidor e durante a hidratação, e por isso a bolinha da
+ * `pronto` é falso no servidor e durante a hidratação, e por isso o selo da
  * contagem não aparece nesse instante: o HTML do servidor não tem como saber o
  * que existe no localStorage de quem está olhando, e desenhar um número que o
- * navegador logo corrige daria divergência de hidratação — o React reclama e o
- * número pisca na tela.
+ * navegador logo corrige daria divergência de hidratação.
+ *
+ * O selo entra e sai animado — é o retorno visual de "a peça entrou no
+ * carrinho" para quem clicou em Comprar lá na vitrine e não mudou de página.
  */
 export function BotaoCarrinho() {
   const { quantidadeTotal, pronto } = useCarrinho();
+  const semMovimento = useReducedMotion();
   const tem = pronto && quantidadeTotal > 0;
 
   return (
@@ -22,10 +27,22 @@ export function BotaoCarrinho() {
       href="/carrinho"
       aria-label={tem ? `Carrinho com ${quantidadeTotal} peça(s)` : "Carrinho"}
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6zM3 6h18M16 10a4 4 0 0 1-8 0" />
-      </svg>
-      {tem && <span className="nav__carrinho-conta">{quantidadeTotal}</span>}
+      <ShoppingCart aria-hidden size={18} strokeWidth={1.5} />
+
+      <AnimatePresence>
+        {tem && (
+          <motion.span
+            key="conta"
+            className="nav__carrinho-conta"
+            initial={semMovimento ? undefined : { scale: 0.5, opacity: 0 }}
+            animate={semMovimento ? undefined : { scale: 1, opacity: 1 }}
+            exit={semMovimento ? undefined : { scale: 0.5, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 28 }}
+          >
+            {quantidadeTotal}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </Link>
   );
 }

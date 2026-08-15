@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Gift, Loader2 } from "lucide-react";
 import { ListaDoCarrinho, ResumoDoCarrinho } from "@/components/ui/interactive-checkout";
 import { ConfirmacaoDoPedido, type PedidoConfirmado } from "@/components/pedido/ConfirmacaoDoPedido";
 import { useCarrinho } from "@/lib/carrinho";
@@ -22,15 +22,40 @@ const formatar = (centavos: number) => moeda.format(centavos / 100);
  * Não há cobrança aqui. O pedido nasce em 'aguardando_pagamento' e o acerto é
  * por WhatsApp. Quando o Mercado Pago entrar, é ele que promove o status.
  */
-export function Checkout({ demo }: { demo: boolean }) {
+export type ContaDoComprador = {
+  nome: string;
+  telefone: string;
+  email: string;
+  cep: string;
+  cidade: string;
+  uf: string;
+};
+
+export function Checkout({ demo, conta }: { demo: boolean; conta: ContaDoComprador | null }) {
   const { itens, totalCentavos, mudarQuantidade, remover, esvaziar, sincronizarEstoque, pronto } =
     useCarrinho();
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [confirmado, setConfirmado] = useState<PedidoConfirmado | null>(null);
   const [buscandoCep, setBuscandoCep] = useState(false);
-  const [cidade, setCidade] = useState("");
-  const [uf, setUf] = useState("");
+
+  /* Endereço começa no que a conta guarda, e é a única parte editável aqui.
+   *
+   * Nome, telefone e e-mail vêm da conta e não se mexe nesta tela. Não é
+   * capricho: são os campos pelos quais a Florenza reconhece o cliente e junta
+   * os pedidos dele. Deixá-los editáveis no checkout produz o mesmo cliente com
+   * três grafias de nome e dois telefones, e ninguém percebe até a aba Clientes
+   * virar uma lista de quase-duplicatas. Quem quiser corrigir vai a /conta, que
+   * é onde o dado mora.
+   *
+   * Endereço é o contrário: muda a cada pedido — casa, trabalho, presente para
+   * a mãe. É por isso que ele é o campo livre. */
+  const [cep, setCep] = useState(conta?.cep ?? "");
+  const [cidade, setCidade] = useState(conta?.cidade ?? "");
+  const [uf, setUf] = useState(conta?.uf ?? "");
+
+  const [presente, setPresente] = useState(false);
+  const [mensagemPresente, setMensagemPresente] = useState("");
 
   // O código digitado e o que foi de fato aceito são coisas diferentes: a
   // pessoa pode estar no meio de digitar outro código com um cupom já aplicado.
@@ -176,14 +201,18 @@ export function Checkout({ demo }: { demo: boolean }) {
       p_itens: itens
         .filter((i) => i.quantidade > 0)
         .map((i) => ({ sku: i.sku, quantidade: i.quantidade })),
-      p_nome: String(dados.get("nome") ?? "").trim(),
-      p_telefone: String(dados.get("telefone") ?? "").trim() || null,
-      p_email: String(dados.get("email") ?? "").trim() || null,
-      p_cep: String(dados.get("cep") ?? "").trim() || null,
+      // Logado, a identidade vem da conta e não do formulário — o campo nem
+      // existe na tela nesse caso.
+      p_nome: (conta?.nome || String(dados.get("nome") ?? "")).trim(),
+      p_telefone: (conta?.telefone || String(dados.get("telefone") ?? "")).trim() || null,
+      p_email: (conta?.email || String(dados.get("email") ?? "")).trim() || null,
+      p_cep: cep.trim() || null,
       p_cidade: cidade || null,
       p_uf: uf || null,
       p_observacoes: String(dados.get("observacoes") ?? "").trim() || null,
       p_cupom: cupomAtivo?.codigo ?? null,
+      p_presente: presente,
+      p_mensagem_presente: presente ? mensagemPresente.trim() || null : null,
     });
     setEnviando(false);
 
@@ -258,19 +287,42 @@ export function Checkout({ demo }: { demo: boolean }) {
             </div>
           )}
 
+          {conta && (
+            <div className="chk-identidade">
+              <div>
+                <p className="chk-identidade__rotulo">Comprando como</p>
+                <p className="chk-identidade__nome">{conta.nome || conta.email}</p>
+                <p className="chk-identidade__linha">
+                  {conta.email}
+                  {conta.telefone && ` · ${conta.telefone}`}
+                </p>
+              </div>
+              <Link className="chk-identidade__editar" href="/conta">
+                Alterar
+              </Link>
+            </div>
+          )}
+
           <div className="checkout__grade">
-            <div className="checkout__campo">
-              <label className="checkout__rotulo" htmlFor="ck-nome">Nome completo</label>
-              <input className="checkout__input" id="ck-nome" name="nome" required placeholder="Seu nome" />
-            </div>
-            <div className="checkout__campo">
-              <label className="checkout__rotulo" htmlFor="ck-tel">WhatsApp</label>
-              <input className="checkout__input" id="ck-tel" name="telefone" type="tel" required placeholder="(00) 00000-0000" />
-            </div>
-            <div className="checkout__campo checkout__campo--largo">
-              <label className="checkout__rotulo" htmlFor="ck-email">E-mail</label>
-              <input className="checkout__input" id="ck-email" name="email" type="email" required placeholder="voce@exemplo.com" />
-            </div>
+            {/* Sem conta, a identidade é digitada aqui mesmo. Com conta, estes
+                três campos não existem — ver o comentário no estado do
+                endereço, lá em cima. */}
+            {!conta && (
+              <>
+                <div className="checkout__campo">
+                  <label className="checkout__rotulo" htmlFor="ck-nome">Nome completo</label>
+                  <input className="checkout__input" id="ck-nome" name="nome" required placeholder="Seu nome" />
+                </div>
+                <div className="checkout__campo">
+                  <label className="checkout__rotulo" htmlFor="ck-tel">WhatsApp</label>
+                  <input className="checkout__input" id="ck-tel" name="telefone" type="tel" required placeholder="(00) 00000-0000" />
+                </div>
+                <div className="checkout__campo checkout__campo--largo">
+                  <label className="checkout__rotulo" htmlFor="ck-email">E-mail</label>
+                  <input className="checkout__input" id="ck-email" name="email" type="email" required placeholder="voce@exemplo.com" />
+                </div>
+              </>
+            )}
 
             <div className="checkout__campo">
               <label className="checkout__rotulo" htmlFor="ck-cep">CEP</label>
@@ -281,7 +333,8 @@ export function Checkout({ demo }: { demo: boolean }) {
                 inputMode="numeric"
                 required
                 placeholder="00000-000"
-                onChange={(e) => consultarCep(e.target.value)}
+                value={cep}
+                onChange={(e) => { setCep(e.target.value); consultarCep(e.target.value); }}
               />
               <span className="checkout__dica">
                 {buscandoCep ? "Buscando endereço…" : "Preenche cidade e estado automaticamente."}
@@ -311,6 +364,45 @@ export function Checkout({ demo }: { demo: boolean }) {
               <label className="checkout__rotulo" htmlFor="ck-obs">Observações</label>
               <input className="checkout__input" id="ck-obs" name="observacoes" placeholder="Tamanho do aro, gravação, prazo… (opcional)" />
             </div>
+          </div>
+
+          {/* Presente é pergunta de joalheria, não enfeite: boa parte das peças
+              é comprada para outra pessoa, e isso muda o que vai na caixa. */}
+          <div className={`chk-presente${presente ? " is-ativo" : ""}`}>
+            <label className="chk-presente__troca">
+              <input
+                type="checkbox"
+                checked={presente}
+                onChange={(e) => setPresente(e.target.checked)}
+              />
+              <Gift aria-hidden size={16} />
+              <span>
+                <strong>É para presente</strong>
+                <span className="chk-presente__dica">
+                  A peça vai em embalagem de presente e <strong>sem nenhum valor impresso</strong>.
+                </span>
+              </span>
+            </label>
+
+            {presente && (
+              <div className="chk-presente__mensagem">
+                <label className="checkout__rotulo" htmlFor="ck-msg">
+                  Mensagem do cartão (opcional)
+                </label>
+                <textarea
+                  className="checkout__input"
+                  id="ck-msg"
+                  rows={3}
+                  maxLength={240}
+                  value={mensagemPresente}
+                  onChange={(e) => setMensagemPresente(e.target.value)}
+                  placeholder="O que escrevemos no cartão que vai junto"
+                />
+                <span className="checkout__dica">
+                  {mensagemPresente.length}/240 · escrito à mão no cartão da caixa
+                </span>
+              </div>
+            )}
           </div>
 
           {erro && <p className="chk-erro" role="alert">{erro}</p>}

@@ -79,20 +79,22 @@
      `text-transform` que vinham de lá. Passam a ser dele. */
   text-decoration: none;
   text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: .06em;
-  padding: 7px 14px;
-  border: 1px solid rgba(227, 198, 146, .38);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  padding: 9px 16px;
+  /* Dentro da cápsula, borda própria seria linha dentro de linha. O botão fica
+     sólido, que é o que o marca como a ação principal do bloco. */
+  border: 0;
   border-radius: 999px;
+  background: rgba(227, 198, 146, .14);
   color: var(--gold-bright);
   opacity: 1;
-  white-space: nowrap;
-  transition: background-color .2s ease, border-color .2s ease;
+  transition: background-color .2s ease, color .2s ease;
 }
 
 .nav__acoes .nav__entrar:hover {
-  background: rgba(227, 198, 146, .14);
-  border-color: rgba(227, 198, 146, .7);
+  background: var(--gold);
+  color: #fffaf2;
 }
 
 /* Bloco de ações: carrinho e conta.
@@ -104,37 +106,50 @@
  * direita e devolve exatamente o desenho anterior. */
 .nav .nav__links { margin-left: auto; }
 
+/* As ações viram uma cápsula, na mesma linguagem dos cartões do carrinho:
+   canto arredondado, borda fina, fundo levemente destacado do fundo da barra.
+   Junta carrinho e conta num bloco só, em vez de dois ícones soltos. */
 .nav__acoes {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
   margin-left: 26px;
+  padding: 4px;
+  border: 1px solid rgba(227, 198, 146, .18);
+  border-radius: 999px;
+  background: rgba(243, 239, 232, .05);
+  transition: border-color .25s ease;
 }
+.nav__acoes:hover { border-color: rgba(227, 198, 146, .34); }
 
 .nav__carrinho {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
   color: var(--text);
   opacity: .85;
-  transition: opacity .2s ease;
+  transition: opacity .2s ease, background-color .2s ease;
 }
-.nav__carrinho:hover { opacity: 1; }
-.nav__carrinho svg { width: 19px; height: 19px; }
+.nav__carrinho:hover { opacity: 1; background: rgba(243, 239, 232, .09); }
 
-/* A bolinha da contagem: dourado sobre o marrom da barra, sem cor nova. */
+/* O selo da contagem: dourado sobre o marrom da barra, sem cor nova. */
 .nav__carrinho-conta {
   position: absolute;
-  top: -6px;
-  right: -8px;
-  min-width: 16px;
-  height: 16px;
+  top: 0;
+  right: -1px;
+  min-width: 17px;
+  height: 17px;
   padding: 0 4px;
+  border: 1.5px solid var(--bg);
   border-radius: 999px;
   background: var(--gold);
   color: #fffaf2;
   font-size: 10px;
-  line-height: 16px;
+  line-height: 14px;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
