@@ -1,0 +1,325 @@
+/* SEÇÃO DE COLEÇÕES — vitrine da home.
+ *
+ * Arquivo isolado, com prefixo `col-` próprio, por dois motivos:
+ *
+ * 1. O desenho anterior mora em `app/estilos/aliancas.css` (`.categoryShowcase__*`),
+ *    que veio do protótipo e não se altera. Classes novas convivem com as
+ *    antigas sem disputa: nenhum seletor daqui casa com nada de lá.
+ * 2. A mudança fica contida. Nada neste arquivo alcança o hero, o rodapé, a
+ *    grade de categorias ou a nav — é o que a tarefa pedia.
+ *
+ * Nenhuma cor nova: tudo sai de --ivory, --gold, --gold-ink, --ink e --ink-dim.
+ *
+ * SOBRE AS TRANSIÇÕES: só `opacity` e `transform`. As duas são resolvidas pelo
+ * compositor, sem recalcular layout — é o que mantém a troca lisa em celular.
+ * A curva é a mesma em toda a seção (`--col-curva`), uma saída suave sem volta:
+ * nada de bounce, nada de elástico. Peça de vitrine não quica.
+ */
+
+.col {
+  --col-curva: cubic-bezier(.22, .61, .36, 1);
+  --col-tempo: .62s;
+
+  position: relative;
+  padding: clamp(70px, 10vw, 120px) 24px clamp(56px, 7vw, 88px);
+  /* A nav é fixa: sem isto, chegar por `/#categoryShowcase` para a seção com o
+     topo debaixo da barra e o "Coleções" some. `scroll-margin-top` é o ajuste
+     do próprio destino da âncora — não desloca nada no layout. */
+  scroll-margin-top: var(--nav-h);
+  background: var(--ivory);
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-sans);
+  /* A seção inteira ancora a rolagem normal da página. Nada de `position:
+     sticky`, nada de ouvinte de wheel: passa-se por ela rolando, como por
+     qualquer outra. */
+}
+
+.col :where(h2, p) { margin: 0; }
+.col :where(button) { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+.col__palco {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.col__eyebrow {
+  font-size: 11px;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  /* O recuo compensa o `letter-spacing` do último caractere, que empurra o
+     texto meio espaço para a esquerda do centro óptico. */
+  text-indent: .34em;
+}
+
+/* Os títulos ficam empilhados no mesmo ponto; a altura é a do maior. `grid`
+   com uma célula só faz isso sem `position: absolute` — e sem tirar os blocos
+   do fluxo, o contêiner continua tendo altura própria e nada abaixo pula. */
+.col__titulos {
+  display: grid;
+  grid-template-areas: "pilha";
+  margin-top: 18px;
+  width: 100%;
+}
+.col__titulo-bloco {
+  grid-area: pilha;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--col-tempo) var(--col-curva),
+              transform var(--col-tempo) var(--col-curva);
+  pointer-events: none;
+}
+.col__titulo-bloco.is-ativo { opacity: 1; transform: none; }
+
+.col__nome {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(34px, 6vw, 56px);
+  line-height: 1.05;
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+
+.col__frase {
+  margin-top: 12px;
+  font-size: clamp(13px, 1.5vw, 15px);
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
+/* ---------- Vitrine ---------- */
+
+.col__vitrine {
+  margin-top: clamp(26px, 4vw, 44px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 3vw, 34px);
+}
+
+.col__joias {
+  display: grid;
+  grid-template-areas: "pilha";
+  flex: 1 1 auto;
+  min-width: 0;
+  place-items: center;
+}
+
+.col__joia {
+  grid-area: pilha;
+  display: block;
+  border-radius: 4px;
+  opacity: 0;
+  /* Entra 3% menor e sobe: a peça "assenta" na vitrine em vez de aparecer. */
+  transform: scale(.97) translateY(8px);
+  transition: opacity var(--col-tempo) var(--col-curva),
+              transform var(--col-tempo) var(--col-curva);
+  pointer-events: none;
+}
+.col__joia.is-ativo {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.col__img {
+  display: block;
+  width: auto;
+  height: clamp(230px, 36vw, 400px);
+  max-width: 100%;
+  object-fit: contain;
+  /* A sombra é o que dá o chão da vitrine. Herdada do desenho anterior, com o
+     mesmo tom, para a peça não parecer recortada e colada. */
+  filter: drop-shadow(0 24px 26px rgba(42, 30, 19, .26));
+  transition: transform .55s var(--col-curva), filter .55s var(--col-curva);
+}
+
+/* A joia é clicável, e o hover diz isso sem espalhafato: sobe um fio e a
+   sombra abre um pouco, como peça erguida da almofada. */
+.col__joia.is-ativo:hover .col__img,
+.col__joia.is-ativo:focus-visible .col__img {
+  transform: translateY(-6px) scale(1.025);
+  filter: drop-shadow(0 34px 34px rgba(42, 30, 19, .34));
+}
+.col__joia:focus-visible { outline: 1px solid var(--gold); outline-offset: 12px; }
+
+/* ---------- Setas ---------- */
+
+.col__seta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border-radius: 999px;
+  color: var(--ink-dim);
+  transition: color .35s var(--col-curva), background-color .35s var(--col-curva);
+}
+.col__seta svg { width: 20px; height: 20px; flex: none; }
+.col__seta:hover { color: var(--gold-ink); background: rgba(227, 198, 146, .18); }
+.col__seta:focus-visible { outline: 1px solid var(--gold); outline-offset: 3px; }
+
+/* O nome da próxima coleção aparece no hover. É enfeite útil, não muleta: o
+   `aria-label` do botão já diz para onde se vai, então quem não tem hover
+   (celular) não perde informação nenhuma.
+   `max-width` em vez de `display` porque só assim há o que animar. */
+.col__seta-dica {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  transition: max-width .45s var(--col-curva), opacity .3s var(--col-curva);
+}
+.col__seta:hover .col__seta-dica,
+.col__seta:focus-visible .col__seta-dica { max-width: 90px; opacity: 1; }
+
+/* ---------- Chamada ---------- */
+
+.col__ctas {
+  display: grid;
+  grid-template-areas: "pilha";
+  margin-top: clamp(26px, 4vw, 40px);
+}
+
+.col__cta {
+  grid-area: pilha;
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 10px;
+  padding: 13px 26px;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--col-tempo) var(--col-curva),
+              transform var(--col-tempo) var(--col-curva),
+              background-color .35s var(--col-curva),
+              color .35s var(--col-curva);
+  pointer-events: none;
+}
+.col__cta.is-ativo { opacity: 1; transform: none; pointer-events: auto; }
+.col__cta.is-ativo:hover { background: var(--gold); color: #fffaf2; border-color: var(--gold); }
+.col__cta svg { width: 15px; height: 15px; transition: transform .35s var(--col-curva); }
+.col__cta.is-ativo:hover svg { transform: translateX(3px); }
+
+/* ---------- Régua de coleções ---------- */
+
+.col__regua {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: clamp(34px, 5vw, 52px);
+}
+
+.col__regua-item {
+  position: relative;
+  padding: 8px 14px;
+  font-size: 10.5px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .65;
+  transition: opacity .35s var(--col-curva), color .35s var(--col-curva);
+}
+.col__regua-item:hover { opacity: 1; color: var(--ink); }
+.col__regua-item.is-ativo { opacity: 1; color: var(--gold-ink); }
+
+/* O fio embaixo do item ativo cresce do centro. Sublinhado inteiro seria
+   pesado demais para o peso do resto da seção. */
+.col__regua-item::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transform: translateX(-50%);
+  transition: width .45s var(--col-curva);
+}
+.col__regua-item.is-ativo::after { width: calc(100% - 28px); }
+
+/* O ponto separador entre os nomes — o "·" da régua. */
+.col__regua-item + .col__regua-item::before {
+  content: "·";
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-dim);
+  opacity: .4;
+}
+
+/* ---------- Contador ---------- */
+
+.col__contador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  font-size: 10.5px;
+  letter-spacing: .18em;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+.col__contador-barra {
+  width: 34px;
+  height: 1px;
+  background: var(--ivory-line);
+}
+.col__contador-total { opacity: .55; }
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 640px) {
+  /* As setas saem de junto da joia e descem para a linha da régua: ali o
+     polegar alcança, e a joia ganha a largura inteira em vez de dividi-la com
+     dois botões. Não é a mesma composição encolhida — é outra composição. */
+  .col__vitrine { gap: 0; }
+  .col__seta { position: absolute; bottom: clamp(56px, 14vw, 74px); padding: 14px; }
+  .col__seta--esq { left: 4px; }
+  .col__seta--dir { right: 4px; }
+  .col__seta-dica { display: none; }
+
+  .col__regua { gap: 0; padding: 0 46px; }
+  .col__regua-item { padding: 8px 10px; font-size: 9.5px; letter-spacing: .14em; }
+  .col__regua-item.is-ativo::after { width: calc(100% - 20px); }
+}
+
+/* ---------- Menos movimento ---------- */
+
+/* Regra do projeto, e aqui ela é literal: sem movimento, a troca vira corte
+   seco. A informação continua inteira — só não desliza. */
+@media (prefers-reduced-motion: reduce) {
+  .col {
+    --col-tempo: .01s;
+  }
+  .col__titulo-bloco,
+  .col__joia,
+  .col__cta { transform: none !important; }
+  .col__img,
+  .col__seta-dica,
+  .col__regua-item::after { transition-duration: .01s; }
+  .col__joia.is-ativo:hover .col__img { transform: none; }
+}

@@ -50,6 +50,30 @@ O visual do site é trabalho concluído e não está em discussão. Toda mudanç
   (`.nav .nav__pilula`, `.nav__acoes .nav__entrar`): este arquivo é importado
   ANTES, e no empate de especificidade vence quem vem depois.
 
+## A vitrine de coleções (home)
+
+`components/ColecoesShowcase.tsx` + `app/colecoes.css`, com prefixo `col-`
+próprio. Substituiu o `CategoryCarousel`, que tinha um *track* com `scroll-snap`
+horizontal.
+
+**Não há mais rolagem horizontal.** As três coleções ficam empilhadas na mesma
+célula de grid e a troca é `opacity` + `transform`. Isso resolve três coisas de
+uma vez: ninguém precisa descobrir que dá para arrastar, as imagens já estão
+todas no DOM (a troca nunca mostra quadro vazio), e a animação não recalcula
+layout.
+
+**A seção não toca no scroll da página.** Nenhum ouvinte de `wheel`, `touchmove`
+ou `scroll`; nada de `sticky`. Navegar é clicar — setas, régua de nomes, a
+própria joia, ou as setas do teclado com foco na seção. Isso é regra: o site já
+tem seções conduzidas por rolagem, e repetir a fórmula cansa.
+
+O CSS antigo (`.categoryShowcase__*`) continua em `app/estilos/aliancas.css`,
+intocado, e simplesmente não casa com nada — as classes novas não colidem.
+
+O `id="categoryShowcase"` foi preservado: é o destino dos links "Coleção" da nav
+e do rodapé. E a seção tem `scroll-margin-top: var(--nav-h)`, senão quem chega
+pela âncora encontra o título debaixo da barra fixa.
+
 ## A barra do topo
 
 Um vocabulário só: pílula com ícone e rótulo, agrupada em cápsulas de borda

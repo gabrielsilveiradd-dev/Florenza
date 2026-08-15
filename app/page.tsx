@@ -1,10 +1,13 @@
-import { CategoryCarousel } from "@/components/CategoryCarousel";
+import { ColecoesShowcase } from "@/components/ColecoesShowcase";
 import { Footer } from "@/components/Footer";
 import { HeroMedia } from "@/components/HeroMedia";
 import { Rings3D } from "@/components/Rings3D";
 
 // Só a home usa a seção 3D — igual ao <link> que existia apenas em index.html.
 import "./estilos/rings-3d.css";
+// A vitrine de coleções tem CSS próprio e isolado, com prefixo `col-`: nada
+// dele alcança as outras seções desta página.
+import "./colecoes.css";
 
 /** Cards da grade "Outras categorias": reaproveitam a estrutura de .ringCard. */
 const CATEGORIAS_EM_BREVE = [
@@ -39,8 +42,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 2. CATEGORIAS — carrossel horizontal entre a Hero e Alianças. */}
-        <CategoryCarousel />
+        {/* 2. COLEÇÕES — a vitrine entre a Hero e Alianças. Mantém o id
+            `categoryShowcase`, que é o destino dos links "Coleção" da nav e do
+            rodapé; trocá-lo quebraria a âncora em quatro lugares. */}
+        <ColecoesShowcase />
 
         {/* 3. ALIANÇAS — vídeo cinematográfico como background da própria seção.
             Toca em loop, sem responder ao scroll. */}
