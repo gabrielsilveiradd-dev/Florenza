@@ -4,12 +4,16 @@ import { ContaFormulario } from "@/components/ContaFormulario";
 import { BotaoSair } from "@/components/conta/BotaoSair";
 import { DadosDaConta } from "@/components/conta/DadosDaConta";
 import { Footer } from "@/components/Footer";
+import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
 import { formatarPreco } from "@/lib/catalogo";
 import { STATUS_DO_PEDIDO } from "@/lib/conta";
 import { lerPerfil, listarMeusPedidos } from "@/lib/conta-servidor";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
+// O acompanhamento do pedido usa o mesmo vocabulário visual do carrinho, de
+// propósito: é a mesma tela que a pessoa viu ao comprar.
+import "../carrinho/checkout.css";
 import "./conta.css";
 
 export const metadata: Metadata = {
@@ -109,9 +113,12 @@ export default async function PaginaConta({
             ) : (
               <ul className="conta__pedidos">
                 {pedidos.map((p) => (
-                  <li className="conta__pedido" key={p.id}>
-                    <div className="conta__pedido-topo">
-                      <span className="conta__pedido-numero">Pedido #{p.numero}</span>
+                  <li className="conta__pedido ped-cartao" key={p.id}>
+                    <div className="ped-cabecalho">
+                      <div>
+                        <p className="ped-rotulo">Código do pedido</p>
+                        <p className="ped-numero">#{p.numero}</p>
+                      </div>
                       <span className={`conta__selo conta__selo--${p.status}`}>
                         {STATUS_DO_PEDIDO[p.status] ?? p.status}
                       </span>
@@ -122,7 +129,23 @@ export default async function PaginaConta({
                       {p.cidade && ` · ${p.cidade}${p.uf ? `/${p.uf}` : ""}`}
                     </p>
 
-                    <ul className="conta__pedido-itens">
+                    {/* Mesmo componente da tela de confirmação. Quem voltou dias
+                        depois reencontra a tela que viu na compra, com uma etapa
+                        a mais acesa — em vez de uma lista diferente. */}
+                    <StatusDoPedido
+                      pedido={{
+                        numero: p.numero,
+                        status: p.status,
+                        criadoEm: p.criadoEm,
+                        pagoEm: p.pagoEm,
+                        enviadoEm: p.enviadoEm,
+                        entregueEm: p.entregueEm,
+                        codigoRastreio: p.codigoRastreio,
+                        transportadora: p.transportadora,
+                      }}
+                    />
+
+                    <ul className="ped-itens">
                       {p.itens.map((i) => (
                         <li key={i.sku}>
                           <span>
@@ -134,17 +157,22 @@ export default async function PaginaConta({
                       ))}
                     </ul>
 
-                    <div className="conta__pedido-total">
-                      <span>Total</span>
-                      <strong>{formatarPreco(p.totalCentavos)}</strong>
-                    </div>
-
-                    {p.status === "aguardando_pagamento" && (
-                      <p className="conta__nota">
-                        A Florenza entra em contato pelo WhatsApp para combinar o pagamento e
-                        o prazo de produção.
-                      </p>
-                    )}
+                    <dl className="ped-contas">
+                      <div>
+                        <dt>Subtotal</dt>
+                        <dd>{formatarPreco(p.subtotalCentavos)}</dd>
+                      </div>
+                      {p.descontoCentavos > 0 && (
+                        <div>
+                          <dt>Desconto{p.cupomCodigo && ` · ${p.cupomCodigo}`}</dt>
+                          <dd>− {formatarPreco(p.descontoCentavos)}</dd>
+                        </div>
+                      )}
+                      <div className="ped-contas__total">
+                        <dt>Total</dt>
+                        <dd>{formatarPreco(p.totalCentavos)}</dd>
+                      </div>
+                    </dl>
                   </li>
                 ))}
               </ul>

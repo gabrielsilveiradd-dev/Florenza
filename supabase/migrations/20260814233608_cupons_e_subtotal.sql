@@ -34,12 +34,10 @@ drop policy if exists "Admin gerencia cupons" on public.cupons;
 create policy "Admin gerencia cupons" on public.cupons
   for all using (public.is_admin()) with check (public.is_admin());
 
--- E o grant de tabela sai para `anon`. A RLS acima já devolvia lista vazia, então
--- isto não corrige vazamento — corrige a profundidade da defesa, tirando a
--- tabela do alcance de visitante em vez de deixar só a policy no caminho.
--- `authenticated` mantém o grant de propósito: é por ali que o painel vai listar
--- os cupons um dia, e lá a policy já restringe a quem é do time.
-revoke select on public.cupons from anon;
+-- O grant de tabela para `anon` sai na migration seguinte
+-- (20260814234458_cupons_sem_select_anonimo.sql), que é onde ele foi aplicado
+-- no banco. Mantido separado para o nome do arquivo continuar batendo com a
+-- versão registrada — se divergir, um `db push` reaplica tudo.
 
 
 -- ---------------------------------------------------------------------------

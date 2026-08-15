@@ -50,8 +50,16 @@ type LinhaPedido = {
   id: string;
   numero: number;
   status: string;
+  subtotal_centavos: number;
+  desconto_centavos: number;
   total_centavos: number;
+  cupom_codigo: string | null;
   created_at: string;
+  pago_em: string | null;
+  enviado_em: string | null;
+  entregue_em: string | null;
+  codigo_rastreio: string | null;
+  transportadora: string | null;
   cidade: string | null;
   uf: string | null;
   pedido_itens: Array<{
@@ -67,7 +75,9 @@ export async function listarMeusPedidos(): Promise<PedidoDaConta[]> {
   const { data, error } = await supabase
     .from("pedidos")
     .select(
-      "id, numero, status, total_centavos, created_at, cidade, uf, " +
+      "id, numero, status, subtotal_centavos, desconto_centavos, total_centavos, " +
+        "cupom_codigo, created_at, pago_em, enviado_em, entregue_em, " +
+        "codigo_rastreio, transportadora, cidade, uf, " +
         "pedido_itens (sku, nome, preco_centavos, quantidade)"
     )
     .order("created_at", { ascending: false });
@@ -82,8 +92,16 @@ export async function listarMeusPedidos(): Promise<PedidoDaConta[]> {
     id: p.id,
     numero: p.numero,
     status: p.status,
+    subtotalCentavos: p.subtotal_centavos,
+    descontoCentavos: p.desconto_centavos,
     totalCentavos: p.total_centavos,
+    cupomCodigo: p.cupom_codigo,
     criadoEm: p.created_at,
+    pagoEm: p.pago_em,
+    enviadoEm: p.enviado_em,
+    entregueEm: p.entregue_em,
+    codigoRastreio: p.codigo_rastreio,
+    transportadora: p.transportadora,
     cidade: p.cidade,
     uf: p.uf,
     itens: (p.pedido_itens ?? []).map((i) => ({

@@ -131,6 +131,33 @@ estoque.
 Não há CRUD de cupom no painel ainda: cadastra-se pelo SQL Editor. O
 `BEMVINDO10` que existe é exemplo, para apagar.
 
+## Carrinho e acompanhamento do pedido
+
+O desenho do carrinho e da confirmação veio do componente `interactive-checkout`
+(cartão por peça, resumo grudado ao lado, entrada e saída animadas, total que
+rola dígito a dígito). Adaptado, não copiado: o carrinho em `useState` local, o
+`Button` da shadcn e a paleta zinc ficaram de fora. O `Button` da shadcn em
+especial não entra — as classes dele apontam para tokens de um tema que este
+projeto não tem, e sem o preflight um `<button>` chega com a borda do navegador.
+
+`components/pedido/StatusDoPedido.tsx` é **um componente só, usado em dois
+lugares**: a confirmação logo após a compra e a aba de pedidos da conta. Não é
+economia de código — é o que garante que a pessoa reencontre a mesma tela ao
+voltar dias depois. Por isso o CSS dele (`.ped-*` em `app/carrinho/checkout.css`)
+não conta com reset de escopo nenhum: ele vive dentro de `.chk` numa tela e de
+`.conta` na outra, e os dois resets são diferentes.
+
+As datas de etapa são carimbadas pela trigger `pedidos_carimba_etapas`, não
+digitadas. Data preenchida à mão erra: alguém marca "enviado" na segunda e anota
+a data na quarta.
+
+**A confirmação não promete o que não acontece.** Nada de "pagamento aprovado"
+ou "e-mail de confirmação enviado" — o pedido nasce em aguardando pagamento, o
+acerto é por WhatsApp, e não existe envio de e-mail de pedido neste sistema.
+
+Falta a contrapartida no painel: os campos de código de rastreio e transportadora
+ainda não existem em `PedidosSection`, então hoje só se preenche pelo SQL Editor.
+
 ## Área da conta
 
 `/conta` tem dois estados no mesmo endereço: formulário para quem chega de fora,

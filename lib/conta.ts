@@ -19,8 +19,17 @@ export type PedidoDaConta = {
   id: string;
   numero: number;
   status: string;
+  subtotalCentavos: number;
+  descontoCentavos: number;
   totalCentavos: number;
+  cupomCodigo: string | null;
   criadoEm: string;
+  /** Carimbadas pelo banco na troca de status, não digitadas no painel. */
+  pagoEm: string | null;
+  enviadoEm: string | null;
+  entregueEm: string | null;
+  codigoRastreio: string | null;
+  transportadora: string | null;
   cidade: string | null;
   uf: string | null;
   itens: ItemDoPedido[];

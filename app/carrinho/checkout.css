@@ -1,0 +1,478 @@
+/* CARRINHO E ACOMPANHAMENTO DO PEDIDO
+ *
+ * O desenho vem do componente `interactive-checkout`: cartão por peça, painel
+ * de resumo grudado ao lado, cantos arredondados, hover discreto na borda. A
+ * paleta, não — aqui é a da Florenza, das mesmas variáveis de estilos/style.css
+ * e estilos/aliancas.css. Nenhuma cor nova entra.
+ *
+ * Por que CSS de verdade e não as utilities do Tailwind, como em admin.css e
+ * conta.css: as utilities vivem em `@layer utilities`, e regra sem camada vence
+ * regra em camada. Some-se o preflight desligado de propósito — sem ele,
+ * `button` e `input` chegam com a borda e a fonte do navegador — e cor e
+ * tipografia precisam vir daqui.
+ *
+ * Tudo escopado em .chk-* e .ped-*, sem encostar na vitrine.
+ */
+
+/* ---------- Reset escopado ----------
+ * `:where()` zera a especificidade do que está dentro, para o reset ser fácil
+ * de sobrescrever pelas classes logo abaixo — mesmo cuidado de admin.css, onde
+ * a falta disso já apagou o fundo de um botão. */
+.chk :where(h1, h2, p, ul, ol, dl, dd) { margin: 0; padding: 0; }
+.chk :where(ul, ol) { list-style: none; }
+.chk :where(button) { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+.chk :where(input) { font: inherit; color: inherit; }
+
+.chk {
+  min-height: 60vh;
+  padding: calc(var(--nav-h) + 46px) 24px 80px;
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+
+.chk__cabecalho { max-width: 1060px; margin: 0 auto 30px; }
+.chk__eyebrow {
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.chk__titulo {
+  margin-top: 10px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 38px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+/* Duas colunas no desktop; empilha no celular, com o resumo em cima — quem
+   abre o carrinho no telefone quer ver o total antes da lista. */
+.chk__grade {
+  max-width: 1060px;
+  margin: 0 auto;
+  display: grid;
+  gap: 22px;
+}
+@media (min-width: 900px) {
+  .chk__grade { grid-template-columns: 1fr 330px; align-items: start; }
+  .chk__coluna { order: 1; }
+  .chk-resumo { order: 2; position: sticky; top: calc(var(--nav-h) + 24px); }
+}
+
+/* ---------- Lista de peças ---------- */
+
+.chk-lista { display: flex; flex-direction: column; gap: 12px; }
+
+.chk-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--ivory-soft);
+  transition: border-color .2s ease;
+}
+.chk-item:hover { border-color: var(--gold-line); }
+.chk-item.is-esgotado { opacity: .62; }
+
+.chk-item__foto {
+  flex: none;
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: var(--ivory);
+}
+
+.chk-item__corpo { flex: 1 1 auto; min-width: 0; }
+
+.chk-item__topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+
+.chk-item__nome {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.chk-item__nome:hover { color: var(--gold-ink); }
+
+.chk-item__tirar {
+  flex: none;
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 7px;
+  color: var(--ink-dim);
+  transition: background-color .2s, color .2s;
+}
+.chk-item__tirar:hover { background: rgba(42, 30, 19, .07); color: var(--ink); }
+
+.chk-item__sku {
+  margin-top: 3px;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--ink-dim);
+}
+
+.chk-selo {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(227, 198, 146, .3);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+
+.chk-item__base {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chk-qtd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 2px;
+}
+.chk-qtd button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  color: var(--ink);
+  transition: background-color .2s, opacity .2s;
+}
+.chk-qtd button:hover:not(:disabled) { background: rgba(42, 30, 19, .07); }
+.chk-qtd button:disabled { opacity: .3; cursor: not-allowed; }
+.chk-qtd span { min-width: 26px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+
+.chk-item__preco {
+  font-size: 15px;
+  color: var(--gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Resumo ---------- */
+
+.chk-resumo {
+  padding: 20px;
+  border: 1px solid var(--gold-line);
+  border-radius: 14px;
+  background: var(--ivory-soft);
+}
+
+.chk-resumo__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.chk-resumo__contagem {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #fffaf2;
+  font-size: 11px;
+  line-height: 20px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.chk-contas { margin-top: 18px; }
+.chk-contas div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  padding: 6px 0;
+}
+.chk-contas dt, .chk-contas dd { font-size: 13px; color: var(--ink-dim); }
+.chk-contas dd { font-variant-numeric: tabular-nums; }
+.chk-contas__desconto dt, .chk-contas__desconto dd { color: var(--gold-ink); }
+
+/* Dois níveis e não !important: `.chk-contas div` acima é (0,1,1) e venceria a
+   classe sozinha (0,1,0). */
+.chk-contas .chk-contas__total {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+.chk-contas__total dt { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+.chk-contas__total dd { font-family: var(--font-serif); font-size: 27px; color: var(--gold-ink); }
+
+/* ---------- Cupom ---------- */
+
+.chk-cupom { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hairline); }
+.chk-cupom__rotulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); }
+.chk-cupom__linha { display: flex; gap: 7px; margin-top: 8px; }
+.chk-cupom__campo {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 9px;
+  background: var(--ivory);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.chk-cupom__campo:focus { outline: 2px solid rgba(179, 133, 78, .4); outline-offset: 1px; }
+.chk-cupom__botao {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  border: 1px solid var(--gold);
+  border-radius: 9px;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  transition: background-color .2s, opacity .2s;
+}
+.chk-cupom__botao:hover:not(:disabled) { background: rgba(227, 198, 146, .25); }
+.chk-cupom__botao:disabled { opacity: .5; cursor: not-allowed; }
+.chk-cupom__erro { margin-top: 8px; font-size: 12px; color: #8c2a26; }
+.chk-cupom__tirar {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.chk-cupom__tirar:hover { color: var(--ink); }
+
+/* ---------- Botão de fechar ---------- */
+
+.chk-fechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 18px;
+  border-radius: 10px;
+  background: var(--gold);
+  color: #fffaf2;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background-color .25s, opacity .25s;
+}
+.chk-fechar:hover { background: var(--gold-ink); }
+.chk-fechar:disabled { opacity: .55; cursor: not-allowed; }
+
+.chk-nota { margin-top: 12px; font-size: 11.5px; line-height: 1.6; color: var(--ink-dim); }
+
+.chk-vazio {
+  padding: 60px 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--ivory-soft);
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+
+.chk-erro {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(163, 49, 44, .35);
+  border-radius: 10px;
+  background: rgba(163, 49, 44, .07);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #8c2a26;
+}
+
+/* ==========================================================================
+   ACOMPANHAMENTO DO PEDIDO
+   Mesmo vocabulário do carrinho de propósito: a pessoa acabou de sair de lá.
+
+   Este bloco é usado em DOIS escopos — dentro de `.chk` (confirmação da compra)
+   e dentro de `.conta` (aba de pedidos) — e os dois têm resets diferentes:
+   conta.css zera h1/h2/p/ul, mas não ol/dl/dd. Por isso nada aqui conta com
+   reset de fora; cada elemento zera o que precisa. Sem isso, a mesma linha do
+   tempo apareceria com margens diferentes em cada tela, que é exatamente o que
+   compartilhar o componente deveria impedir.
+   ========================================================================== */
+
+.ped-cartao {
+  padding: 22px;
+  border: 1px solid var(--gold-line);
+  border-radius: 14px;
+  background: var(--ivory-soft);
+}
+
+.ped-cabecalho { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.ped-cabecalho p { margin: 0; }
+.ped-numero { font-family: var(--font-serif); font-size: 30px; color: var(--gold-ink); }
+.ped-rotulo { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
+
+/* ---------- Linha do tempo ---------- */
+
+.ped-status { margin-top: 22px; }
+.ped-status p { margin: 0; }
+
+.ped-trilha {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.ped-trilha__etapa {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+/* O fio que liga uma etapa à seguinte. No último item ele não existe, senão
+   sobraria um traço apontando para o nada. */
+.ped-trilha__etapa:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 28px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--hairline);
+}
+.ped-trilha__etapa.is-cumprida:not(:last-child)::before { background: var(--gold-line); }
+
+.ped-trilha__marca {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--ivory);
+  color: var(--ink-dim);
+}
+.ped-trilha__etapa.is-cumprida .ped-trilha__marca {
+  border-color: var(--gold-line);
+  background: rgba(227, 198, 146, .3);
+  color: var(--gold-ink);
+}
+.ped-trilha__etapa.is-atual .ped-trilha__marca {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #fffaf2;
+}
+
+.ped-trilha__rotulo { font-size: 13.5px; color: var(--ink-dim); }
+.ped-trilha__etapa.is-cumprida .ped-trilha__rotulo { color: var(--ink); }
+.ped-trilha__etapa.is-atual .ped-trilha__rotulo { color: var(--ink); font-weight: 500; }
+.ped-trilha__data { margin-top: 2px; font-size: 11.5px; color: var(--ink-dim); }
+.ped-trilha__dica { margin-top: 5px; font-size: 12px; line-height: 1.55; color: var(--ink-dim); }
+
+.ped-status__dica { margin-top: 10px; font-size: 12px; line-height: 1.6; color: var(--ink-dim); }
+
+/* ---------- Rastreio ---------- */
+
+.ped-rastreio {
+  margin-top: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--gold-line);
+  border-radius: 11px;
+  background: rgba(227, 198, 146, .16);
+}
+.ped-rastreio__rotulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
+.ped-rastreio__linha { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.ped-rastreio__codigo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px;
+  letter-spacing: .06em;
+  color: var(--ink);
+  /* Selecionável de verdade: se o botão de copiar falhar (sem HTTPS, permissão
+     negada), a pessoa ainda consegue marcar o texto com o dedo. */
+  user-select: all;
+}
+.ped-rastreio__copiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  transition: background-color .2s;
+}
+.ped-rastreio__copiar:hover { background: rgba(227, 198, 146, .35); }
+
+.ped-status--cancelado { padding: 4px 0; }
+.ped-status__cancelado-titulo { font-size: 14px; color: var(--ink); }
+
+/* ---------- Itens do pedido ---------- */
+
+.ped-itens {
+  margin: 20px 0 0;
+  padding: 16px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+.ped-itens li { display: flex; justify-content: space-between; gap: 14px; padding: 5px 0; font-size: 13.5px; }
+.ped-itens li span:last-child { font-variant-numeric: tabular-nums; color: var(--ink-dim); }
+
+.ped-contas { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--hairline); }
+.ped-contas div { display: flex; justify-content: space-between; gap: 14px; padding: 4px 0; }
+.ped-contas dt, .ped-contas dd { margin: 0; font-size: 13px; color: var(--ink-dim); }
+.ped-contas dd { font-variant-numeric: tabular-nums; }
+.ped-contas .ped-contas__total dt,
+.ped-contas .ped-contas__total dd { color: var(--gold-ink); font-size: 15px; }
+
+.ped-acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.ped-acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .2s, background-color .2s;
+}
+.ped-acao:hover { border-color: var(--gold-line); background: rgba(227, 198, 146, .18); }
+.ped-acao--principal { border-color: var(--gold); background: var(--gold); color: #fffaf2; }
+.ped-acao--principal:hover { background: var(--gold-ink); border-color: var(--gold-ink); }
+
+@media (max-width: 560px) {
+  .chk__titulo { font-size: 30px; }
+  .chk-item { gap: 11px; padding: 12px; }
+  .chk-item__foto { width: 52px; height: 52px; }
+  .ped-numero { font-size: 25px; }
+}
