@@ -56,7 +56,7 @@ export default async function PaginaCarrinho() {
           }
         />
       </main>
-      <Footer colecoes="categoria" />
+      <Footer />
     </>
   );
 }

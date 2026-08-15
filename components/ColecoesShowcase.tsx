@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { CATEGORIAS_NAV } from "@/lib/navegacao";
 
 /**
  * As coleções da Florenza — vitrine, não carrossel de slides.
@@ -26,48 +27,17 @@ import Link from "next/link";
  *    joia, ou as setas do teclado quando a seção está em foco.
  */
 
-type Colecao = {
-  href: string;
-  img: string;
-  alt: string;
-  /** Título da experiência. */
-  rotulo: string;
-  /** Nome curto, para a régua de navegação não virar uma linha de texto. */
-  curto: string;
-  /** Uma frase. A elegância aqui está em não explicar demais. */
-  frase: string;
-  cta: string;
-};
-
-const COLECOES: Colecao[] = [
-  {
-    href: "/aliancas-ouro",
-    img: "/categorias/aliançaouro.png",
-    alt: "Aliança de ouro Florenza",
-    rotulo: "Alianças de Ouro",
-    curto: "Ouro",
-    frase: "Promessas que atravessam gerações.",
-    cta: "Descobrir alianças",
-  },
-  {
-    href: "/aliancas-prata",
-    img: "/categorias/alliançaprata.png",
-    alt: "Aliança de prata Florenza",
-    rotulo: "Alianças de Prata",
-    curto: "Prata",
-    frase: "Elegância discreta, para todos os dias.",
-    cta: "Descobrir alianças",
-  },
-  {
-    href: "/aneis-formatura",
-    img: "/categorias/anelformatura.png",
-    alt: "Anel de formatura Florenza",
-    rotulo: "Anéis de Formatura",
-    curto: "Formatura",
-    frase: "Uma conquista merece ser eternizada.",
-    cta: "Explorar coleção",
-  },
-];
+/**
+ * As três vêm de `lib/navegacao.ts`, que é a mesma lista da barra do topo e do
+ * rodapé. Antes esta cópia vivia aqui, e a do rodapé em outro arquivo: renomear
+ * uma categoria exigia lembrar de três lugares, e o site passava a chamá-la de
+ * dois jeitos até alguém reparar.
+ *
+ * O CTA é "Explorar" para as três. Antes duas diziam "Descobrir alianças" e uma
+ * "Explorar coleção" — três botões com dois verbos e dois substantivos, para a
+ * mesma ação. O rótulo do botão não precisa repetir o nome que está logo acima.
+ */
+const COLECOES = CATEGORIAS_NAV;
 
 const Seta = ({ para }: { para: "esq" | "dir" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"
@@ -106,13 +76,45 @@ export function ColecoesShowcase() {
     return () => secao.removeEventListener("keydown", aoTeclar);
   }, [ir]);
 
+  /* Arrastar de lado troca a coleção — só no toque, e sem tocar no scroll.
+   *
+   * Isto NÃO contradiz a regra da seção ("nada escuta wheel, touchmove ou
+   * scroll"). Aquela regra existe para a página nunca ser sequestrada na
+   * vertical, e aqui nada é sequestrado: não há `preventDefault` em lugar
+   * nenhum, então a rolagem vertical segue exatamente como seguiria se este
+   * código não existisse. O gesto só conta quando é claramente horizontal —
+   * 45px de percurso e pelo menos 1,5x mais largo que alto.
+   *
+   * Existe porque no celular não há hover: as setas continuam lá e continuam
+   * clicáveis, mas quem chega numa vitrine de três peças tenta arrastar antes
+   * de procurar botão. */
+  const toque = useRef<{ x: number; y: number } | null>(null);
+
+  const aoIniciarToque = (evento: React.PointerEvent) => {
+    if (evento.pointerType === "mouse") return;
+    toque.current = { x: evento.clientX, y: evento.clientY };
+  };
+
+  const aoTerminarToque = (evento: React.PointerEvent) => {
+    if (!toque.current) return;
+    const dx = evento.clientX - toque.current.x;
+    const dy = evento.clientY - toque.current.y;
+    toque.current = null;
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    ir(dx < 0 ? 1 : -1);
+  };
+
   const anterior = COLECOES[(indice - 1 + total) % total];
   const proxima = COLECOES[(indice + 1) % total];
 
   return (
     <section className="col" id="categoryShowcase" ref={secaoRef} aria-roledescription="carrossel">
       <div className="col__palco js-reveal">
-        <p className="col__eyebrow">Coleções</p>
+        <p className="col__eyebrow">Descubra sua joia</p>
+        {/* A frase de abertura da seção, fixa — não muda com a coleção ativa.
+            Ela diz o que a seção é (descoberta) e deixa o título abaixo dizer
+            o que a coleção é. */}
+        <p className="col__chamada">Cada história pede uma joia diferente.</p>
 
         {/* O título e a frase vivem empilhados, um por coleção, e só o ativo
             aparece. Trocar o texto de um elemento só custaria um remonte, e
@@ -141,17 +143,20 @@ export function ColecoesShowcase() {
             <span className="col__seta-dica">{anterior.curto}</span>
           </button>
 
-          <div className="col__joias">
+          <div
+            className="col__joias"
+            onPointerDown={aoIniciarToque}
+            onPointerUp={aoTerminarToque}
+            onPointerCancel={() => { toque.current = null; }}
+          >
             {COLECOES.map((c, i) => (
               <Link
                 className={`col__joia${i === indice ? " is-ativo" : ""}`}
                 href={c.href}
                 key={c.href}
-                target="_blank"
-                rel="noopener"
                 tabIndex={i === indice ? undefined : -1}
                 aria-hidden={i !== indice}
-                aria-label={`Ver ${c.rotulo} (abre em nova aba)`}
+                aria-label={`Ver ${c.rotulo}`}
               >
                 {/* Sem `loading="lazy"`: as três imagens precisam estar prontas
                     antes da primeira troca, senão a segunda coleção aparece em
@@ -180,12 +185,11 @@ export function ColecoesShowcase() {
               className={`col__cta${i === indice ? " is-ativo" : ""}`}
               href={c.href}
               key={c.href}
-              target="_blank"
-              rel="noopener"
               tabIndex={i === indice ? undefined : -1}
               aria-hidden={i !== indice}
+              aria-label={`Explorar ${c.rotulo}`}
             >
-              {c.cta}
+              Explorar
               <Seta para="dir" />
             </Link>
           ))}

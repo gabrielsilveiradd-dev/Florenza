@@ -1,0 +1,269 @@
+/* ============================================================
+   COMO FUNCIONA + ÁREA DE CONFIANÇA
+
+   Duas seções novas, prefixos próprios (`fluxo-` e `confianca-`), nenhuma
+   regra que alcance o que já existe. Como `app/colecoes.css`, este arquivo é
+   importado só pela home.
+
+   Nenhuma cor nova: --ivory, --ivory-soft, --ink, --ink-dim, --gold,
+   --gold-ink, --gold-line e --hairline, todas de estilos/style.css e
+   estilos/aliancas.css. Tipografia idem: --font-serif para título, --font-sans
+   para microtipografia, que é a régua do site inteiro.
+   ============================================================ */
+
+/* ============================================================
+   COMO FUNCIONA
+   ============================================================ */
+
+.fluxo {
+  background: var(--ivory-soft);
+  padding: clamp(72px, 9vw, 120px) 32px;
+  border-top: 1px solid var(--hairline);
+}
+
+.fluxo__cabeca {
+  max-width: 1200px;
+  margin: 0 auto clamp(48px, 6vw, 78px);
+  text-align: center;
+}
+
+.fluxo__titulo {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(27px, 3.4vw, 46px);
+  line-height: 1.15;
+  letter-spacing: .01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.fluxo__trilha {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* A linha que liga as etapas: do centro do primeiro marco ao centro do último.
+   Sem os recuos ela sobraria nas pontas, apontando para o vazio.
+
+   O recuo NÃO é 12,5%. Meia coluna só seria 1/8 da largura se as colunas se
+   encostassem; com três vãos entre quatro colunas, a largura de cada uma é
+   `(100% - 3 * gap) / 4`, e o centro da primeira fica na metade disso. Com o
+   12,5% a linha nascia 13px à direita do primeiro marco — pouco, e visível. */
+.fluxo__etapas { --fluxo-gap: 34px; }
+
+.fluxo__linha {
+  position: absolute;
+  top: 5px;
+  left: calc((100% - 3 * var(--fluxo-gap, 34px)) / 8);
+  right: calc((100% - 3 * var(--fluxo-gap, 34px)) / 8);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-line) 12%,
+    var(--gold-line) 88%,
+    transparent
+  );
+}
+
+.fluxo__etapas {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--fluxo-gap, 34px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fluxo__etapa {
+  position: relative;
+  padding-top: 26px;
+  text-align: center;
+}
+
+/* O marco senta EM CIMA da linha e usa o fundo da seção para abrir um vão nela
+   — é o que faz o ponto parecer estar na linha, e não desenhado por cima. */
+.fluxo__marco {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: var(--ivory-soft);
+  box-shadow: 0 0 0 5px var(--ivory-soft);
+}
+
+.fluxo__numero {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .28em;
+  color: var(--gold-ink);
+}
+
+.fluxo__etapa-titulo {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(19px, 1.7vw, 23px);
+  line-height: 1.25;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.fluxo__etapa-texto {
+  margin: 0 auto;
+  max-width: 30ch;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ink-dim);
+  text-wrap: pretty;
+}
+
+/* ---------- Celular: a mesma trilha, em pé ----------
+   Uma coluna, linha vertical à esquerda e os marcos sobre ela. Não é o desktop
+   espremido: no desktop a leitura é da esquerda para a direita e o número vem
+   antes do título; aqui a leitura é de cima para baixo, e o texto ganha o
+   alinhamento à esquerda, que é o que se lê com uma mão só. */
+/* O corte é 960 e não 860 (o da nav): a nav some porque não cabe, a trilha
+   vira vertical porque fica ruim antes disso. Em 900px as quatro colunas caem
+   para 183px cada, e "Combine o pagamento" já quebra em duas linhas com o
+   texto abaixo em quatro. Vertical, cada etapa tem a largura inteira. */
+@media (max-width: 960px) {
+  .fluxo { padding-left: 20px; padding-right: 20px; }
+
+  .fluxo__etapas {
+    grid-template-columns: 1fr;
+    gap: 0;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .fluxo__linha {
+    top: 8px;
+    bottom: 30px;
+    left: 5px;
+    right: auto;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(180deg, var(--gold-line), var(--gold-line) 85%, transparent);
+  }
+
+  .fluxo__etapa {
+    padding: 0 0 34px 30px;
+    text-align: left;
+  }
+  .fluxo__etapa:last-child { padding-bottom: 0; }
+
+  .fluxo__marco {
+    top: 3px;
+    left: 0;
+    margin-left: 0;
+  }
+
+  .fluxo__numero { margin-bottom: 6px; }
+  .fluxo__etapa-texto { margin: 0; max-width: none; }
+}
+
+/* ============================================================
+   ÁREA DE CONFIANÇA
+   ============================================================ */
+
+.confianca {
+  background: var(--ivory);
+  padding: clamp(72px, 9vw, 118px) 32px;
+  border-top: 1px solid var(--hairline);
+}
+
+.confianca__cabeca {
+  max-width: 1200px;
+  margin: 0 auto clamp(46px, 5.5vw, 72px);
+  text-align: center;
+}
+
+.confianca__risco {
+  display: block;
+  width: 34px;
+  height: 1px;
+  margin: 0 auto clamp(18px, 2vw, 26px);
+  background: var(--gold-line);
+}
+
+.confianca__titulo {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(26px, 3.2vw, 44px);
+  line-height: 1.15;
+  letter-spacing: .01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.confianca__grade {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(28px, 3vw, 44px);
+}
+
+/* Sem cartão: o que separa um pilar do outro é uma linha fina à esquerda e o
+   espaço. Caixa com borda e sombra nos quatro viraria grade de e-commerce, que
+   é exatamente o que esta seção não pode parecer. O primeiro também tem a
+   linha — sem ela, os quatro deixariam de ser uma série. */
+.confianca__pilar {
+  padding-left: clamp(18px, 2vw, 28px);
+  border-left: 1px solid var(--hairline);
+}
+
+.confianca__numero {
+  display: block;
+  margin-bottom: 14px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .28em;
+  color: var(--gold-ink);
+}
+
+.confianca__pilar-titulo {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.25;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.confianca__pilar-texto {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ink-dim);
+  text-wrap: pretty;
+}
+
+/* Duas colunas antes de virar uma: em 700px quatro colunas dariam 150px cada,
+   e "Prata 925 e 950" quebraria em três linhas. */
+@media (max-width: 1000px) {
+  .confianca__grade { grid-template-columns: repeat(2, 1fr); gap: 34px 28px; }
+}
+
+@media (max-width: 560px) {
+  .confianca { padding-left: 20px; padding-right: 20px; }
+  .confianca__grade { grid-template-columns: 1fr; gap: 26px; max-width: 460px; }
+}

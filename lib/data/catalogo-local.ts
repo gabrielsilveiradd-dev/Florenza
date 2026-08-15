@@ -96,7 +96,7 @@ export const categorias: Categoria[] = [
   },
   {
     slug: "aliancas-ouro",
-    nome: "Alianças de Ouro",
+    nome: "Anéis de Ouro",
     descricao:
       "Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações. O ouro 18K é sinônimo de nobreza, beleza e eternidade.",
     imagemUrl: "/categorias/aliançaouro.png",
@@ -115,7 +115,7 @@ export const categorias: Categoria[] = [
   },
   {
     slug: "aliancas-prata",
-    nome: "Alianças de Prata",
+    nome: "Anéis de Prata",
     descricao:
       "Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.",
     imagemUrl: "/categorias/alliançaprata.png",

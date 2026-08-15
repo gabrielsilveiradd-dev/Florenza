@@ -59,6 +59,20 @@
   text-indent: .34em;
 }
 
+/* A chamada da seção. Fixa: ela diz o que a SEÇÃO é (descoberta), enquanto o
+   título logo abaixo diz qual coleção está na frente. Duas funções, dois
+   textos — antes o eyebrow "Coleções" tentava fazer as duas. */
+.col__chamada {
+  margin: 14px 0 0;
+  max-width: 30ch;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.7vw, 21px);
+  line-height: 1.45;
+  color: var(--ink-dim);
+  text-wrap: balance;
+}
+
 /* Os títulos ficam empilhados no mesmo ponto; a altura é a do maior. `grid`
    com uma célula só faz isso sem `position: absolute` — e sem tirar os blocos
    do fluxo, o contêiner continua tendo altura própria e nada abaixo pula. */

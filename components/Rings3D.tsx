@@ -109,8 +109,13 @@ export function Rings3D() {
         <span className="rings3d-glow" aria-hidden="true" />
         <canvas className="rings3d-canvas" id="canvasSilver" ref={canvasPrata} />
 
-        <div className="rings3d-hint">
-          <span className="rings3d-hint-label">Passe o mouse ou toque</span>
+        {/* A instrução escrita saiu. "Passe o mouse ou toque" ensinava com
+            palavra o que os chevrons já ensinam com movimento — e ainda
+            descrevia o gesto errado para metade dos visitantes, já que num
+            aparelho de toque não existe mouse. Os chevrons ficam: eles pulsam
+            para baixo, indicando que há algo a revelar, e somem quando o
+            painel abre (.rings3d-panel.open .rings3d-hint). */}
+        <div className="rings3d-hint" aria-hidden="true">
           <Chevrons />
         </div>
 
@@ -176,8 +181,13 @@ export function Rings3D() {
         <span className="rings3d-glow" aria-hidden="true" />
         <canvas className="rings3d-canvas" id="canvasGold" ref={canvasOuro} />
 
-        <div className="rings3d-hint">
-          <span className="rings3d-hint-label">Passe o mouse ou toque</span>
+        {/* A instrução escrita saiu. "Passe o mouse ou toque" ensinava com
+            palavra o que os chevrons já ensinam com movimento — e ainda
+            descrevia o gesto errado para metade dos visitantes, já que num
+            aparelho de toque não existe mouse. Os chevrons ficam: eles pulsam
+            para baixo, indicando que há algo a revelar, e somem quando o
+            painel abre (.rings3d-panel.open .rings3d-hint). */}
+        <div className="rings3d-hint" aria-hidden="true">
           <Chevrons />
         </div>
 

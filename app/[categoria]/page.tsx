@@ -115,7 +115,7 @@ export default async function PaginaCategoria({
         </section>
       </main>
 
-      <Footer colecoes="categoria" />
+      <Footer />
     </>
   );
 }

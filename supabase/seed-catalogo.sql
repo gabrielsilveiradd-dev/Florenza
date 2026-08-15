@@ -26,7 +26,7 @@ on conflict (slug) do update set
 insert into public.categorias
   (slug, nome, descricao, imagem_url, filtro_campo, variante, rotulo_filtro, nota, ordem, ativo)
 values
-  ('aliancas-ouro', 'Alianças de Ouro', 'Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações. O ouro 18K é sinônimo de nobreza, beleza e eternidade.', '/categorias/aliançaouro.png',
+  ('aliancas-ouro', 'Anéis de Ouro', 'Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações. O ouro 18K é sinônimo de nobreza, beleza e eternidade.', '/categorias/aliançaouro.png',
    NULL, 'foto',
    'Filtrar por material', '{}', 2, true)
 on conflict (slug) do update set
@@ -37,7 +37,7 @@ on conflict (slug) do update set
 insert into public.categorias
   (slug, nome, descricao, imagem_url, filtro_campo, variante, rotulo_filtro, nota, ordem, ativo)
 values
-  ('aliancas-prata', 'Alianças de Prata', 'Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.', '/categorias/alliançaprata.png',
+  ('aliancas-prata', 'Anéis de Prata', 'Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.', '/categorias/alliançaprata.png',
    NULL, 'produto',
    'Filtrar por material', '{}', 3, true)
 on conflict (slug) do update set

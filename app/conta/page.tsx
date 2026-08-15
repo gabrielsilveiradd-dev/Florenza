@@ -77,7 +77,7 @@ export default async function PaginaConta({
           </div>
         </main>
 
-        <Footer colecoes="categoria" />
+        <Footer />
       </>
     );
   }
@@ -190,7 +190,7 @@ export default async function PaginaConta({
         </div>
       </main>
 
-      <Footer colecoes="categoria" />
+      <Footer />
     </>
   );
 }

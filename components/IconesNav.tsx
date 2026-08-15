@@ -93,3 +93,68 @@ export function IconeConta({ className, size = 16 }: Props) {
     </svg>
   );
 }
+
+/* ---------------------------------------------------------------------------
+   AS TRÊS CATEGORIAS
+
+   A barra passou a listar as categorias em vez de seções da home, então cada
+   uma precisa do próprio ícone. As três são anéis — é isso que a Florenza
+   vende —, e o desenho não tenta fingir o contrário: a silhueta é a mesma nas
+   três, e o que muda é o detalhe da peça. Lidas juntas, dizem "três tipos de
+   anel"; lidas de longe, continuam sendo um anel.
+
+   Distinguir ouro de prata por traço monocromático seria mentira gráfica: a
+   diferença entre elas é o metal, não a forma. Quem separa é o rótulo, que no
+   desktop está sempre ao lado e no celular abre por extenso no menu.
+   --------------------------------------------------------------------------- */
+
+/** Anéis de Ouro: aro liso e largo, visto de frente. */
+export function IconeAnelOuro({ className, size = 16 }: Props) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="12" cy="13.5" r="7.5" />
+      <circle cx="12" cy="13.5" r="4.6" />
+    </svg>
+  );
+}
+
+/** Anéis de Prata: o mesmo aro, com o friso que corre no meio da peça. */
+export function IconeAnelPrata({ className, size = 16 }: Props) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="12" cy="13.5" r="7.5" />
+      <circle cx="12" cy="13.5" r="4.6" />
+      <path d="M12 2.4v3.6" />
+    </svg>
+  );
+}
+
+/** Anéis de Formatura: o aro com a pedra montada — o que define a categoria. */
+export function IconeAnelFormatura({ className, size = 16 }: Props) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="12" cy="15" r="6.4" />
+      <circle cx="12" cy="15" r="3.7" />
+      <path d="M9.4 6.6 12 2.6l2.6 4" />
+      <path d="M9.4 6.6h5.2" />
+    </svg>
+  );
+}
+
+/** Menu: três linhas. No celular ele substitui as pílulas de categoria. */
+export function IconeMenu({ className, size = 18 }: Props) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+/** Fechar: o X do menu aberto. */
+export function IconeFechar({ className, size = 18 }: Props) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}

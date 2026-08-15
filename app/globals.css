@@ -134,6 +134,35 @@
 }
 .nav__pilula-icone { flex: none; }
 
+/* ---------- Estado ativo ----------
+   A barra passou a listar categorias, e categoria tem página: quem está em
+   /aliancas-ouro precisa ver onde está. O sinal é o mesmo vocabulário da
+   pílula — fundo levemente aceso e a cor dourada da marca —, mais um risco de
+   1px embaixo, que é o que o site já usa para "selecionado" no filtro do
+   catálogo. Sem peso de fonte diferente: a barra é flex e engrossar o rótulo
+   ativo empurraria os vizinhos a cada navegação. */
+.nav .nav__pilula.is-ativa {
+  opacity: 1;
+  color: var(--gold-bright);
+  background: rgba(227, 198, 146, .1);
+}
+
+.nav .nav__pilula.is-ativa::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 3px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.nav .nav__pilula { position: relative; }
+
+/* Rótulo longo x curto. Os dois estão no HTML; o curto é `aria-hidden`, então
+   o leitor de tela lê sempre "Anéis de Formatura", nunca "Formatura". */
+.nav__pilula-curto { display: none; }
+
 /* ---------- Botão de conta ---------- */
 
 .nav__acoes .nav__entrar {
@@ -204,40 +233,77 @@
 .nav .nav__logo { margin-right: 16px; }
 
 /* ---------------------------------------------------------------------------
-   TELAS ESTREITAS: o rótulo sai, o ícone fica
+   TELAS ESTREITAS: três faixas, e a do meio mudou de estratégia
    ---------------------------------------------------------------------------
-   Aqui está o ganho real de ter desenhado os ícones. Antes, os quatro links
-   eram só texto: em 390px ocupavam 194px e não cabiam junto com a marca e as
-   ações — a barra precisou virar duas linhas, e `--nav-h` foi de 76px para 112.
+   O desenho anterior tinha um truque bom: abaixo de 860px o rótulo saía por
+   `clip-path` e ficava só o ícone, o que devolveu a barra a uma linha só.
+   Ele funcionava porque os rótulos eram seções — "Coleção", "Contato" — e um
+   ícone genérico ao menos não mentia sobre o destino.
 
-   Com ícone, a pílula continua reconhecível sem a palavra e cai para ~34px.
-   Quatro delas somam ~136 em vez de 194, e a barra volta a caber em UMA linha.
-   `--nav-h` volta para 76px, e as páginas recuperam 36px de altura no topo.
+   Com as categorias na barra, não funciona mais. "Anéis de Ouro" e "Anéis de
+   Prata" são o mesmo anel: o que separa as duas é o metal, e metal não se
+   desenha em traço monocromático. Ícone sem rótulo aqui viraria adivinhação.
 
-   O rótulo não some de todo: continua no HTML e é lido por leitor de tela,
-   escondido pela técnica de recorte (`clip-path`) em vez de `display: none`,
-   que o tiraria da árvore de acessibilidade junto.
+   Então a faixa estreita troca de estratégia: as pílulas somem inteiras e o
+   hambúrguer entra, com as três categorias escritas por extenso na gaveta.
+   Não é esconder navegação atrás de um clique — é o contrário do que existia,
+   onde o rótulo estava escondido sem clique nenhum que o revelasse.
+
+   A faixa do meio (860–1180) é o meio-termo que ainda cabe: rótulo curto
+   ("Ouro", "Prata", "Formatura") em vez do nome completo.
    --------------------------------------------------------------------------- */
-/* Faixa intermediária: aperta a pílula antes de desistir do rótulo. */
-@media (max-width: 1080px) {
+
+/* O hambúrguer não existe no desktop. */
+.nav__hamburguer {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-right: 4px;
+  padding: 0;
+  border: 1px solid rgba(227, 198, 146, .16);
+  border-radius: 999px;
+  background: rgba(243, 239, 232, .04);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+.nav__hamburguer:hover {
+  background: rgba(243, 239, 232, .09);
+  border-color: rgba(227, 198, 146, .3);
+  color: var(--gold-bright);
+}
+
+/* Faixa do meio: o nome completo sai, o curto entra. Medido: com os nomes
+   por extenso as quatro pílulas somam ~530px, e junto com marca (150) e ações
+   (180) estouram qualquer tela abaixo de ~1180. Com o rótulo curto caem para
+   ~330 e cabem com folga até os 860, onde a gaveta assume. */
+@media (max-width: 1180px) {
   .nav .nav__inner { padding: 0 18px; }
-  .nav .nav__pilula { padding: 8px 10px; gap: 6px; letter-spacing: .06em; }
+  .nav .nav__pilula { padding: 8px 11px; gap: 6px; letter-spacing: .07em; }
+  .nav__pilula-longo { display: none; }
+  .nav__pilula-curto { display: inline; }
   .nav__acoes { margin-left: 8px; }
   .nav .nav__logo { margin-right: 10px; }
 }
 
-/* O corte fica em 860px, e o número saiu de medição, não de estimativa.
-   Com os rótulos, marca + links + ações somam 777px: em 900px sobram 72px, em
-   830 sobrariam 17 — margem fina demais para a largura do texto variar com a
-   fonte que o sistema carregar. Em 600px o conjunto estourava 180px, que foi o
-   que a régua mostrou depois de eu ter chutado que caberia. */
+/* O corte segue em 860px, e o número segue saindo de medição. Aqui as pílulas
+   saem de cena inteiras — não por `clip-path`, que as manteria ocupando a
+   linha, mas por `display: none`: quem responde pela navegação nesta faixa é a
+   gaveta, e ela tem o mesmo conteúdo com os rótulos por extenso. */
 @media (max-width: 860px) {
   .nav .nav__gem { width: 17px; }
   .nav__logo .nav__word { font-size: 21px; }
   .nav .nav__inner { padding: 0 12px; }
 
-  .nav .nav__pilula { padding: 8px; }
-  .nav__pilula-texto,
+  .nav__hamburguer { display: inline-flex; }
+  .nav .nav__links { display: none; }
+
+  /* A marca deixa de disputar espaço com as pílulas e ganha o centro da
+     barra, que é a composição `☰ FLORENZA ações` que o celular espera. */
+  .nav .nav__logo { margin: 0 auto; }
+
   .nav__entrar-texto {
     position: absolute;
     width: 1px;
@@ -250,13 +316,132 @@
   .nav__acoes .nav__entrar { padding: 9px; }
 }
 
-/* Abaixo de 400px o vão entre as pílulas some — cada 1px de `gap` custa 3px
+/* Abaixo de 400px o vão entre os botões some — cada 1px de `gap` custa 3px
    aqui, e é a última coisa que se percebe. */
 @media (max-width: 400px) {
-  .nav .nav__links,
   .nav__acoes { gap: 1px; padding: 3px; }
-  .nav .nav__pilula { padding: 7px; }
+  .nav__hamburguer { width: 36px; height: 36px; }
 }
+
+/* ---------------------------------------------------------------------------
+   A GAVETA DO CELULAR
+   ---------------------------------------------------------------------------
+   Cor nenhuma nova: o painel é o mesmo marrom da barra (--bg), a borda é o
+   mesmo dourado a 16%, e os rótulos usam --gold-bright e --text.
+
+   Ela desce de baixo da barra, não de fora da tela, porque a barra é fixa e
+   continua visível — a gaveta é uma extensão dela, não uma tela nova. */
+.menuMobile {
+  position: fixed;
+  inset: var(--nav-h) 0 0;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Acima de 860px a gaveta não existe, mesmo que algum estado a deixe aberta:
+   a barra completa já está lá, e as duas juntas seriam navegação dobrada. */
+@media (min-width: 861px) {
+  .menuMobile { display: none; }
+}
+
+.menuMobile__fundo {
+  position: absolute;
+  inset: 0;
+  background: rgba(27, 17, 8, .55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: menuMobileFundo .28s ease both;
+}
+
+.menuMobile__painel {
+  position: relative;
+  background: rgba(27, 17, 8, .97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(227, 198, 146, .14);
+  padding: 22px 20px 28px;
+  max-height: calc(100dvh - var(--nav-h));
+  overflow-y: auto;
+  animation: menuMobileAbre .3s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+@keyframes menuMobileFundo {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes menuMobileAbre {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menuMobile__fundo,
+  .menuMobile__painel { animation-duration: .01ms; }
+}
+
+.menuMobile__rotulo {
+  margin: 0 0 12px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: .8;
+}
+.menuMobile__rotulo:not(:first-child) { margin-top: 26px; }
+
+.menuMobile__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* 56px de alvo de toque, com folga sobre os 44 do mínimo — é o item que a
+   pessoa procura no escuro, com uma mão só. */
+.menuMobile__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color .2s ease, color .2s ease;
+}
+.menuMobile__item:hover,
+.menuMobile__item:focus-visible { background: rgba(243, 239, 232, .06); }
+
+.menuMobile__item.is-ativa {
+  background: rgba(227, 198, 146, .1);
+  color: var(--gold-bright);
+}
+
+.menuMobile__icone { flex: none; opacity: .9; }
+
+.menuMobile__texto { display: flex; flex-direction: column; gap: 3px; }
+
+.menuMobile__nome {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: .01em;
+}
+
+.menuMobile__frase {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
+.menuMobile__lista--simples .menuMobile__nome { font-size: 17px; }
 
 /* Estoque na vitrine.
  *

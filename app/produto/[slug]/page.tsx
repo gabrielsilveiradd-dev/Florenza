@@ -150,7 +150,7 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
         </div>
       </main>
 
-      <Footer colecoes="categoria" />
+      <Footer />
     </>
   );
 }

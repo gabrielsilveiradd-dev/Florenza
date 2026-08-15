@@ -1,4 +1,6 @@
 import { ColecoesShowcase } from "@/components/ColecoesShowcase";
+import { ComoFunciona } from "@/components/ComoFunciona";
+import { Confianca } from "@/components/Confianca";
 import { Footer } from "@/components/Footer";
 import { HeroMedia } from "@/components/HeroMedia";
 import { Rings3D } from "@/components/Rings3D";
@@ -8,15 +10,8 @@ import "./estilos/rings-3d.css";
 // A vitrine de coleções tem CSS próprio e isolado, com prefixo `col-`: nada
 // dele alcança as outras seções desta página.
 import "./colecoes.css";
-
-/** Cards da grade "Outras categorias": reaproveitam a estrutura de .ringCard. */
-const CATEGORIAS_EM_BREVE = [
-  { inicial: "R", nome: "Relógios", desc: "Precisão e elegância no pulso.", href: "#" },
-  { inicial: "C", nome: "Cordões", desc: "Peças que acompanham cada dia.", href: "#" },
-  { inicial: "P", nome: "Pingentes", desc: "Detalhes que contam histórias.", href: "#" },
-  { inicial: "A", nome: "Anéis", desc: "Além das alianças, para todos os momentos.", href: "/#categoryShowcase" },
-  { inicial: "S", nome: "Anéis Solitários", desc: "O brilho de um único diamante.", href: "#" },
-];
+// Como funciona + área de confiança, prefixos `fluxo-` e `confianca-`.
+import "./secoes.css";
 
 export default function Home() {
   return (
@@ -62,14 +57,20 @@ export default function Home() {
           />
           <div className="aliancasFeature__scrim" aria-hidden="true" />
           <div className="aliancasFeature__content js-reveal">
-            <p className="section-eyebrow">Coleção</p>
-            <h2 className="aliancasFeature__title">Alianças</h2>
-            <p className="aliancasFeature__subtitle">De Prata e Ouro</p>
+            {/* O título era "Alianças", com "De Prata e Ouro" embaixo — e
+                "Alianças" é justamente o nome que não pode conviver com
+                "Anéis de Ouro"/"Anéis de Prata" nos outros seis lugares onde
+                o site nomeia as categorias. Duas palavras para a mesma coisa
+                é como um catálogo se torna confuso. O vídeo, a composição e o
+                CSS da seção seguem exatamente como estavam. */}
+            <p className="section-eyebrow">A casa</p>
+            <h2 className="aliancasFeature__title">Ouro e Prata</h2>
+            <p className="aliancasFeature__subtitle">Dois metais, a mesma promessa</p>
             <p className="aliancasFeature__desc">
               Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações.
             </p>
             <a className="btn-outline" href="#categoryShowcase">
-              Explorar Coleção{" "}
+              Ver as categorias{" "}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
@@ -80,35 +81,17 @@ export default function Home() {
         {/* 4. MATERIAIS — anéis 3D em Three.js. */}
         <Rings3D />
 
-        {/* 5. OUTRAS CATEGORIAS — grade normal, sem paredes de mármore, sem pin
-            de scroll. Reaproveita a estrutura exata de .ringCard. */}
-        <section className="categorySection" id="categorias">
-          <p className="section-eyebrow categorySection__eyebrow js-reveal">Florenza</p>
-          <div className="categorySection__grid js-reveal-stagger">
-            {CATEGORIAS_EM_BREVE.map((cat) => (
-              <article className="ringCard" key={cat.nome}>
-                <a
-                  className="ringCard__media ringCard__media--placeholder"
-                  href={cat.href}
-                  aria-label={`Ver ${cat.nome}`}
-                >
-                  <span className="ringCard__initial">{cat.inicial}</span>
-                </a>
-                <div className="ringCard__body">
-                  <h3 className="ringCard__name">{cat.nome}</h3>
-                  <p className="ringCard__material">Próxima coleção</p>
-                  <p className="ringCard__desc">{cat.desc}</p>
-                  <div className="ringCard__foot">
-                    <span className="ringCard__price">Em breve</span>
-                    <a className="ringCard__view" href={cat.href} aria-label={`Ver categoria ${cat.nome}`}>
-                      &rarr;
-                    </a>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
+        {/* A grade "Outras categorias" saiu daqui.
+            Eram cinco cards — Relógios, Cordões, Pingentes, Anéis, Anéis
+            Solitários — marcados "Em breve", com preço "Em breve" e `href="#"`
+            em quatro deles. Nenhuma dessas categorias existe: não há tabela,
+            não há foto, não há rota. Na prática a home anunciava um catálogo
+            cinco vezes maior do que a loja tem, e o único card que levava a
+            algum lugar apontava de volta para a seção logo acima.
+            A Florenza vende três categorias de anel. É o que a página diz
+            agora — e a vitrine de descoberta já as apresenta por inteiro.
+            (O CSS `.categorySection` continua em estilos/aliancas.css,
+            intocado; ele simplesmente deixou de casar com algo.) */}
 
         {/* Encerramento editorial — peça curta, autoplay, em loop, sem prender a
             navegação. */}
@@ -126,9 +109,20 @@ export default function Home() {
             />
           </div>
         </section>
+
+        {/* COMO FUNCIONA — as quatro etapas reais da compra, e a resposta à
+            pergunta que a vitrine sozinha deixava no ar: "e depois que eu
+            clico em comprar?". Vem depois dos produtos de propósito: quem
+            ainda não se interessou por uma peça não tem por que ler o
+            processo. */}
+        <ComoFunciona />
+
+        {/* ÁREA DE CONFIANÇA — o último bloco antes do rodapé, onde a compra
+            se decide. Só afirmações que este projeto sustenta. */}
+        <Confianca />
       </main>
 
-      <Footer colecoes="home" />
+      <Footer />
     </>
   );
 }

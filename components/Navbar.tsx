@@ -2,12 +2,8 @@ import Link from "next/link";
 import { BotaoCarrinho } from "@/components/BotaoCarrinho";
 import { BotaoConta } from "@/components/BotaoConta";
 import { Gem } from "@/components/GemDefs";
-import {
-  IconeAliancas,
-  IconeCategorias,
-  IconeColecao,
-  IconeContato,
-} from "@/components/IconesNav";
+import { MenuMobile } from "@/components/MenuMobile";
+import { NavCategorias } from "@/components/NavCategorias";
 
 /**
  * A barra do topo, agora com um vocabulário só.
@@ -21,34 +17,34 @@ import {
  * rótulo some no celular. É o que permite a barra caber em uma linha de novo
  * em telas estreitas, sem esconder seção nenhuma atrás de menu.
  *
- * A nav segue sendo componente de servidor: só o carrinho e a conta hidratam,
- * porque só eles dependem de estado do navegador.
+ * A nav segue sendo componente de servidor: só o carrinho, a conta, as pílulas
+ * de categoria e o menu do celular hidratam, porque só eles dependem de estado
+ * do navegador (carrinho e conta) ou da rota atual (as outras duas).
+ *
+ * O QUE A BARRA LISTA MUDOU
+ *
+ * Eram quatro seções da home — "Alianças", "Coleção", "Categorias", "Contato".
+ * Nenhuma dizia o que a loja vende, e "Categorias" existia só para guardar as
+ * três atrás de mais um clique. Agora as três categorias estão na barra, e a
+ * única seção institucional que sobrou é a que existe de verdade: o rodapé de
+ * atendimento. A lista mora em `lib/navegacao.ts`, escrita uma vez.
  */
-
-const SECOES = [
-  { href: "/#aliancas", rotulo: "Alianças", Icone: IconeAliancas },
-  { href: "/#categoryShowcase", rotulo: "Coleção", Icone: IconeColecao },
-  { href: "/#categorias", rotulo: "Categorias", Icone: IconeCategorias },
-  { href: "/#contato", rotulo: "Contato", Icone: IconeContato },
-] as const;
 
 export function Navbar() {
   return (
     <header className="nav">
       <div className="nav__inner">
+        {/* O hambúrguer vem ANTES da marca no HTML e só aparece abaixo de
+            860px: é a ordem `☰ FLORENZA ações` que o celular espera, e ela sai
+            de graça do fluxo, sem `order` no CSS. */}
+        <MenuMobile />
+
         <Link className="nav__logo" href="/#top" aria-label="Florenza — início">
           <Gem className="nav__gem" />
           <span className="nav__word">Florenza</span>
         </Link>
 
-        <nav className="nav__links" aria-label="Seções do site">
-          {SECOES.map(({ href, rotulo, Icone }) => (
-            <Link className="nav__pilula" href={href} key={rotulo}>
-              <Icone className="nav__pilula-icone" />
-              <span className="nav__pilula-texto">{rotulo}</span>
-            </Link>
-          ))}
-        </nav>
+        <NavCategorias />
 
         <div className="nav__acoes">
           <BotaoCarrinho />
