@@ -9,6 +9,15 @@ import { buscarCategoria, listarCategorias, listarProdutos } from "@/lib/catalog
 // existia apenas em aneis-formatura.html e aliancas-*.html.
 import "../estilos/categoria.css";
 
+// Quarta camada, e só para uma categoria. O arquivo carrega nas três rotas
+// (o import é da rota compartilhada), mas toda regra dele desce de
+// `.categoryPage--formatura` — classe que só o slug `aneis-formatura` recebe.
+// Alianças de ouro e de prata baixam o CSS e não casam com uma linha dele.
+import "./formatura.css";
+
+/** O slug que ganha o tratamento refinado; ver formatura.css. */
+const SLUG_FORMATURA = "aneis-formatura";
+
 /**
  * Uma rota para as três páginas que antes eram três arquivos HTML quase iguais:
  * aneis-formatura.html, aliancas-ouro.html e aliancas-prata.html. Os slugs são
@@ -50,10 +59,13 @@ export default async function PaginaCategoria({
   if (!categoria) notFound();
 
   const produtos = await listarProdutos(slug);
+  const ehFormatura = slug === SLUG_FORMATURA;
 
   return (
     <>
-      <main>
+      {/* A classe é o interruptor de formatura.css. Nas outras categorias o
+          <main> continua sem classe nenhuma, como sempre esteve. */}
+      <main className={ehFormatura ? "categoryPage--formatura" : undefined}>
         <section className="categoryPage__header">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -69,11 +81,25 @@ export default async function PaginaCategoria({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <path d="M19 12H5M11 18l-6-6 6-6" />
             </svg>
-            Voltar às categorias
+            {/* Mesmo destino (#categoryShowcase), outra promessa: em formatura
+                o link convida a descobrir as demais coleções, em vez de sugerir
+                que a pessoa se perdeu. As alianças seguem com o rótulo antigo,
+                que é o que esta tarefa não pode mexer. */}
+            {ehFormatura ? "Explorar outras categorias" : "Voltar às categorias"}
           </Link>
         </section>
 
         <section className="catalog categoryPage__catalog" aria-label={`${categoria.nome} disponíveis`}>
+          {/* A costura entre a joia do topo e a grade. Não é enfeite solto: o
+              risco e a palavra em serifa dizem que uma seção terminou e outra
+              começou, papel que antes cabia à linha de 1px do cabeçalho. */}
+          {ehFormatura && (
+            <div className="fmt-abertura">
+              <span className="fmt-abertura__risco" aria-hidden="true" />
+              <h2 className="fmt-abertura__titulo">A coleção</h2>
+            </div>
+          )}
+
           <CatalogoGrade categoria={categoria} produtos={produtos} />
 
           {categoria.nota.length > 0 && (

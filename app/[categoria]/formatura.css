@@ -1,0 +1,449 @@
+/* ============================================================
+   ANÉIS DE FORMATURA — refinamento visual só desta categoria.
+
+   POR QUE ESTE ARQUIVO EXISTE, E POR QUE ELE É ASSIM
+
+   `app/[categoria]/page.tsx` é uma rota só para as três categorias
+   (formatura, aliancas-ouro, aliancas-prata), e `estilos/categoria.css`
+   é o CSS das três — veio do protótipo e não se mexe. Mudar qualquer
+   uma daquelas regras mudaria as alianças junto, que é justamente o
+   que este trabalho não pode fazer.
+
+   Então nada aqui redefine seletor de categoria.css: TODA regra é
+   descendente de `.categoryPage--formatura`, classe que a página só
+   coloca no <main> quando o slug é `aneis-formatura`. As outras duas
+   categorias carregam este arquivo (o import é da rota compartilhada)
+   e não casam com uma linha dele.
+
+   ESPECIFICIDADE, que aqui não é detalhe: o prefixo dá (0,2,0) contra
+   os (0,1,0) de categoria.css, então estas regras vencem independente
+   da ordem em que o Next resolver importar os dois arquivos. Onde a
+   regra de baixo já tem duas classes (`.catalog__filter.is-active`,
+   `.categoryPage__catalog .catalog__grid`), o seletor daqui leva três
+   — nunca empata, nunca depende de ordem.
+
+   Nenhuma cor nova: tudo sai de --ivory, --ivory-soft, --ink,
+   --ink-dim, --gold, --gold-line, --gold-ink e --hairline.
+   ============================================================ */
+
+/* ============================================================
+   1. O CABEÇALHO — 23% mais baixo
+   ============================================================
+   O medido no desenho anterior, em 1440x900: ~800px de altura, ou
+   seja, a primeira tela inteira só para o cabeçalho — a pessoa
+   rolava sem nunca ter visto uma peça. O alvo é ~615px, que põe
+   joia, categoria, título, descrição e o CTA dentro do primeiro
+   viewport com o começo do catálogo aparecendo por baixo.
+
+   A redução NÃO é proporcional. A maior parte vem do espaço morto
+   (padding e vãos, que somavam ~366px), e só o resto da joia e do
+   título — os dois elementos que precisam continuar imponentes. */
+
+.categoryPage--formatura .categoryPage__header {
+  /* Era calc(--nav-h + clamp(48px,7vw,88px)) / clamp(40px,6vw,70px). */
+  padding: calc(var(--nav-h) + clamp(22px, 3vw, 40px)) 32px clamp(26px, 3.2vw, 38px);
+  /* O vão de 22px valia para todos os pares. Cada par tem agora a sua
+     distância própria (por margin), porque a relação entre a régua
+     "CATEGORIA" e o título não é a mesma entre título e descrição. */
+  gap: 0;
+
+  /* A costura com o catálogo. Antes era uma linha de 1px atravessando
+     a tela inteira; agora o marfim do cabeçalho dissolve no marfim do
+     catálogo nos últimos 30% da altura. A separação continua legível
+     — muda o tom — sem o traço que cortava a página em dois. */
+  background: linear-gradient(
+    180deg,
+    var(--ivory-soft) 0%,
+    var(--ivory-soft) 70%,
+    var(--ivory) 100%
+  );
+  border-bottom: 0;
+}
+
+/* A joia segue sendo o elemento mais alto do cabeçalho: 220px contra
+   ~67px do título. Ela cede 70px dos 290 — o suficiente para o CTA
+   caber na primeira tela, longe de virar miniatura. Imagem, cores,
+   proporção e a sombra de baixo ficam como estavam. */
+.categoryPage--formatura .categoryPage__img {
+  height: clamp(150px, 18.5vw, 220px);
+  margin-bottom: clamp(14px, 1.6vw, 20px);
+}
+
+/* Microtipografia editorial: continua discreta, só encosta um pouco
+   mais no título — o par "CATEGORIA / Anéis de Formatura" se lê como
+   um bloco só quando a distância entre os dois é menor que a que os
+   separa do resto. */
+.categoryPage--formatura .section-eyebrow {
+  margin: 0 0 clamp(8px, 1vw, 11px);
+  font-size: 11px;
+  letter-spacing: .34em;
+}
+
+.categoryPage--formatura .categoryPage__title {
+  /* Era clamp(38px, 6vw, 72px), e o 6vw estourava o teto em qualquer
+     tela acima de 1200px — na prática, 72px fixos no desktop inteiro.
+     Com 4.8vw a redução acontece onde ela pesa (1366 → 66px, 1440 →
+     68px) e o teto cai para 68: continua sendo o maior tipo da
+     página, sem ser o assunto dela. */
+  font-size: clamp(34px, 4.8vw, 68px);
+  margin-bottom: clamp(12px, 1.3vw, 17px);
+  /* Distribui as linhas quando o título quebra (tablet/celular), em
+     vez de deixar uma palavra órfã na segunda linha. */
+  text-wrap: balance;
+}
+
+.categoryPage--formatura .categoryPage__desc {
+  /* 56ch mantém as três linhas do texto atual sem virar bloco: mais
+     largo que isso e a linha fica longa demais para itálico; mais
+     estreito e vira quatro linhas. */
+  max-width: 56ch;
+  font-size: clamp(14.5px, 1.3vw, 17px);
+  line-height: 1.5;
+  margin-bottom: clamp(16px, 1.9vw, 24px);
+  /* `balance` e não `pretty`: o texto é centralizado e tem três linhas,
+     e sem ele a última fica com quatro palavras soltas embaixo de duas
+     linhas cheias — o bloco parece cair para a esquerda. */
+  text-wrap: balance;
+}
+
+/* "Explorar outras categorias" é mais longo que "Voltar às
+   categorias"; o respiro entre letras cede um pouco para o rótulo não
+   virar uma faixa atravessada. */
+.categoryPage--formatura .categoryPage__back {
+  font-size: 10.5px;
+  letter-spacing: .16em;
+}
+
+/* ============================================================
+   2. A ABERTURA DO CATÁLOGO
+   ============================================================
+   O que separa cabeçalho e catálogo é isto, e não uma régua: um
+   risco curto, uma palavra em serifa e a contagem. É a mesma
+   gramática das aberturas de seção do site (risco + linha fina +
+   tipo grande), no tamanho de um subtítulo. */
+
+.categoryPage--formatura .categoryPage__catalog {
+  /* Era clamp(48px, 6vw, 76px). Com o cabeçalho mais baixo, manter os
+     76px de vazio devolveria de graça o espaço que acabou de ser
+     economizado. */
+  padding-top: clamp(34px, 4vw, 56px);
+}
+
+.fmt-abertura {
+  max-width: 1200px;
+  margin: 0 auto clamp(10px, 1.4vw, 16px);
+  text-align: center;
+}
+
+.fmt-abertura__risco {
+  display: block;
+  width: 34px;
+  height: 1px;
+  margin: 0 auto clamp(14px, 1.6vw, 20px);
+  background: var(--gold-line);
+}
+
+.fmt-abertura__titulo {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(24px, 2.4vw, 34px);
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+/* A contagem deixa de ser uma linha solta no meio do vazio e passa a
+   ser a legenda do título acima — por isso encosta nele. */
+.categoryPage--formatura .categoryPage__count {
+  margin-bottom: clamp(22px, 2.6vw, 32px);
+  font-size: 11px;
+  letter-spacing: .18em;
+  color: var(--ink-dim);
+}
+
+/* ============================================================
+   3. OS FILTROS
+   ============================================================
+   Mesma barra, mesmos botões, mesma lógica de filtragem — só a
+   hierarquia muda. O ativo ganha uma linha dourada que cresce do
+   centro; o hover mostra a mesma linha pela metade, o que diz de
+   antemão o que o clique faz.
+
+   O peso da fonte NÃO muda entre ativo e inativo, de propósito: a
+   barra é flex e quebra em duas linhas, e um botão que engorda ao
+   ser clicado empurra os vizinhos de lugar. Cor e linha bastam. */
+
+.categoryPage--formatura .categoryPage__filters {
+  gap: 6px 10px;
+  padding-bottom: clamp(16px, 1.8vw, 22px);
+  /* A única régua da página: fecha o bloco de cabeçalho do catálogo e
+     abre a grade. */
+  border-bottom: 1px solid var(--hairline);
+  margin-bottom: clamp(30px, 3.4vw, 44px);
+}
+
+.categoryPage--formatura .catalog__filter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 10px;
+  font-size: 11.5px;
+  letter-spacing: .17em;
+  /* A borda inferior de aliancas.css vira a linha animada abaixo. */
+  border-bottom: 0;
+  transition: color .28s ease;
+}
+
+.categoryPage--formatura .catalog__filter::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 2px;
+  height: 1px;
+  background: var(--gold);
+  opacity: .5;
+  transform: scaleX(0);
+  transition: transform .32s cubic-bezier(.22, .61, .36, 1), opacity .32s ease;
+}
+
+.categoryPage--formatura .catalog__filter:hover { color: var(--ink); }
+.categoryPage--formatura .catalog__filter:hover::after { transform: scaleX(.44); }
+
+/* Três classes contra as duas de `.catalog__filter.is-active` em
+   aliancas.css: vence sem depender da ordem dos arquivos. */
+.categoryPage--formatura .catalog__filter.is-active {
+  color: var(--gold-ink);
+  border-color: transparent;
+}
+
+.categoryPage--formatura .catalog__filter.is-active::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* A amostra de cor cresce e ganha um halo quando o filtro está ativo:
+   é a confirmação de qual pedra está sendo vista, sem palavra nova. */
+.categoryPage--formatura .catalog__swatch {
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.categoryPage--formatura .catalog__filter.is-active .catalog__swatch {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 1px rgba(42, 30, 19, .25), 0 0 0 4px rgba(179, 133, 78, .16);
+}
+
+/* ============================================================
+   4. A GRADE — todos os cards da mesma altura
+   ============================================================
+   `grid-auto-rows: 1fr` iguala TODAS as linhas da grade, não só os
+   cards de uma mesma linha (isso o grid já fazia sozinho). Com o
+   card virando coluna flex e o rodapé recebendo `margin-top: auto`,
+   preço e botão pousam na mesma altura nas quatro colunas e nas
+   quatro linhas — inclusive depois de filtrar, quando a grade
+   refaz as linhas com menos peças. */
+
+.categoryPage--formatura .catalog__grid {
+  grid-auto-rows: 1fr;
+}
+
+.categoryPage--formatura .ringCard {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A moldura tem aspect-ratio; sem isto o flex a comprimiria para
+   caber na altura da linha, e o anel sairia achatado. */
+.categoryPage--formatura .ringCard__media {
+  flex: 0 0 auto;
+}
+
+.categoryPage--formatura .ringCard__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ---------- Texto do card ---------- */
+
+.categoryPage--formatura .ringCard__name {
+  font-size: 20px;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  text-wrap: balance;
+}
+
+.categoryPage--formatura .ringCard__material {
+  margin-bottom: 10px;
+  color: var(--gold-ink);
+  opacity: .85;
+}
+
+/* A descrição some do card, não do banco: `line-clamp` corta a
+   exibição em duas linhas e a ficha da peça continua inteira em
+   /produto/[slug], que é onde ela tem espaço para ser lida. O
+   `min-height` reserva as duas linhas mesmo na peça de texto curto —
+   sem ele, o bloco de texto dançaria de card para card. */
+.categoryPage--formatura .ringCard__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  min-height: calc(2 * 1.6 * 12px);
+}
+
+.categoryPage--formatura .ringCard__sku {
+  margin-bottom: 0;
+  font-size: 10px;
+  letter-spacing: .16em;
+  opacity: .7;
+}
+
+/* O empurrão que alinha tudo: o que sobrar de altura no card vira
+   espaço ANTES do rodapé, nunca dentro dele. */
+.categoryPage--formatura .ringCard__foot {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.categoryPage--formatura .ringCard__price {
+  font-size: 17px;
+}
+
+/* ---------- Botão ----------
+   Continua sendo "Comprar" porque continua adicionando ao carrinho
+   (components/BotaoComprar.tsx) — trocar para "Ver peça" prometeria
+   navegação e entregaria outra coisa. Quem quer a página da peça tem
+   a foto, o nome e a seta do rodapé, todos apontando para lá.
+
+   Visualmente ele afina: a borda cai de 40% para 26% de opacidade e
+   só fecha em marrom sólido no hover. */
+.categoryPage--formatura .ringCard__buy {
+  margin-top: 14px;
+  padding: 11px 20px;
+  border-color: rgba(42, 30, 19, .26);
+  font-size: 11px;
+  letter-spacing: .16em;
+}
+
+.categoryPage--formatura .ringCard:hover .ringCard__buy {
+  border-color: rgba(42, 30, 19, .45);
+}
+
+.categoryPage--formatura .ringCard__buy:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ivory);
+}
+
+/* Esgotado não é clicável, então não acompanha nem a borda afinada do
+   botão nem o realce de hover do card. As duas regras acima têm duas
+   classes cada; estas têm três e quatro. */
+.categoryPage--formatura .ringCard__buy.is-esgotado,
+.categoryPage--formatura .ringCard:hover .ringCard__buy.is-esgotado {
+  border-color: var(--hairline);
+}
+
+/* ---------- Favoritar ----------
+   O coração continua onde estava, do mesmo tamanho e visível desde o
+   primeiro quadro — esconder até o hover o tiraria do celular, onde
+   hover não existe. O que muda é só a resposta ao toque: firma no
+   hover do card, doura no hover dele mesmo, afunda no clique. */
+
+.categoryPage--formatura .ringCard__fav {
+  transition: opacity .3s ease, transform .28s ease, border-color .3s ease, color .3s ease;
+}
+
+.categoryPage--formatura .ringCard:hover .ringCard__fav,
+.categoryPage--formatura .ringCard:focus-within .ringCard__fav {
+  opacity: 1;
+}
+
+.categoryPage--formatura .ringCard__fav:hover {
+  border-color: var(--gold);
+  color: var(--gold-ink);
+  transform: scale(1.08);
+}
+
+.categoryPage--formatura .ringCard__fav:active { transform: scale(.94); }
+
+/* ---------- Hover do card ----------
+   Três graus de intensidade, todos em transform e opacity/sombra: o
+   card sobe 3px, a sombra abre, a foto cresce 2%. O `scale(1.09)` do
+   catálogo padrão é muito para foto recortada — o anel tem `inset` de
+   6% e encosta na moldura antes de terminar o movimento. */
+
+.categoryPage--formatura .ringCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-line);
+  box-shadow: 0 26px 50px -26px rgba(42, 30, 19, .42);
+}
+
+.categoryPage--formatura .ringCard:hover .ringCard__img--produto {
+  transform: scale(1.06);
+}
+
+/* ============================================================
+   5. TELAS ESTREITAS
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .categoryPage--formatura .categoryPage__desc { max-width: 48ch; }
+}
+
+@media (max-width: 640px) {
+  .categoryPage--formatura .categoryPage__header {
+    padding-top: calc(var(--nav-h) + 20px);
+    padding-bottom: 24px;
+  }
+
+  /* 42vw em vez do clamp de desktop: no celular a joia acompanha a
+     largura da tela, e não o teto de 220px, que ali ocuparia meia
+     dobra sozinho. */
+  .categoryPage--formatura .categoryPage__img { height: clamp(132px, 42vw, 178px); }
+  .categoryPage--formatura .categoryPage__desc { max-width: 38ch; }
+
+  /* O filtro é a única coisa que se toca nesta página antes do card:
+     40px de altura mínima é o alvo de toque, e o vão de 4px evita
+     acertar o vizinho. */
+  .categoryPage--formatura .categoryPage__filters { gap: 4px; }
+  .categoryPage--formatura .catalog__filter {
+    min-height: 40px;
+    padding: 10px 10px 12px;
+    font-size: 11px;
+    letter-spacing: .12em;
+  }
+  .categoryPage--formatura .catalog__filter::after { left: 10px; right: 10px; bottom: 5px; }
+
+  /* Card único e largo: a descrição cabe em duas linhas com folga, e
+     o corte fica mais raro. */
+  .categoryPage--formatura .ringCard__desc { font-size: 12.5px; min-height: calc(2 * 1.6 * 12.5px); }
+}
+
+/* ============================================================
+   6. MOVIMENTO REDUZIDO
+   ============================================================
+   Quem pediu menos animação continua vendo os estados — a linha do
+   filtro, a borda do card, a sombra —, só não vê nada se mover. */
+
+@media (prefers-reduced-motion: reduce) {
+  .categoryPage--formatura .catalog__filter::after,
+  .categoryPage--formatura .catalog__swatch,
+  .categoryPage--formatura .ringCard__fav,
+  .categoryPage--formatura .ringCard,
+  .categoryPage--formatura .ringCard__img--produto {
+    transition-duration: .01ms;
+  }
+
+  .categoryPage--formatura .ringCard:hover { transform: none; }
+  .categoryPage--formatura .ringCard:hover .ringCard__img--produto { transform: scale(1.04); }
+  .categoryPage--formatura .ringCard__fav:hover,
+  .categoryPage--formatura .ringCard__fav:active { transform: none; }
+  .categoryPage--formatura .catalog__filter.is-active .catalog__swatch { transform: none; }
+}
