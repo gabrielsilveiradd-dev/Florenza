@@ -120,10 +120,24 @@ export const categorias: Categoria[] = [
       "Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.",
     imagemUrl: "/categorias/alliançaprata.png",
     filtroCampo: null,
-    variante: "foto",
+    // Passou de `foto` para `produto` quando as 14 peças de prata 950 entraram.
+    // Não é preferência: `foto` é 4/5 + object-fit:cover, e cover corta as
+    // laterais — exatamente onde está o aro. As 14 fotos novas são recortadas
+    // com fundo transparente, como as de formatura, e pedem 5/4 + contain.
+    //
+    // O preço disso são as duas peças antigas (P301 e P601), que são cenas em
+    // mármore e não recortes: com `contain` elas aparecem inteiras dentro da
+    // moldura, com o próprio fundo à mostra, em vez de preencherem o card. O
+    // fundo delas é quase o marfim do site, então destoa pouco — e é bem menos
+    // grave que cortar o aro de 14 peças. A saída definitiva é `variante` virar
+    // campo do produto, não da categoria.
+    variante: "produto",
     rotuloFiltro: "Filtrar por material",
     nota: [],
-    opcoes: [{ slug: "prata", nome: "Prata 925", amostra: "#cfd3d6" }],
+    // O teor deixou de ser um só: P301 e P601 são 925, as 14 novas são 950. O
+    // rótulo do filtro deixa de afirmar um número que vale para 2 de 16 peças.
+    // (A barra não aparece hoje — `filtroCampo` é null —, mas o dado fica certo.)
+    opcoes: [{ slug: "prata", nome: "Prata", amostra: "#cfd3d6" }],
   },
 ];
 
@@ -156,6 +170,56 @@ const formatura = (
   descricao,
   precoCentavos,
   ...fotoFormatura(sku),
+  alt: null,
+  estoque: 5,
+  ativo: true,
+});
+
+/**
+ * As 14 alianças de prata que entraram pela pasta `alianças de prata/`.
+ *
+ * Mesma ideia do `formatura()` acima: a ficha é sempre a mesma forma, então o
+ * que varia entra por parâmetro. Aqui as colunas de pedra são nulas e quem
+ * carrega a diferença é `larguraMm` — é assim que o card monta a linha
+ * "PRATA 950 · 4MM" (ver `linhaDoMaterial` em lib/catalogo.ts).
+ *
+ * PRATA 950, e não 925: o teor está no nome de todos os arquivos de origem, e
+ * é maior que o das duas peças antigas (P301 e P601, que são 925). As duas
+ * convivem na mesma categoria porque teor é dado da peça, não da vitrine.
+ *
+ * `material: "prata"` continua sendo o valor do filtro, e não o teor —
+ * `aliancas-prata` tem `filtroCampo: null`, então nada é filtrado por ele
+ * hoje; a coluna existe para o dia em que for.
+ */
+const fotoPrata = (sku: string) => ({
+  imagemUrl: `/produtos/prata/${sku}.webp`,
+  imagemSmUrl: `/produtos/prata/${sku}-sm.webp`,
+});
+
+const prata = (
+  sku: string,
+  slug: string,
+  nome: string,
+  larguraMm: number,
+  descricao: string,
+  precoCentavos: number,
+  metal = "Prata 950"
+): Produto => ({
+  sku,
+  slug,
+  categoriaSlug: "aliancas-prata",
+  nome,
+  metal,
+  pedra: null,
+  corPedra: null,
+  lapidacao: null,
+  larguraMm,
+  material: "prata",
+  descricao,
+  precoCentavos,
+  ...fotoPrata(sku),
+  // Nulo de propósito: o RingCard compõe o alt de metal + largura, como já faz
+  // para os anéis de formatura. Escrever à mão 14 vezes só criaria divergência.
   alt: null,
   estoque: 5,
   ativo: true,
@@ -275,6 +339,39 @@ export const produtos: Produto[] = [
     estoque: 5,
     ativo: true,
   },
+
+  // ---------- Prata 950 ----------
+  // Descrições escritas a partir da foto, uma a uma. O que o nome do arquivo
+  // não dizia (o desenho da peça) foi olhado; o que ele dizia (código, teor,
+  // largura, preço) foi lido pelo importador e não redigitado aqui.
+  prata("9001", "alianca-lumen", "Aliança Lumen", 4,
+    "Friso em banho dourado sobre aro polido, com coração vazado em uma das peças.", 27900),
+  prata("9002", "alianca-vertice", "Aliança Vértice", 8,
+    "Oito milímetros de prata polida, riscada por dois frisos paralelos.", 69000),
+  prata("9003", "alianca-enlace", "Aliança Enlace", 5,
+    "Bordas diamantadas e centro polido, com coração vazado em uma das peças.", 39000),
+  prata("9004", "alianca-solar", "Aliança Solar", 4,
+    "Aro diamantado cortado por friso dourado, com coração em banho dourado.", 29900),
+  prata("9005", "alianca-aurora", "Aliança Aurora", 4,
+    "Textura diamantada intensa, friso dourado ao centro e coração vazado.", 39900),
+  prata("9006", "alianca-meridiano", "Aliança Meridiano", 6,
+    "Seis milímetros polidos, com friso em banho dourado percorrendo o centro.", 39900),
+  prata("9007", "alianca-duo", "Aliança Duo", 6,
+    "Par em contraste: um aro diamantado, outro polido, ambos com borda fosca.", 36900),
+  prata("9008", "alianca-chanfro", "Aliança Chanfro", 3,
+    "Aro chanfrado que alterna prata polida e banho rosé.", 15900),
+  prata("9009", "alianca-cintila", "Aliança Cintila", 3,
+    "Par fino inteiramente diamantado, com um friso polido ao centro.", 22000),
+  prata("9010", "alianca-rose", "Aliança Rosé", 3,
+    "Chanfro bicolor: prata polida de um lado, banho rosé do outro.", 14900),
+  prata("9011", "alianca-nevoa", "Aliança Névoa", 3,
+    "Superfície diamantada com um friso polido correndo ao centro.", 15900),
+  prata("9012", "alianca-sol-e-lua", "Aliança Sol e Lua", 4,
+    "Par com sol e lua gravados, um símbolo em cada aliança.", 39000),
+  prata("9013", "alianca-serena", "Aliança Serena", 5,
+    "Aro abaulado e polido, sem relevo — o desenho mais simples da linha.", 11500),
+  prata("9014", "alianca-martelada", "Aliança Martelada", 4,
+    "Superfície martelada, com brilho irregular que muda conforme a luz.", 14900),
 ];
 
 /* ---------- Por que preço em centavos ----------

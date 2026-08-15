@@ -23,6 +23,9 @@ next-env.d.ts
 # todo clone e todo deploy com o mesmo pixel duas vezes.
 /aneisFormatura/
 /produtos/
+# Mesmo caso: 20 MB de fotos originais das alianças de prata, que alimentam
+# tools/importar-aliancas-prata.py. A saída dele já está em public/produtos/prata/.
+/alianças de prata/
 
 # Capturas de tela dos testes de navegador
 /*.png
