@@ -1,6 +1,5 @@
 import { ColecoesShowcase } from "@/components/ColecoesShowcase";
 import { ComoFunciona } from "@/components/ComoFunciona";
-import { Confianca } from "@/components/Confianca";
 import { Footer } from "@/components/Footer";
 import { HeroMedia } from "@/components/HeroMedia";
 import { Rings3D } from "@/components/Rings3D";
@@ -10,7 +9,7 @@ import "./estilos/rings-3d.css";
 // A vitrine de coleções tem CSS próprio e isolado, com prefixo `col-`: nada
 // dele alcança as outras seções desta página.
 import "./colecoes.css";
-// Como funciona + área de confiança, prefixos `fluxo-` e `confianca-`.
+// Como funciona, prefixo `fluxo-`.
 import "./secoes.css";
 
 export default function Home() {
@@ -116,10 +115,6 @@ export default function Home() {
             ainda não se interessou por uma peça não tem por que ler o
             processo. */}
         <ComoFunciona />
-
-        {/* ÁREA DE CONFIANÇA — o último bloco antes do rodapé, onde a compra
-            se decide. Só afirmações que este projeto sustenta. */}
-        <Confianca />
       </main>
 
       <Footer />

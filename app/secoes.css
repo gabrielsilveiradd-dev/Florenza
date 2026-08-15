@@ -1,14 +1,18 @@
 /* ============================================================
-   COMO FUNCIONA + ÁREA DE CONFIANÇA
+   COMO FUNCIONA
 
-   Duas seções novas, prefixos próprios (`fluxo-` e `confianca-`), nenhuma
-   regra que alcance o que já existe. Como `app/colecoes.css`, este arquivo é
-   importado só pela home.
+   Prefixo próprio (`fluxo-`), nenhuma regra que alcance o que já existe.
+   Como `app/colecoes.css`, este arquivo é importado só pela home.
 
-   Nenhuma cor nova: --ivory, --ivory-soft, --ink, --ink-dim, --gold,
-   --gold-ink, --gold-line e --hairline, todas de estilos/style.css e
-   estilos/aliancas.css. Tipografia idem: --font-serif para título, --font-sans
-   para microtipografia, que é a régua do site inteiro.
+   Nenhuma cor nova: --ivory-soft, --ink, --ink-dim, --gold, --gold-line e
+   --hairline, todas de estilos/style.css e estilos/aliancas.css. Tipografia
+   idem: --font-serif para título, --font-sans para microtipografia, que é a
+   régua do site inteiro.
+
+   O arquivo nasceu com duas seções — esta e uma área de confiança de quatro
+   pilares (Ouro 18K / Prata 925 e 950 / Preparada à mão / Pedido acompanhado).
+   A segunda foi removida a pedido; o prefixo `confianca-` não existe mais em
+   lugar nenhum do projeto. Está no histórico do git, se um dia voltar.
    ============================================================ */
 
 /* ============================================================
@@ -172,98 +176,4 @@
 
   .fluxo__numero { margin-bottom: 6px; }
   .fluxo__etapa-texto { margin: 0; max-width: none; }
-}
-
-/* ============================================================
-   ÁREA DE CONFIANÇA
-   ============================================================ */
-
-.confianca {
-  background: var(--ivory);
-  padding: clamp(72px, 9vw, 118px) 32px;
-  border-top: 1px solid var(--hairline);
-}
-
-.confianca__cabeca {
-  max-width: 1200px;
-  margin: 0 auto clamp(46px, 5.5vw, 72px);
-  text-align: center;
-}
-
-.confianca__risco {
-  display: block;
-  width: 34px;
-  height: 1px;
-  margin: 0 auto clamp(18px, 2vw, 26px);
-  background: var(--gold-line);
-}
-
-.confianca__titulo {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-weight: 300;
-  font-size: clamp(26px, 3.2vw, 44px);
-  line-height: 1.15;
-  letter-spacing: .01em;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-.confianca__grade {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(28px, 3vw, 44px);
-}
-
-/* Sem cartão: o que separa um pilar do outro é uma linha fina à esquerda e o
-   espaço. Caixa com borda e sombra nos quatro viraria grade de e-commerce, que
-   é exatamente o que esta seção não pode parecer. O primeiro também tem a
-   linha — sem ela, os quatro deixariam de ser uma série. */
-.confianca__pilar {
-  padding-left: clamp(18px, 2vw, 28px);
-  border-left: 1px solid var(--hairline);
-}
-
-.confianca__numero {
-  display: block;
-  margin-bottom: 14px;
-  font-family: var(--font-sans);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: .28em;
-  color: var(--gold-ink);
-}
-
-.confianca__pilar-titulo {
-  margin: 0 0 10px;
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(18px, 1.6vw, 22px);
-  line-height: 1.25;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-.confianca__pilar-texto {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--ink-dim);
-  text-wrap: pretty;
-}
-
-/* Duas colunas antes de virar uma: em 700px quatro colunas dariam 150px cada,
-   e "Prata 925 e 950" quebraria em três linhas. */
-@media (max-width: 1000px) {
-  .confianca__grade { grid-template-columns: repeat(2, 1fr); gap: 34px 28px; }
-}
-
-@media (max-width: 560px) {
-  .confianca { padding-left: 20px; padding-right: 20px; }
-  .confianca__grade { grid-template-columns: 1fr; gap: 26px; max-width: 460px; }
 }

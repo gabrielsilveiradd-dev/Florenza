@@ -443,6 +443,37 @@
 
 .menuMobile__lista--simples .menuMobile__nome { font-size: 17px; }
 
+/* Nota do rodapé.
+ *
+ * Classe nova, e mora aqui pelo mesmo motivo das outras: `.footer__*` é
+ * vocabulário de estilos/aliancas.css, que veio pronto e não se mexe.
+ *
+ * Ela existe porque o rodapé precisa dizer como o pagamento é combinado sem
+ * fingir um link — não há número de WhatsApp publicado no projeto, e um item
+ * de lista que não leva a lugar nenhum era exatamente o problema que a
+ * limpeza do rodapé resolveu. Sendo texto e não link, ela tem que PARECER
+ * texto: encostada nos links de 13px e na mesma cor, lia-se como mais um
+ * deles. Fica menor, mais apagada, com um respiro e um filete acima que
+ * separa "coisas em que se clica" de "coisa que se lê".
+ *
+ * DOIS NÍVEIS no seletor, e não um — a mesma regra que vale para a nav aqui
+ * neste arquivo. `estilos/style.css` tem um `.footer p` (0,1,1) que fixa
+ * `font-size: 13px` e zera a margem; `.footer__nota` sozinho é (0,1,0) e
+ * perdia. Escrito assim eu já tinha visto a borda aparecer e o tamanho e o
+ * respiro NÃO — o que é o sintoma exato de um seletor fraco demais, porque só
+ * as propriedades que o vizinho não declara passam. */
+.footer .footer__nota {
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(227, 198, 146, .14);
+  max-width: 30ch;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  opacity: .75;
+}
+
 /* Estoque na vitrine.
  *
  * Também mora aqui pelo mesmo motivo do botão da nav: `.ringCard__*` e
