@@ -1,406 +1,95 @@
 # CLAUDE.md
 
-Guia para o Claude Code (claude.ai/code) trabalhar neste repositório.
-
-Site da **Florenza Joalheria**: vitrine, conta do cliente e painel administrativo.
-Next.js 16 (App Router) + Supabase + Vercel. Código, comentários e interface em
-português do Brasil — mantenha o idioma ao escrever qualquer coisa nova.
+Site da **Florenza Joalheria** — vitrine, conta do cliente e painel admin.
+Next.js 16 (App Router) + Supabase + Vercel. Código, comentários e interface em **português do Brasil**.
 
 ## Comandos
 
 ```bash
-npm install
-npm run dev              # localhost:3000
-npm run build            # build de produção — roda a checagem de tipos
+npm run dev      # localhost:3000
+npm run build    # A VERIFICAÇÃO REAL antes de commitar — é ela que roda o TypeScript
 npm run lint
-
-npm run seed             # gera supabase/seed-catalogo.sql das fichas locais
-npm run mapa             # regera lib/geo/brasil-uf.ts da malha do IBGE (roda uma vez)
-
+npm run seed     # gera supabase/seed-catalogo.sql das fichas locais
+npm run mapa     # regera lib/geo/brasil-uf.ts da malha do IBGE
 python tools/importar-aneis-formatura.py   # fotos originais -> WebP em public/produtos/
 ```
 
-Não há testes nem formatter configurados. **A verificação de verdade antes de
-qualquer commit é `npm run build`** — é ela que roda o TypeScript.
-
-## Regra que molda tudo: a estética pronta não se mexe
-
-O visual do site é trabalho concluído e não está em discussão. Toda mudança é
-**aditiva**.
-
-- **`app/estilos/` é intocável.** `style.css`, `aliancas.css`, `categoria.css` e
-  `rings-3d.css` vieram do protótipo sem uma linha alterada e continuam sendo a
-  fonte da identidade visual. Os dois `:root` com os tokens (cores e `--nav-h` em
-  `style.css`; fontes e linhas em `aliancas.css`) ficam onde estão.
-- **A cascata é aditiva:** `style` → `aliancas` → `categoria`. Cada camada só
-  soma; nenhuma redefine regra da anterior. `layout.tsx` importa as duas
-  primeiras; a página de categoria importa a terceira; a home importa
-  `rings-3d.css`.
-- **O Tailwind entra sem preflight**, de propósito (ver `app/globals.css`). O
-  reset dele desmontaria o site. E, por estar em `@layer utilities`, ele **perde
-  de qualquer regra** dos CSS acima, que são CSS comum sem camada. Isso é a
-  garantia, não um efeito colateral: as utilities existem para as telas novas e
-  não alcançam a vitrine nem por acidente.
-- Telas novas (`/admin`, `/conta`, `/entrar`) têm CSS próprio —
-  `app/admin/admin.css`, `app/conta/conta.css`, `app/entrar/entrar.css` — usando
-  **as variáveis que já existem**. Nenhuma cor nova entra no projeto.
-- A única exceção mora em `app/globals.css`: a barra do topo. É o único CSS
-  global que o projeto escreveu, e é onde a nav cabe sem tocar `app/estilos/`.
-  Todo seletor que disputa com o `style.css` ali tem **dois níveis**
-  (`.nav .nav__pilula`, `.nav__acoes .nav__entrar`): este arquivo é importado
-  ANTES, e no empate de especificidade vence quem vem depois.
-
-## A vitrine de coleções (home)
-
-`components/ColecoesShowcase.tsx` + `app/colecoes.css`, com prefixo `col-`
-próprio. Substituiu o `CategoryCarousel`, que tinha um *track* com `scroll-snap`
-horizontal.
-
-**Não há mais rolagem horizontal.** As três coleções ficam empilhadas na mesma
-célula de grid e a troca é `opacity` + `transform`. Isso resolve três coisas de
-uma vez: ninguém precisa descobrir que dá para arrastar, as imagens já estão
-todas no DOM (a troca nunca mostra quadro vazio), e a animação não recalcula
-layout.
-
-**A seção não toca no scroll da página.** Nenhum ouvinte de `wheel`, `touchmove`
-ou `scroll`; nada de `sticky`. Navegar é clicar — setas, régua de nomes, a
-própria joia, ou as setas do teclado com foco na seção. Isso é regra: o site já
-tem seções conduzidas por rolagem, e repetir a fórmula cansa.
-
-O CSS antigo (`.categoryShowcase__*`) continua em `app/estilos/aliancas.css`,
-intocado, e simplesmente não casa com nada — as classes novas não colidem.
-
-O `id="categoryShowcase"` foi preservado: é o destino dos links "Coleção" da nav
-e do rodapé. E a seção tem `scroll-margin-top: var(--nav-h)`, senão quem chega
-pela âncora encontra o título debaixo da barra fixa.
-
-## A barra do topo
-
-Um vocabulário só: pílula com ícone e rótulo, agrupada em cápsulas de borda
-fina e canto redondo — o desenho dos cartões do carrinho aplicado à navegação.
-Antes eram duas linguagens na mesma faixa (links de texto puro à esquerda,
-cápsula de ícones à direita).
-
-Os ícones de `components/IconesNav.tsx` são desenhados aqui, não importados de
-biblioteca. O losango da marca tem traço fino e canto reto; colar ao lado dele
-ícones genéricos de traço grosso deixaria a barra com duas caligrafias. Todos
-seguem a mesma régua: viewBox 24, traço 1.3, `currentColor`,
-`vector-effect: non-scaling-stroke` para a espessura não mudar quando encolhem.
-
-**Abaixo de 860px o rótulo sai e fica o ícone**, e é isso que devolveu a barra a
-uma linha só no celular — `--nav-h` voltou de 112px para 76px. O número saiu de
-medição: com rótulo o conjunto ocupa 777px, sobram 72px em 900 e faltariam 180
-em 600. O texto continua no HTML, escondido por `clip-path` e não por
-`display: none`, para o leitor de tela continuar lendo.
-- No CSS dessas telas, o reset escopado usa `:where()` para ter especificidade
-  zero. Sem isso `.adm button` venceria `.adm-botao` e o botão perde o fundo —
-  já aconteceu uma vez.
-
-Bugs visuais conhecidos (o nav sobreposto em ~390px) só se corrigem com
-aprovação explícita: consertar é mudar estética.
-
-## Entrada de conta
-
-Duas portas para a mesma autenticação: `/entrar` é a tela cheia com o fundo de
-fumaça em WebGL; `/conta` é a página de conta, que também cria cadastro (nome e
-telefone, que a trigger lê de `raw_user_meta_data`) e lista pedidos. Mesmo
-Supabase, mesma `auth.users`, mesma trigger — quem entra por qualquer uma
-aparece igual na aba Clientes do painel.
-
-`components/ui/` existe porque é a convenção que o componente de origem pedia.
-**O shadcn não foi inicializado, e não deve ser:** o `init` dele escreve um
-`@layer base` com `*` e `body` no CSS global, que é o preflight por outro nome —
-desmontaria a vitrine. A pasta é só uma pasta.
-
-O botão da nav (`components/BotaoConta.tsx`) é cliente e isolado de propósito. A
-nav em si segue sendo componente de servidor: descobrir a sessão no servidor
-exige ler cookie, e ler cookie tornaria dinâmicas as 23 páginas pré-renderizadas
-— pelo rótulo de um botão. Mesmo raciocínio de `lib/supabase/publico.ts`.
-
-**No celular o botão não aparece, e isso é medido, não desleixo.** Em 390px a
-nav tem 311px úteis e já ocupa 335 só com o logo e os quatro links: ela estoura
-24px *antes* de qualquer adição — é a mesma conta que produz o bug conhecido do
-logo sobreposto. Não há tamanho de botão que caiba. No celular a conta se acessa
-pelo link no rodapé, até o nav ser corrigido (o que exige aprovação, por ser
-estética).
-
-## Estoque e fechamento do pedido
-
-`produtos.estoque` deixou de ser enfeite. A regra em uma frase: **quem decide se
-a venda pode acontecer é o banco, não a tela.**
-
-`public.criar_pedido()` faz tudo numa transação — confere o estoque com a linha
-do produto travada (`for update`), insere `pedidos` e `pedido_itens`, e desconta.
-Ou nasce tudo, ou não nasce nada. Antes eram dois inserts do navegador, e o
-próprio código admitia que podia sobrar pedido sem itens.
-
-**A função não aceita preço.** Ela copia `preco_centavos` de `produtos`. Na
-versão anterior o preço do item vinha do navegador e a trigger de total só somava
-o que recebia — dava para fechar um anel de R$ 2.420 por R$ 1 mexendo na
-requisição.
-
-O laço percorre as peças **em ordem de SKU**. Dois pedidos com as mesmas peças em
-ordens opostas travariam um no outro; ordem igual para todos elimina o impasse.
-
-Cancelar devolve o estoque, e sair de 'cancelado' tira de novo — senão
-cancelar/descancelar vira máquina de inventar unidade. Reativar sem estoque é
-barrado com recado.
-
-As três camadas do lado do site são **aviso, não autorização**: a vitrine esconde
-o esgotado, o carrinho apara a quantidade ao abrir, e `criar_pedido` decide. As
-duas primeiras existem para a pessoa descobrir cedo, não para liberar a venda.
-
-Por isso as páginas de categoria e produto têm `export const revalidate = 60`.
-Sem isso o HTML congelaria no build e o site ofereceria "Comprar" numa peça
-esgotada até o próximo deploy. Dinâmico seria pior: são conteúdo público, igual
-para todos — ver o motivo de `lib/supabase/publico.ts`.
-
-## Cupons
-
-Mesma regra do preço e do estoque: **o navegador manda o código, nunca o
-valor.** `public.conferir_cupom(codigo, subtotal)` responde o desconto para a
-tela mostrar; `criar_pedido()` recalcula do zero ao fechar, com o subtotal que
-ele mesmo somou do catálogo. O que a tela exibe é previsão, não a conta.
-
-A tabela `cupons` não é legível por visitante — nem o grant de `anon` existe.
-Lista de cupons é lista de desconto para quem souber pedir. Quem precisa saber
-se um código vale pergunta pela função, que só responde sobre o código
-perguntado. Código inexistente e código desativado dão a **mesma** resposta, de
-propósito.
-
-`usos` sobe dentro da transação, com `for update` na linha do cupom — sem a
-trava, dois pedidos simultâneos furam o limite do mesmo jeito que furariam o
-estoque.
-
-Não há CRUD de cupom no painel ainda: cadastra-se pelo SQL Editor. O
-`BEMVINDO10` que existe é exemplo, para apagar.
-
-## Carrinho e acompanhamento do pedido
-
-O desenho do carrinho e da confirmação veio do componente `interactive-checkout`
-(cartão por peça, resumo grudado ao lado, entrada e saída animadas, total que
-rola dígito a dígito). Adaptado, não copiado: o carrinho em `useState` local, o
-`Button` da shadcn e a paleta zinc ficaram de fora. O `Button` da shadcn em
-especial não entra — as classes dele apontam para tokens de um tema que este
-projeto não tem, e sem o preflight um `<button>` chega com a borda do navegador.
-
-`components/pedido/StatusDoPedido.tsx` é **um componente só, usado em dois
-lugares**: a confirmação logo após a compra e a aba de pedidos da conta. Não é
-economia de código — é o que garante que a pessoa reencontre a mesma tela ao
-voltar dias depois. Por isso o CSS dele (`.ped-*` em `app/carrinho/checkout.css`)
-não conta com reset de escopo nenhum: ele vive dentro de `.chk` numa tela e de
-`.conta` na outra, e os dois resets são diferentes.
-
-As datas de etapa são carimbadas pela trigger `pedidos_carimba_etapas`, não
-digitadas. Data preenchida à mão erra: alguém marca "enviado" na segunda e anota
-a data na quarta.
-
-**A confirmação não promete o que não acontece.** Nada de "pagamento aprovado"
-ou "e-mail de confirmação enviado" — o pedido nasce em aguardando pagamento, o
-acerto é por WhatsApp, e não existe envio de e-mail de pedido neste sistema.
-
-**Logado, a identidade do pedido vem da conta e não do formulário.** Nome,
-telefone e e-mail não são editáveis no checkout — são os campos pelos quais a
-Florenza reconhece o cliente e junta os pedidos dele, e deixá-los livres ali
-produz o mesmo cliente com três grafias de nome, sem ninguém perceber até a aba
-Clientes virar uma lista de quase-duplicatas. Endereço é o contrário: muda a
-cada pedido, e é o único campo livre. Corrigir nome ou telefone é em `/conta`.
-
-**O SKU não aparece para o público.** Saiu do card, do atributo `data-sku` e da
-linha do carrinho — é chave de logística (vem do nome do arquivo da foto) e não
-diz nada a quem compra. Ele continua no painel, e continua na URL da foto, que é
-consequência da convenção de nomes; tirá-lo de lá exigiria renomear os arquivos.
-
-Falta a contrapartida no painel: os campos de código de rastreio e transportadora
-ainda não existem em `PedidosSection`, então hoje só se preenche pelo SQL Editor.
-Presente e mensagem do cartão também ainda não aparecem lá.
-
-## Área da conta
-
-`/conta` tem dois estados no mesmo endereço: formulário para quem chega de fora,
-área da conta para quem entrou. Fica junto de propósito — é o link que o cliente
-guarda e que chega no e-mail; trocar o significado do endereço conforme o estado
-seria pior.
-
-As consultas ficam em `lib/conta-servidor.ts`, separadas de `lib/conta.ts`
-porque este é importado também por componente de cliente e aquele puxa
-`next/headers`. Juntos, o build quebra.
-
-**Nenhuma consulta da conta filtra por `user_id`.** Quem filtra é a RLS. Repetir
-o filtro no cliente daria a impressão de que ele é a proteção, e esquecê-lo um
-dia vazaria em silêncio.
-
-**Cartão não entra neste banco.** "Formas de pagamento" é preferência declarada
-(`profiles.forma_pagamento_preferida`), para a Florenza saber o que oferecer no
-contato. Guardar cartão exige cofre de PSP e certificação PCI; quando o Mercado
-Pago entrar, o que se guarda é o token dele.
-
-## Catálogo dirigido a dados
-
-Fluxo: Supabase → `lib/catalogo.ts` → páginas.
-
-**`lib/catalogo.ts` é a fronteira.** As páginas não sabem de onde os produtos
-vêm. Com as chaves configuradas vêm do banco; sem elas, de
-`lib/data/catalogo-local.ts`.
-
-A queda para o catálogo local só acontece quando o Supabase **não está
-configurado** — serve para quem clona o repositório sem `.env.local`. Se estiver
-configurado e a consulta falhar, o erro sobe em vez de cair no local: numa
-joalheria, servir preço velho em silêncio é pior que mostrar erro, porque o
-preço do ouro muda e a peça sairia pelo valor errado.
-
-A vitrine usa `lib/supabase/publico.ts`, não o cliente de `server.ts`. O motivo é
-de renderização: `server.ts` lê os cookies da requisição, e ler cookie faz o Next
-marcar a página como dinâmica — as três páginas de categoria e as 20 de produto
-deixariam de ser pré-renderizadas. Conteúdo público não depende de quem olha.
-
-Regras do dado, todas duras:
-- **Preço sempre em centavos inteiros** (`precoCentavos: 317900`), nunca float.
-  Formatação só na exibição. Vale igual na coluna do banco (`integer`).
-- **O SKU é chave de negócio**, não detalhe visual: vem do nome do arquivo da
-  foto original (`3187_R$2420.png` → `3187`) e é por ele que a peça é encontrada
-  na gaveta.
-- Duas formas de produto convivem: anel de formatura tem pedra/cor/lapidação;
-  aliança tem largura em mm. São colunas nulas tipadas, não `jsonb` — precisam
-  ser filtráveis e conferíveis pelo banco.
-
-Detalhe fácil de errar: `categorias[].variante` decide o corte da foto.
-`produto` são as fotos recortadas, deitadas (`5/4` + `contain` + `drop-shadow`,
-modificadores `--produto`); `foto` são as de aliança, em pé (`4/5` + `cover`).
-Sem o modificador certo, o `cover` corta justamente o aro do anel.
-
-## Banco
-
-O projeto existe: `FLORENZA` (`jydcgsxzinrguounnmpi`), Postgres 17. Sete
-migrations aplicadas.
-
-Migrations versionadas em `supabase/migrations/`, aplicadas por
-`npx supabase db push --linked` ou coladas no SQL Editor. **O nome do arquivo
-começa com a versão registrada no banco** — se divergir, um `db push` reaplica
-tudo. `supabase/aplicar-tudo.sql` é a concatenação de todas mais o catálogo,
-gerada, para recriar o banco do zero numa colada só.
-
-Convenções que valem para toda migration nova:
-
-- cabeçalho em português explicando **o porquê**, não o quê;
-- idempotente (`if not exists` / `create or replace` / `on conflict`);
-- `enable row level security` em **toda** tabela;
-- toda view com `with (security_invoker = true)` — sem isso a view roda com os
-  direitos do dono, ignora a RLS de baixo e vaza dado de cliente;
-- `revoke`/`grant` explícito em função `security definer`;
-- bloco `CONFERÊNCIA` no fim, com a linha do resultado esperado.
-
-Em policy, use `(select auth.uid())` e não `auth.uid()` solto: dentro do
-parêntese o Postgres avalia uma vez; solto, chama a função uma vez por linha.
-
-`public.is_admin()` sustenta a RLS do painel inteiro. É `security definer` com
-`set search_path = ''` — sem isso, a policy de `profiles` chamaria `is_admin()`
-em recursão infinita, e o search_path aberto é porta de escalada de privilégio.
-
-**`is_admin()` tem EXECUTE para `anon` de propósito.** As policies têm a forma
-`<condição> or is_admin()`; sem sessão a primeira parte dá `NULL`, então o
-Postgres precisa avaliar a segunda. Sem o grant, a consulta anônima morre com
-"permission denied for function" em vez de devolver lista vazia. Conceder não
-abre nada: a função só responde sobre quem chama. Vale o mesmo para
-`email_dos_clientes()`. O linter do Supabase aponta as duas; as duas ficam.
-
-**`auth.users` é inalcançável pelos papéis do cliente.** Nem `anon` nem
-`authenticated` têm SELECT ali. Uma view com `security_invoker` que leia aquela
-tabela direto falha com *permission denied* até para o admin. Por isso o e-mail
-sai por `public.email_dos_clientes()` — `security definer`, com a checagem de
-admin dentro do corpo.
-
-**Função de trigger não recebe EXECUTE.** O PostgREST expõe toda função de
-`public` em `/rest/v1/rpc/<nome>`, e as de trigger são `security definer`.
-Revogar não desliga a trigger: o Postgres confere essa permissão ao criar a
-trigger, não a cada disparo.
-
-**Índice em toda coluna de chave estrangeira.** O Postgres não cria sozinho.
-
-**RLS decide linha, não coluna.** A policy "Cada um edita o próprio perfil"
-liberava UPDATE na própria linha de `profiles`, e o Supabase concede UPDATE da
-tabela inteira a `authenticated` — somando as duas coisas, qualquer cliente
-cadastrado virava admin com um `PATCH {"role":"admin"}` na própria linha. O
-conserto é privilégio de coluna (`grant update (nome, telefone, …)`), não uma
-policy nova. Ao abrir qualquer coluna sensível para o dono da linha, pergunte
-qual coluna, não qual linha.
-
-Depois de mexer no schema, rode os Advisors (segurança e performance). Foi o
-que apontou os três achados corrigidos na migration `..._endurecimento`.
-
-## Modo demonstração
-
-Sem `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` em
-`.env.local`, o site continua abrindo: a vitrine lê o catálogo local e o painel
-usa `lib/admin/dados-demo.ts`, com um aviso na tela. Serve para conferir layout
-sem banco, e para quem clonar o repositório sem as chaves.
-`lib/supabase/config.ts` é quem decide.
-
-Com o banco ligado — que é o estado atual — esse caminho não roda. Ele não é
-plano B de produção: ver a regra em "Catálogo dirigido a dados".
-
-E não pode virar: `config.ts` **estoura** se `VERCEL_ENV === "production"` sem
-as chaves. Sem essa trava, o pior caso é silencioso — build verde, site no ar, e
-a loja de verdade servindo o catálogo do repositório com o painel cheio de
-pedidos de exemplo. Preview segue permissivo, que é onde se confere layout.
-
-`vercel.json` fixa `framework: "nextjs"` e não é enfeite. Com o preset em
-**Other**, a Vercel roda o build inteiro — o Next compila e gera as páginas —
-e depois **descarta o `.next` e publica `public/`** como site estático. O deploy
-fica verde, os arquivos de `public/` respondem 200, e **toda página dá 404**
-com o texto cru `NOT_FOUND` da plataforma, não com a página de erro do site.
-Foi exatamente isso que segurou a primeira publicação. O `vercel.json` tem
-precedência sobre o painel, então o preset viaja com o código.
-
-**Nenhuma service-role key entra neste projeto.** Quem protege os dados é a RLS.
-A carga inicial do catálogo é SQL colado no SQL Editor (`npm run seed`),
-justamente para não precisar dessa chave.
-
-## Gráficos e mapa
-
-- O mapa do Brasil é **SVG inline** de `lib/geo/brasil-uf.ts`, gerado uma vez da
-  malha do IBGE e versionado. Sem biblioteca de mapa, sem rede em runtime.
-- A escala do coroplético é por **raiz quadrada** do faturamento. Linear, o
-  estado líder apaga o resto do país.
-- A paleta categórica de `lib/admin/format.ts` foi **conferida por script**
-  (skill `dataviz`), não escolhida no olho. Ao mexer nela, rode o validador de
-  novo — o comentário no arquivo traz o comando. Vermelho e verde nunca ficam
-  adjacentes, e os pares críticos se separam por luminosidade.
-- Todo gráfico precisa de **estado vazio textual**: com banco novo eles nascem
-  sem dado, e um gráfico vazio parece defeito.
-
-## Animações
-
-Os reveals GSAP vivem em `components/Reveal.tsx`, portados do protótipo **sem
-alteração de parâmetro** — duração, easing e pontos de gatilho são a assinatura
-do site. `.js-reveal-catalogo` existe separado de `.js-reveal-stagger` porque a
-grade do catálogo tinha stagger e gatilho próprios.
-
-`components/VideoAutoplay.tsx` dá `pause()` nos vídeos fora da viewport. Não é
-sobra: três decoders simultâneos travam a rolagem no celular.
-
-Tudo respeita `prefers-reduced-motion`.
-
-## Pendências conhecidas
-
-- **Ninguém é admin ainda.** O painel só abre depois de um `update
-  public.profiles set role = 'admin'` — passo manual e consciente, de propósito.
-- **Upload de foto pelo painel** não está ligado. O formulário existe, o bucket
-  e as policies também; falta o envio do arquivo. Hoje a foto entra pelo script
-  Python.
-- **Entrar com Google** existe no formulário de `/entrar` e ainda não funciona:
-  o provedor precisa ser ligado em Authentication → Providers no painel do
-  Supabase. Enquanto não estiver, o botão devolve um recado explicando, em vez
-  de erro seco.
-- Mercado Pago (gateway escolhido) fica para o Módulo 2.
-- Sem os tipos gerados do banco (`supabase gen types --project-id
-  jydcgsxzinrguounnmpi`), há um cast em `lib/admin/listas.ts`. Exige
-  `supabase login`, que é interativo.
-- O projeto nasceu em **us-east-2**, não em São Paulo: ~120 ms a mais por
-  consulta. Trocar exige projeto novo — o schema está todo versionado, então é
-  colar `aplicar-tudo.sql` e trocar duas variáveis.
-- ~~No celular o logo e os links do nav se sobrepõem.~~ **Resolvido**: com
-  ícone no lugar do rótulo abaixo de 860px, a barra cabe em uma linha com 53px
-  de folga em 390px, e nada precisou ser escondido atrás de menu.
-- `aneisFormatura/` (33 MB de fotos originais) e `public/produtos/` seguem fora
-  e dentro do git respectivamente; pense duas vezes antes de commitar mídia.
+Não há testes nem formatter configurados.
+
+## Estética: mudança é aditiva
+
+- **`app/estilos/`** (`style.css`, `aliancas.css`, `categoria.css`, `rings-3d.css`) é a identidade visual. Os dois `:root` são a **fonte única** de cores, fontes e `--nav-h`. Trocar o valor de um token ali, só a pedido explícito; escrever cor solta fora dele, nunca — use `var(--…)`.
+- Cascata aditiva: `style` → `aliancas` → `categoria`. Nenhuma camada redefine a anterior.
+- **Tailwind entra sem preflight**, de propósito — o reset desmontaria o site. Por viver em `@layer utilities`, ele perde de qualquer CSS comum: as utilities servem às telas novas e não alcançam a vitrine nem por acidente.
+- **Não rode `shadcn init`**: ele escreve `@layer base` com `*` e `body`, que é o preflight por outro nome. `components/ui/` é só uma pasta.
+- Telas novas (`/admin`, `/conta`, `/entrar`) têm CSS próprio e usam os tokens existentes. Reset escopado com `:where()` (especificidade zero), senão `.adm button` vence `.adm-botao`.
+- Exceção única: a nav em `app/globals.css`. Seletor lá precisa de **dois níveis** (`.nav .nav__pilula`) para vencer o `style.css`, importado depois.
+- Bugs visuais conhecidos só se corrigem com aprovação — consertar é mudar estética.
+
+## Regra de ouro do dinheiro: quem decide é o banco, não a tela
+
+- `public.criar_pedido()` faz tudo numa transação, com `for update` na linha do produto. **Não aceita preço** — copia `preco_centavos` de `produtos`. Antes dava para fechar um anel de R$ 2.420 por R$ 1 mexendo na requisição.
+- Percorre as peças **em ordem de SKU**, senão dois pedidos travam um no outro.
+- Cancelar devolve estoque; sair de 'cancelado' desconta de novo.
+- Cupom: **o navegador manda o código, nunca o valor.** `conferir_cupom()` é previsão para a tela; `criar_pedido()` recalcula do zero. `cupons` não é legível por `anon`, e código inexistente ou desativado dão a mesma resposta.
+- Vitrine e carrinho são **aviso, não autorização**.
+- Categoria e produto usam `export const revalidate = 60`: sem isso o HTML congela no build e o site oferece "Comprar" em peça esgotada.
+
+## Banco (`FLORENZA`, jydcgsxzinrguounnmpi, Postgres 17)
+
+Migrations em `supabase/migrations/`, por `npx supabase db push --linked`. **O nome do arquivo começa com a versão registrada no banco** — se divergir, o push reaplica tudo. `supabase/aplicar-tudo.sql` recria o banco do zero.
+
+Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable row level security` em toda tabela; view sempre com `with (security_invoker = true)`; `revoke`/`grant` explícito em `security definer`; bloco `CONFERÊNCIA` no fim.
+
+- Em policy use `(select auth.uid())`, não `auth.uid()` solto — evita uma chamada por linha.
+- **RLS decide linha, não coluna.** UPDATE na própria linha de `profiles`, somado ao grant de tabela inteira, fazia qualquer cliente virar admin com `PATCH {"role":"admin"}`. O conserto é privilégio de coluna. Ao abrir coluna sensível, pergunte *qual coluna*, não qual linha.
+- `is_admin()` é `security definer` com `set search_path = ''` — sem isso, recursão infinita na policy de `profiles` e porta de escalada. Tem **EXECUTE para `anon` de propósito**: as policies são `<condição> or is_admin()` e sem sessão a primeira dá NULL. Idem `email_dos_clientes()`. O linter reclama das duas; as duas ficam.
+- `auth.users` é inalcançável por `anon`/`authenticated` — e-mail sai só por `email_dos_clientes()`.
+- **Função de trigger não recebe EXECUTE** (o PostgREST expõe tudo em `/rpc/`).
+- **Índice em toda chave estrangeira** — o Postgres não cria sozinho.
+- Rode os Advisors depois de mexer no schema.
+- **Nenhuma service-role key entra no projeto.** Quem protege os dados é a RLS.
+
+## Catálogo e dados
+
+- **`lib/catalogo.ts` é a fronteira** — as páginas não sabem de onde vêm os produtos.
+- Cai para `lib/data/catalogo-local.ts` **só se o Supabase não estiver configurado**. Configurado e falhando, o erro sobe: servir preço velho em silêncio é pior, porque o ouro muda de preço e a peça sairia pelo valor errado.
+- A vitrine usa `lib/supabase/publico.ts`, não `server.ts` — este lê cookie, e cookie torna dinâmicas as 23 páginas pré-renderizadas.
+- **Preço sempre em centavos inteiros**, nunca float.
+- **SKU é chave de negócio** (vem do nome do arquivo da foto) e **não aparece ao público**.
+- `categorias[].variante` decide o corte da foto: `produto` (5/4 + contain) x `foto` (4/5 + cover). Errado, o `cover` corta justamente o aro do anel.
+
+## Conta e checkout
+
+- Consultas em `lib/conta-servidor.ts`, separadas de `lib/conta.ts` porque este é importado por componente de cliente e aquele puxa `next/headers` — juntos, o build quebra.
+- **Nenhuma consulta filtra por `user_id`**: quem filtra é a RLS. Repetir o filtro daria a impressão de que ele é a proteção.
+- **Cartão não entra neste banco** — "forma de pagamento" é preferência declarada.
+- Logado, nome/telefone/e-mail não são editáveis no checkout (senão o mesmo cliente aparece com três grafias). Endereço é o único campo livre.
+- A confirmação **não promete o que não acontece**: sem "pagamento aprovado", sem e-mail de pedido — o acerto é por WhatsApp.
+- Datas de etapa vêm da trigger `pedidos_carimba_etapas`, nunca digitadas.
+
+## Deploy
+
+- `vercel.json` fixa `framework: "nextjs"` e **não é enfeite**: com o preset em "Other" a Vercel descarta o `.next`, publica `public/` como estático e **toda página dá 404**.
+- `lib/supabase/config.ts` **estoura** se `VERCEL_ENV === "production"` sem as chaves — senão a loja real serviria o catálogo do repositório em silêncio, com build verde.
+- Sem chaves em `.env.local` o site abre em modo demonstração. Não é plano B de produção.
+
+## Gráficos e animações
+
+- Mapa do Brasil: **SVG inline** de `lib/geo/brasil-uf.ts`, versionado. Sem biblioteca de mapa, sem rede em runtime. Coroplético em **raiz quadrada** do faturamento — linear, o estado líder apaga o resto do país.
+- A paleta categórica de `lib/admin/format.ts` foi conferida por script; ao mexer, rode o validador (o comando está no comentário do arquivo).
+- Todo gráfico precisa de **estado vazio textual** — gráfico vazio parece defeito.
+- Reveals GSAP em `components/Reveal.tsx`, **sem alterar parâmetro**: duração, easing e gatilho são a assinatura do site.
+- `VideoAutoplay.tsx` pausa vídeo fora da viewport — três decoders travam o celular.
+- Tudo respeita `prefers-reduced-motion`.
+
+## Pendências
+
+- **Ninguém é admin ainda**: o painel só abre após `update public.profiles set role = 'admin'`.
+- Upload de foto pelo painel não está ligado — hoje a foto entra pelo script Python.
+- "Entrar com Google" exige habilitar o provedor em Authentication → Providers.
+- Mercado Pago fica para o Módulo 2.
+- Sem os tipos gerados do banco, há um cast em `lib/admin/listas.ts`.
+- Rastreio, transportadora, presente e mensagem do cartão ainda não aparecem em `PedidosSection` — só pelo SQL Editor.
+- Projeto em us-east-2, não São Paulo (~120 ms a mais por consulta).
+- Pense duas vezes antes de commitar mídia.
