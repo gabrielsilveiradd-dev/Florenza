@@ -3,16 +3,16 @@
    globalmente, então é seguro colar dentro de um site já existente. */
 
   .rings3d-section{
-    --rings3d-gold-1:#e9c67b;
-    --rings3d-gold-2:#a9762f;
-    --rings3d-gold-3:#3a2a12;
+    --rings3d-gold-1:#E5D3A6;
+    --rings3d-gold-2:#A38A4A;
+    --rings3d-gold-3:#332B16;
     --rings3d-silver-1:#f4f4f6;
     --rings3d-silver-2:#b9bdc4;
     --rings3d-silver-3:#7d828b;
-    --rings3d-ink-dark:#0c0a08;
-    --rings3d-ink-light:#1c1a17;
-    --rings3d-accent:#c98a4b;
-    --rings3d-paper:#f6f3ee;
+    --rings3d-ink-dark:#0E0C06;
+    --rings3d-ink-light:#231D10;
+    --rings3d-accent:#D4B973;
+    --rings3d-paper:#F0EADE;
     --rings3d-card-radius:2px;
     --rings3d-ease-lux: cubic-bezier(.22,.61,.16,1);
     /* geometria da luz: o spotlight e a máscara do padrão acompanham o
@@ -37,7 +37,7 @@
     min-height:100vh;
     overflow:hidden;
     isolation:isolate;
-    background:#050403;
+    background:#060502;
     font-family:'Jost',sans-serif;
   }
   .rings3d-section, .rings3d-section *{ box-sizing:border-box; }
@@ -111,7 +111,7 @@
     background:radial-gradient(ellipse var(--rings3d-spot-w) var(--rings3d-spot-h) at 50% 45%, rgba(255,255,255,.42) 0%, rgba(250,251,252,.16) 45%, rgba(246,247,249,0) 74%);
   }
   .rings3d-panel.gold .rings3d-glow{
-    background:radial-gradient(ellipse var(--rings3d-spot-w) var(--rings3d-spot-h) at 50% 44%, rgba(226,182,108,.14) 0%, rgba(163,120,55,.07) 45%, rgba(120,86,38,0) 74%);
+    background:radial-gradient(ellipse var(--rings3d-spot-w) var(--rings3d-spot-h) at 50% 44%, rgba(229, 211, 166,.14) 0%, rgba(212, 185, 115,.07) 45%, rgba(125, 99, 48,0) 74%);
   }
 
   .rings3d-panel.silver{
@@ -141,17 +141,17 @@
     --rings3d-lift:var(--rings3d-gold-lift);
     background:
       /* brilho dourado colado na joia, quase imperceptível */
-      radial-gradient(ellipse 34% 30% at 50% 44%, rgba(214,168,92,.15) 0%, rgba(163,120,55,.06) 45%, rgba(120,86,38,0) 75%),
+      radial-gradient(ellipse 34% 30% at 50% 44%, rgba(212, 185, 115,.15) 0%, rgba(212, 185, 115,.06) 45%, rgba(125, 99, 48,0) 75%),
       /* spotlight quente, mas o painel continua escuro */
-      radial-gradient(ellipse calc(var(--rings3d-spot-w) + 8%) calc(var(--rings3d-spot-h) + 6%) at 50% 44%, rgba(92,66,32,.4) 0%, rgba(46,33,17,.2) 45%, rgba(16,12,9,0) 76%),
+      radial-gradient(ellipse calc(var(--rings3d-spot-w) + 8%) calc(var(--rings3d-spot-h) + 6%) at 50% 44%, rgba(74, 68, 58,.4) 0%, rgba(27, 22, 12,.2) 45%, rgba(16, 13, 7,0) 76%),
       linear-gradient(180deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 58%, rgba(0,0,0,.48) 100%),
       /* base preto / marrom quase preto */
-      linear-gradient(152deg,#14100c 0%,#0d0a08 46%,#100c09 74%,#070606 100%);
+      linear-gradient(152deg,#16120A 0%,#0E0C07 46%,#110E08 74%,#090704 100%);
   }
   .rings3d-panel.gold::before{
     background-image:
-      repeating-linear-gradient(120deg, rgba(233,198,123,.045) 0 1px, transparent 1px 104px),
-      repeating-linear-gradient(50deg, rgba(233,198,123,.022) 0 1px, transparent 1px 148px);
+      repeating-linear-gradient(120deg, rgba(212, 185, 115,.045) 0 1px, transparent 1px 104px),
+      repeating-linear-gradient(50deg, rgba(212, 185, 115,.022) 0 1px, transparent 1px 148px);
     mix-blend-mode:screen;
     opacity:.55;
   }
@@ -182,9 +182,9 @@
     width:1px;
     /* fio de ouro apagado, com um vão no meio onde o seletor entra */
     background:linear-gradient(to bottom,
-      transparent 6%, rgba(233,198,123,.1) 24%, rgba(233,198,123,.22) 41%,
+      transparent 6%, rgba(212, 185, 115,.1) 24%, rgba(212, 185, 115,.22) 41%,
       transparent 44%, transparent 56%,
-      rgba(233,198,123,.22) 59%, rgba(233,198,123,.1) 76%, transparent 94%);
+      rgba(212, 185, 115,.22) 59%, rgba(212, 185, 115,.1) 76%, transparent 94%);
     z-index:20;
     transform:translateX(-.5px);
   }
@@ -253,7 +253,7 @@
   .rings3d-metal--gold{
     color:var(--rings3d-gold-1);
     opacity:calc(.68 + var(--rings3d-gold-lift) * .26);
-    text-shadow:0 0 6px rgba(10,8,6,.9), 0 1px 3px rgba(0,0,0,.65);
+    text-shadow:0 0 6px rgba(11, 9, 5,.9), 0 1px 3px rgba(0,0,0,.65);
   }
   .rings3d-metal--gold::before{
     -webkit-backdrop-filter:blur(7px) brightness(.55) saturate(.9);
@@ -261,7 +261,7 @@
   }
   .rings3d-metal:focus{ outline:none; }
   .rings3d-metal:focus-visible{
-    outline:1px solid rgba(201,138,75,.75);
+    outline:1px solid rgba(212, 185, 115,.75);
     outline-offset:5px;
   }
 
@@ -275,7 +275,7 @@
     background:linear-gradient(to right, rgba(28,32,40,0), rgba(28,32,40,.28));
   }
   .rings3d-rail--gold{
-    background:linear-gradient(to left, rgba(233,198,123,0), rgba(233,198,123,.34));
+    background:linear-gradient(to left, rgba(212, 185, 115,0), rgba(212, 185, 115,.34));
   }
 
   /* indicador: disco metálico de 9px. A base é platina neutra; as duas
@@ -303,7 +303,7 @@
     opacity:max(0, var(--rings3d-silver-lift));
   }
   .rings3d-selector-dot::after{
-    background:radial-gradient(circle at 34% 28%, #f8e7bd 0%, #d9ac4f 45%, #a9762f 100%);
+    background:radial-gradient(circle at 34% 28%, #F2E4BF 0%, #D4B973 45%, #A38A4A 100%);
     opacity:max(0, var(--rings3d-gold-lift));
   }
 
@@ -433,14 +433,14 @@
     border:1px solid rgba(255,255,255,.5);
     backdrop-filter:blur(16px) saturate(120%);
     box-shadow:0 26px 50px -28px rgba(28,32,40,.4), inset 0 1px 0 rgba(255,255,255,.6);
-    color:#191714;
+    color:#1F1A0E;
   }
   .rings3d-card.gold-card{
-    background:linear-gradient(165deg, rgba(22,16,11,.5), rgba(8,6,5,.6));
-    border:1px solid rgba(233,198,123,.16);
+    background:linear-gradient(165deg, rgba(17, 14, 8,.5), rgba(9, 7, 4,.6));
+    border:1px solid rgba(212, 185, 115,.16);
     backdrop-filter:blur(16px) saturate(120%);
-    box-shadow:0 30px 56px -30px rgba(0,0,0,.72), inset 0 1px 0 rgba(233,198,123,.09);
-    color:#efe6d6;
+    box-shadow:0 30px 56px -30px rgba(0,0,0,.72), inset 0 1px 0 rgba(212, 185, 115,.09);
+    color:#F0EADE;
   }
 
   .rings3d-card h3{
@@ -474,7 +474,7 @@
     gap:9px;
   }
   .silver-card ul{ border-top:1px solid rgba(28,32,40,.12); }
-  .gold-card ul{ border-top:1px solid rgba(233,198,123,.14); }
+  .gold-card ul{ border-top:1px solid rgba(212, 185, 115,.14); }
   .rings3d-card ul li{
     display:flex;
     align-items:center;
@@ -518,7 +518,7 @@
   }
   .gold-card .rings3d-cta{
     background:linear-gradient(155deg,var(--rings3d-gold-1),var(--rings3d-gold-2));
-    color:#2a1c08;
+    color:#221C0F;
     box-shadow:0 12px 26px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25);
   }
 
@@ -547,9 +547,9 @@
     .rings3d-panel{ min-height:78vh; }
     .rings3d-divider{ top:50%; left:0; right:0; bottom:auto; width:100%; height:1px;
       background:linear-gradient(to right,
-        transparent 4%, rgba(233,198,123,.1) 18%, rgba(233,198,123,.22) 30%,
+        transparent 4%, rgba(212, 185, 115,.1) 18%, rgba(212, 185, 115,.22) 30%,
         transparent 34%, transparent 66%,
-        rgba(233,198,123,.22) 70%, rgba(233,198,123,.1) 82%, transparent 96%); }
+        rgba(212, 185, 115,.22) 70%, rgba(212, 185, 115,.1) 82%, transparent 96%); }
 
     /* na costura os dois rótulos ficam metade sobre o painel claro e metade
        sobre o escuro — a placa translúcida resolve o contraste e permite
@@ -558,8 +558,8 @@
       gap:11px;
       padding:10px 18px;
       border-radius:999px;
-      background:rgba(12,9,7,.44);
-      border:1px solid rgba(233,198,123,.16);
+      background:rgba(12, 10, 6,.44);
+      border:1px solid rgba(212, 185, 115,.16);
       backdrop-filter:blur(10px) saturate(120%);
       box-shadow:0 14px 32px -20px rgba(0,0,0,.75);
     }
@@ -570,7 +570,7 @@
     .rings3d-metal--silver{ color:#e9eaec; text-shadow:0 1px 3px rgba(0,0,0,.5); }
     .rings3d-rail{ width:26px; }
     .rings3d-rail--silver{ background:linear-gradient(to right, rgba(233,234,236,0), rgba(233,234,236,.3)); }
-    .rings3d-rail--gold{ background:linear-gradient(to left, rgba(233,198,123,0), rgba(233,198,123,.34)); }
+    .rings3d-rail--gold{ background:linear-gradient(to left, rgba(212, 185, 115,0), rgba(212, 185, 115,.34)); }
 
     .rings3d-card{ width:min(340px, 88%); bottom:7%; padding:28px 24px 24px; }
     .rings3d-card h3{ font-size:30px; }

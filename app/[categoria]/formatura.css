@@ -231,7 +231,7 @@
 
 .categoryPage--formatura .catalog__filter.is-active .catalog__swatch {
   transform: scale(1.18);
-  box-shadow: 0 0 0 1px rgba(42, 30, 19, .25), 0 0 0 4px rgba(179, 133, 78, .16);
+  box-shadow: 0 0 0 1px rgba(20, 18, 15, .25), 0 0 0 4px rgba(212, 185, 115, .16);
 }
 
 /* ============================================================
@@ -322,24 +322,24 @@
    navegação e entregaria outra coisa. Quem quer a página da peça tem
    a foto, o nome e a seta do rodapé, todos apontando para lá.
 
-   Visualmente ele afina: a borda cai de 40% para 26% de opacidade e
-   só fecha em marrom sólido no hover. */
+   Visualmente ele afina: a borda cai de 45% para 30% de opacidade e
+   só fecha em champanhe sólido no hover. */
 .categoryPage--formatura .ringCard__buy {
   margin-top: 14px;
   padding: 11px 20px;
-  border-color: rgba(42, 30, 19, .26);
+  border-color: rgba(125, 99, 48, .30);
   font-size: 11px;
   letter-spacing: .16em;
 }
 
 .categoryPage--formatura .ringCard:hover .ringCard__buy {
-  border-color: rgba(42, 30, 19, .45);
+  border-color: rgba(125, 99, 48, .55);
 }
 
 .categoryPage--formatura .ringCard__buy:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--ivory);
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
 }
 
 /* Esgotado não é clicável, então não acompanha nem a borda afinada do
@@ -382,7 +382,7 @@
 .categoryPage--formatura .ringCard:hover {
   transform: translateY(-3px);
   border-color: var(--gold-line);
-  box-shadow: 0 26px 50px -26px rgba(42, 30, 19, .42);
+  box-shadow: 0 26px 50px -26px rgba(20, 18, 15, .42);
 }
 
 .categoryPage--formatura .ringCard:hover .ringCard__img--produto {

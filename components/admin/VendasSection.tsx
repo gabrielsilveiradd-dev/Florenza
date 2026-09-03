@@ -29,8 +29,8 @@ function Dica({
   );
 }
 
-const EIXO = { fill: "#7c6a56", fontSize: 11 };
-const GRADE = "rgba(42,30,19,.10)";
+const EIXO = { fill: "#726348", fontSize: 11 };
+const GRADE = "rgba(125, 99, 48,.22)";
 
 export function VendasSection({ dados }: { dados: DashboardData }) {
   const [regiao, setRegiao] = useState<string | null>(null);
@@ -91,7 +91,7 @@ export function VendasSection({ dados }: { dados: DashboardData }) {
                     <YAxis type="category" dataKey="regiao" tick={EIXO} axisLine={false} tickLine={false} width={96} />
                     <Tooltip
                       content={<Dica formatar={formatarPreco} />}
-                      cursor={{ fill: "rgba(179,133,78,.10)" }}
+                      cursor={{ fill: "rgba(212, 185, 115,.10)" }}
                     />
                     <Bar dataKey="totalCentavos" radius={[0, 4, 4, 0]} maxBarSize={22}>
                       {regioesOrdenadas.map((r) => (
@@ -151,7 +151,7 @@ export function VendasSection({ dados }: { dados: DashboardData }) {
                     width={48}
                     tickFormatter={(v) => formatarEixoValor(Number(v))}
                   />
-                  <Tooltip content={<Dica formatar={formatarPreco} />} cursor={{ stroke: "rgba(179,133,78,.35)" }} />
+                  <Tooltip content={<Dica formatar={formatarPreco} />} cursor={{ stroke: "rgba(212, 185, 115,.35)" }} />
                   <Line
                     type="monotone"
                     dataKey="totalCentavos"
@@ -183,7 +183,7 @@ export function VendasSection({ dados }: { dados: DashboardData }) {
                     tickFormatter={(v) => formatarEixoValor(Number(v))}
                   />
                   <YAxis type="category" dataKey="nome" tick={EIXO} axisLine={false} tickLine={false} width={172} />
-                  <Tooltip content={<Dica formatar={formatarPreco} />} cursor={{ fill: "rgba(179,133,78,.10)" }} />
+                  <Tooltip content={<Dica formatar={formatarPreco} />} cursor={{ fill: "rgba(212, 185, 115,.10)" }} />
                   <Bar dataKey="totalCentavos" fill={COR_SERIE} radius={[0, 4, 4, 0]} maxBarSize={18} />
                 </BarChart>
               </ResponsiveContainer>

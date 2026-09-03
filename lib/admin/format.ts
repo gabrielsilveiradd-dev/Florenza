@@ -86,7 +86,7 @@ export const ROTULO_ORIGEM: Record<string, string> = {
  *
  * Para reconferir depois de mexer em qualquer valor:
  *   node <skill dataviz>/scripts/validate_palette.js \
- *     "#a3123a,#1b4fb0,#b5701a,#6b3fa0,#2f9e6b,#8f2765" --mode light --surface "#ece2d0"
+ *     "#a3123a,#1b4fb0,#b5701a,#6b3fa0,#2f9e6b,#8f2765" --mode light --surface "#E8DFCD"
  *
  * Sobra um aviso: o verde tem contraste 2,63 contra o bege do cartão, abaixo de
  * 3:1. É aceitável aqui porque a legenda ao lado da rosca traz o nome e o
@@ -108,4 +108,4 @@ export const COR_ORIGEM: Record<string, string> = {
  * vendidas, regiões). Série única não precisa de paleta nem de legenda — o
  * título já diz o que a barra mede. É o dourado da marca.
  */
-export const COR_SERIE = "#8a6a37";
+export const COR_SERIE = "#7D6330";

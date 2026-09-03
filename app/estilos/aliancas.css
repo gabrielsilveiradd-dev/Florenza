@@ -8,8 +8,8 @@
 :root {
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Inter", "Segoe UI", sans-serif;
-  --gold-line: rgba(179, 133, 78, .38);
-  --hairline: rgba(42, 30, 19, .12);
+  --gold-line: rgba(212, 185, 115, .62);
+  --hairline: rgba(125, 99, 48, .26);
 }
 
 /* ---------- Elementos compartilhados ---------- */
@@ -47,18 +47,18 @@
 .btn-outline:hover {
   background: var(--gold);
   border-color: var(--gold);
-  color: #1b1108;
+  color: #15120A;
 }
 
 .btn-outline--dark {
-  border-color: rgba(42, 30, 19, .4);
-  color: var(--ink);
+  border-color: rgba(125, 99, 48, .45);
+  color: var(--gold-ink);
 }
 
 .btn-outline--dark:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--ivory);
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
 }
 
 .btn-outline svg { width: 14px; height: 14px; transition: transform .35s ease; }
@@ -136,13 +136,13 @@
   max-width: 100%;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 24px 26px rgba(42, 30, 19, .28));
+  filter: drop-shadow(0 24px 26px rgba(20, 18, 15, .28));
   transition: filter .4s ease;
 }
 
 .categoryShowcase__link:hover .categoryShowcase__img,
 .categoryShowcase__link:focus-visible .categoryShowcase__img {
-  filter: drop-shadow(0 30px 34px rgba(42, 30, 19, .38));
+  filter: drop-shadow(0 30px 34px rgba(20, 18, 15, .38));
 }
 
 .categoryShowcase__cta {
@@ -209,7 +209,7 @@
 .categoryShowcase__arrow:hover {
   background: var(--gold);
   border-color: var(--gold);
-  color: #1b1108;
+  color: #15120A;
 }
 
 .categoryShowcase__arrow svg { width: 18px; height: 18px; }
@@ -275,8 +275,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(19, 12, 6, .86) 0%, rgba(19, 12, 6, .6) 34%, rgba(19, 12, 6, .16) 60%, rgba(19, 12, 6, 0) 80%),
-    linear-gradient(180deg, rgba(19, 12, 6, .3) 0%, rgba(19, 12, 6, 0) 22%, rgba(19, 12, 6, .5) 100%);
+    linear-gradient(90deg, rgba(14, 12, 6, .86) 0%, rgba(14, 12, 6, .6) 34%, rgba(14, 12, 6, .16) 60%, rgba(14, 12, 6, 0) 80%),
+    linear-gradient(180deg, rgba(14, 12, 6, .3) 0%, rgba(14, 12, 6, 0) 22%, rgba(14, 12, 6, .5) 100%);
   pointer-events: none;
 }
 
@@ -326,7 +326,7 @@
   .aliancasFeature { min-height: 92vh; align-items: flex-end; padding-bottom: 56px; }
 
   .aliancasFeature__scrim {
-    background: linear-gradient(180deg, rgba(19, 12, 6, .12) 0%, rgba(19, 12, 6, .22) 42%, rgba(19, 12, 6, .92) 100%);
+    background: linear-gradient(180deg, rgba(14, 12, 6, .12) 0%, rgba(14, 12, 6, .22) 42%, rgba(14, 12, 6, .92) 100%);
   }
 
   .aliancasFeature__content {
@@ -420,13 +420,13 @@
   overflow: hidden;
   border: 1px solid var(--hairline);
   background: var(--ivory-soft);
-  box-shadow: 0 18px 40px -28px rgba(42, 30, 19, .3);
+  box-shadow: 0 18px 40px -28px rgba(20, 18, 15, .3);
   transition: opacity .38s ease, transform .38s ease, border-color .45s ease, box-shadow .45s ease;
 }
 
 .ringCard:hover {
   border-color: var(--gold-line);
-  box-shadow: 0 22px 46px -24px rgba(42, 30, 19, .4);
+  box-shadow: 0 22px 46px -24px rgba(20, 18, 15, .4);
 }
 
 .ringCard.is-hidden {
@@ -444,7 +444,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(244, 237, 225, .85);
+  background: rgba(240, 234, 222, .85);
   border: 1px solid var(--hairline);
   border-radius: 50%;
   color: var(--ink);
@@ -623,7 +623,7 @@
   display: flex;
   justify-content: center;
   background:
-    radial-gradient(ellipse 60% 55% at 50% 0%, rgba(179, 133, 78, .22) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 55% at 50% 0%, rgba(212, 185, 115, .22) 0%, transparent 65%),
     var(--bg);
 }
 

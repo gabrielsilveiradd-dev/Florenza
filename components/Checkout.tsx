@@ -282,7 +282,7 @@ export function Checkout({ demo, conta }: { demo: boolean; conta: ContaDoComprad
           </h2>
 
           {demo && (
-            <div className="chk-erro" style={{ borderColor: "var(--gold-line)", background: "rgba(227,198,146,.22)", color: "var(--ink)" }}>
+            <div className="chk-erro" style={{ borderColor: "var(--gold-line)", background: "rgba(229, 211, 166,.22)", color: "var(--ink)" }}>
               O Supabase não está conectado nesta cópia, então o pedido não pode ser registrado.
             </div>
           )}

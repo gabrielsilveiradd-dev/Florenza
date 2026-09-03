@@ -1,27 +1,29 @@
 :root {
-  /* Base clara — bege/ivory, a vitrine da joalheria */
-  --ivory: #f4ede1;
-  --ivory-soft: #ece2d0;
-  --ivory-line: rgba(43, 31, 21, .12);
+  /* Base clara — creme/off-white da paleta */
+  --ivory: #F0EADE;
+  --ivory-soft: #E8DFCD;
+  --ivory-line: rgba(125, 99, 48, .26);
 
-  /* Áreas sofisticadas — marrom escuro e couro, usados com moderação */
-  --bg: #1b1108;
-  --bg-alt: #241608;
-  --leather: #5c4128;
-  --leather-dark: #2f2013;
+  /* Áreas escuras — preto de subtom champanhe (matiz 42), no lugar do
+     marrom original; usadas com moderação */
+  --bg: #15120A;
+  --bg-alt: #201B0F;
+  --leather: #544930;
+  --leather-dark: #2B2414;
 
-  /* Dourado — detalhe refinado, não predominante */
-  --gold: #b3854e;
-  --gold-bright: #e3c692;
-  --gold-ink: #8a6a37;
+  /* Dourado champanhe — detalhe refinado, não predominante */
+  --gold: #D4B973;
+  --gold-bright: #E5D3A6;
+  --gold-ink: #7D6330;
 
   --silver: #cfd3d6;
 
-  /* Texto: marrom escuro sobre bege, branco quente sobre marrom */
-  --text: #f3efe8;
-  --text-dim: #a89f92;
-  --ink: #2a1e13;
-  --ink-dim: #7c6a56;
+  /* Texto: preto sobre creme, creme sobre preto — os dois com o mesmo
+     subtom quente, para o preto nunca ler frio ao lado do champanhe */
+  --text: #F0EADE;
+  --text-dim: #AAA089;
+  --ink: #15130E;
+  --ink-dim: #726348;
 
   --nav-h: 76px;
 }
@@ -51,10 +53,10 @@ a { color: inherit; }
   z-index: 100;
   display: flex;
   align-items: center;
-  background: rgba(27, 17, 8, .82);
+  background: rgba(21, 18, 10, .82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(227, 198, 146, .14);
+  border-bottom: 1px solid rgba(229, 211, 166, .22);
   pointer-events: none;
 }
 
@@ -82,7 +84,7 @@ a { color: inherit; }
   font-family: "Alex Brush", cursive;
   font-size: 28px;
   line-height: 1;
-  background: linear-gradient(180deg, #f5e5bd 0%, #cda45e 45%, #8a6a37 100%);
+  background: linear-gradient(180deg, #F2E4BF 0%, #D4B973 45%, #7D6330 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -163,8 +165,8 @@ a { color: inherit; }
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(100deg, rgba(19, 12, 6, .92) 0%, rgba(19, 12, 6, .72) 30%, rgba(19, 12, 6, .28) 54%, rgba(19, 12, 6, 0) 72%),
-    linear-gradient(0deg, rgba(19, 12, 6, .55) 0%, rgba(19, 12, 6, 0) 30%);
+    linear-gradient(100deg, rgba(14, 12, 6, .92) 0%, rgba(14, 12, 6, .72) 30%, rgba(14, 12, 6, .28) 54%, rgba(14, 12, 6, 0) 72%),
+    linear-gradient(0deg, rgba(14, 12, 6, .55) 0%, rgba(14, 12, 6, 0) 30%);
   pointer-events: none;
 }
 
@@ -248,7 +250,7 @@ a { color: inherit; }
 
 .hero__cta:hover {
   background: var(--gold);
-  color: #1b1108;
+  color: #15120A;
 }
 
 .hero__scrollcue {
@@ -261,7 +263,7 @@ a { color: inherit; }
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  color: rgba(243, 239, 232, .75);
+  color: rgba(240, 234, 222, .75);
   font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 11px;
   letter-spacing: .18em;
@@ -271,7 +273,7 @@ a { color: inherit; }
 .hero__scrollcue-line {
   width: 1px;
   height: 34px;
-  background: linear-gradient(to bottom, rgba(243, 239, 232, .75), transparent);
+  background: linear-gradient(to bottom, rgba(240, 234, 222, .75), transparent);
   animation: cue-pulse 1.8s ease-in-out infinite;
 }
 
@@ -288,7 +290,7 @@ a { color: inherit; }
 
   .hero__scrim {
     background:
-      linear-gradient(0deg, rgba(19, 12, 6, .95) 0%, rgba(19, 12, 6, .5) 38%, rgba(19, 12, 6, .18) 62%, rgba(19, 12, 6, .1) 100%);
+      linear-gradient(0deg, rgba(14, 12, 6, .95) 0%, rgba(14, 12, 6, .5) 38%, rgba(14, 12, 6, .18) 62%, rgba(14, 12, 6, .1) 100%);
   }
 
   .hero__content {
@@ -309,7 +311,7 @@ a { color: inherit; }
 .footer {
   background: var(--bg);
   padding: 48px 32px;
-  border-top: 1px solid rgba(227, 198, 146, .12);
+  border-top: 1px solid rgba(229, 211, 166, .18);
 }
 
 .footer__inner {
@@ -333,7 +335,7 @@ a { color: inherit; }
   font-family: "Alex Brush", cursive;
   font-size: 26px;
   line-height: 1;
-  background: linear-gradient(180deg, #f5e5bd 0%, #cda45e 45%, #8a6a37 100%);
+  background: linear-gradient(180deg, #F2E4BF 0%, #D4B973 45%, #7D6330 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

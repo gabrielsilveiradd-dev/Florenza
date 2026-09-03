@@ -152,7 +152,7 @@
   object-fit: contain;
   /* A sombra é o que dá o chão da vitrine. Herdada do desenho anterior, com o
      mesmo tom, para a peça não parecer recortada e colada. */
-  filter: drop-shadow(0 24px 26px rgba(42, 30, 19, .26));
+  filter: drop-shadow(0 24px 26px rgba(20, 18, 15, .26));
   transition: transform .55s var(--col-curva), filter .55s var(--col-curva);
 }
 
@@ -161,7 +161,7 @@
 .col__joia.is-ativo:hover .col__img,
 .col__joia.is-ativo:focus-visible .col__img {
   transform: translateY(-6px) scale(1.025);
-  filter: drop-shadow(0 34px 34px rgba(42, 30, 19, .34));
+  filter: drop-shadow(0 34px 34px rgba(20, 18, 15, .34));
 }
 .col__joia:focus-visible { outline: 1px solid var(--gold); outline-offset: 12px; }
 
@@ -178,7 +178,7 @@
   transition: color .35s var(--col-curva), background-color .35s var(--col-curva);
 }
 .col__seta svg { width: 20px; height: 20px; flex: none; }
-.col__seta:hover { color: var(--gold-ink); background: rgba(227, 198, 146, .18); }
+.col__seta:hover { color: var(--gold-ink); background: rgba(229, 211, 166, .18); }
 .col__seta:focus-visible { outline: 1px solid var(--gold); outline-offset: 3px; }
 
 /* O nome da próxima coleção aparece no hover. É enfeite útil, não muleta: o
@@ -231,7 +231,7 @@
   pointer-events: none;
 }
 .col__cta.is-ativo { opacity: 1; transform: none; pointer-events: auto; }
-.col__cta.is-ativo:hover { background: var(--gold); color: #fffaf2; border-color: var(--gold); }
+.col__cta.is-ativo:hover { background: var(--gold); color: var(--ink); border-color: var(--gold); }
 .col__cta svg { width: 15px; height: 15px; transition: transform .35s var(--col-curva); }
 .col__cta.is-ativo:hover svg { transform: translateX(3px); }
 

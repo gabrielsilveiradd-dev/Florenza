@@ -13,9 +13,9 @@ export function GemDefs() {
           <stop offset="1" stopColor="#888e94" />
         </linearGradient>
         <linearGradient id="gemGoldGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f5e5bd" />
-          <stop offset="0.55" stopColor="#cda45e" />
-          <stop offset="1" stopColor="#8a6a37" />
+          <stop offset="0" stopColor="#F2E4BF" />
+          <stop offset="0.55" stopColor="#D4B973" />
+          <stop offset="1" stopColor="#7D6330" />
         </linearGradient>
       </defs>
     </svg>
@@ -29,14 +29,14 @@ export function Gem({ className }: { className: string }) {
       <path
         d="M20,8 L44,8 L58,27 L32,73 L6,27 Z"
         fill="url(#gemGoldGrad)"
-        stroke="#a9884f"
+        stroke="#B39A55"
         strokeWidth="1.5"
         vectorEffect="non-scaling-stroke"
       />
       <path
         d="M6,27 L58,27 M20,8 L32,73 M44,8 L32,73"
         fill="none"
-        stroke="#a9884f"
+        stroke="#B39A55"
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
         opacity="0.8"

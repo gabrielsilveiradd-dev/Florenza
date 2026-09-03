@@ -105,7 +105,7 @@
   color: var(--ink-dim);
   transition: background-color .2s, color .2s;
 }
-.chk-item__tirar:hover { background: rgba(42, 30, 19, .07); color: var(--ink); }
+.chk-item__tirar:hover { background: rgba(212, 185, 115, .28); color: var(--ink); }
 
 .chk-item__sku {
   margin-top: 3px;
@@ -119,7 +119,7 @@
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(227, 198, 146, .3);
+  background: rgba(229, 211, 166, .3);
   font-size: 10px;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -152,7 +152,7 @@
   color: var(--ink);
   transition: background-color .2s, opacity .2s;
 }
-.chk-qtd button:hover:not(:disabled) { background: rgba(42, 30, 19, .07); }
+.chk-qtd button:hover:not(:disabled) { background: rgba(212, 185, 115, .28); }
 .chk-qtd button:disabled { opacity: .3; cursor: not-allowed; }
 .chk-qtd span { min-width: 26px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
 
@@ -189,7 +189,7 @@
   padding: 0 6px;
   border-radius: 999px;
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
   font-size: 11px;
   line-height: 20px;
   text-align: center;
@@ -230,7 +230,7 @@
   padding: 14px 16px;
   border: 1px solid var(--gold-line);
   border-radius: 12px;
-  background: rgba(227, 198, 146, .16);
+  background: rgba(229, 211, 166, .16);
 }
 .chk-identidade p { margin: 0; }
 .chk-identidade__rotulo {
@@ -253,7 +253,7 @@
   text-decoration: none;
   transition: background-color .2s;
 }
-.chk-identidade__editar:hover { background: rgba(227, 198, 146, .35); }
+.chk-identidade__editar:hover { background: rgba(229, 211, 166, .35); }
 
 /* ---------- Presente ---------- */
 
@@ -265,7 +265,7 @@
   background: var(--ivory-soft);
   transition: border-color .2s, background-color .2s;
 }
-.chk-presente.is-ativo { border-color: var(--gold-line); background: rgba(227, 198, 146, .16); }
+.chk-presente.is-ativo { border-color: var(--gold-line); background: rgba(229, 211, 166, .16); }
 
 .chk-presente__troca {
   display: flex;
@@ -303,7 +303,7 @@
 /* ---------- Cupom ---------- */
 
 .chk-cupom { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hairline); }
-.chk-cupom__rotulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); }
+.chk-cupom__rotulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
 .chk-cupom__linha { display: flex; gap: 7px; margin-top: 8px; }
 .chk-cupom__campo {
   flex: 1 1 auto;
@@ -316,7 +316,7 @@
   font-size: 13px;
   text-transform: uppercase;
 }
-.chk-cupom__campo:focus { outline: 2px solid rgba(179, 133, 78, .4); outline-offset: 1px; }
+.chk-cupom__campo:focus { outline: 2px solid rgba(212, 185, 115, .4); outline-offset: 1px; }
 .chk-cupom__botao {
   flex: none;
   display: inline-flex;
@@ -331,7 +331,7 @@
   color: var(--gold-ink);
   transition: background-color .2s, opacity .2s;
 }
-.chk-cupom__botao:hover:not(:disabled) { background: rgba(227, 198, 146, .25); }
+.chk-cupom__botao:hover:not(:disabled) { background: rgba(229, 211, 166, .25); }
 .chk-cupom__botao:disabled { opacity: .5; cursor: not-allowed; }
 .chk-cupom__erro { margin-top: 8px; font-size: 12px; color: #8c2a26; }
 .chk-cupom__tirar {
@@ -355,7 +355,7 @@
   margin-top: 18px;
   border-radius: 10px;
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
   font-size: 11px;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -410,7 +410,7 @@
 .ped-cabecalho { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
 .ped-cabecalho p { margin: 0; }
 .ped-numero { font-family: var(--font-serif); font-size: 30px; color: var(--gold-ink); }
-.ped-rotulo { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
+.ped-rotulo { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-ink); }
 
 /* ---------- Linha do tempo ---------- */
 
@@ -460,13 +460,13 @@
 }
 .ped-trilha__etapa.is-cumprida .ped-trilha__marca {
   border-color: var(--gold-line);
-  background: rgba(227, 198, 146, .3);
+  background: rgba(229, 211, 166, .3);
   color: var(--gold-ink);
 }
 .ped-trilha__etapa.is-atual .ped-trilha__marca {
   border-color: var(--gold);
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
 }
 
 .ped-trilha__rotulo { font-size: 13.5px; color: var(--ink-dim); }
@@ -484,7 +484,7 @@
   padding: 14px 16px;
   border: 1px solid var(--gold-line);
   border-radius: 11px;
-  background: rgba(227, 198, 146, .16);
+  background: rgba(229, 211, 166, .16);
 }
 .ped-rastreio__rotulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
 .ped-rastreio__linha { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
@@ -510,7 +510,7 @@
   color: var(--gold-ink);
   transition: background-color .2s;
 }
-.ped-rastreio__copiar:hover { background: rgba(227, 198, 146, .35); }
+.ped-rastreio__copiar:hover { background: rgba(229, 211, 166, .35); }
 
 .ped-status--cancelado { padding: 4px 0; }
 .ped-status__cancelado-titulo { font-size: 14px; color: var(--ink); }
@@ -548,8 +548,8 @@
   text-decoration: none;
   transition: border-color .2s, background-color .2s;
 }
-.ped-acao:hover { border-color: var(--gold-line); background: rgba(227, 198, 146, .18); }
-.ped-acao--principal { border-color: var(--gold); background: var(--gold); color: #fffaf2; }
+.ped-acao:hover { border-color: var(--gold-line); background: rgba(229, 211, 166, .18); }
+.ped-acao--principal { border-color: var(--gold); background: var(--gold); color: var(--ink); }
 .ped-acao--principal:hover { background: var(--gold-ink); border-color: var(--gold-ink); }
 
 @media (max-width: 560px) {

@@ -24,8 +24,15 @@ const vertexSmokeySource = `
  *
  * O original fazia `u_color * glow`: a fumaça nascia de um preto puro e
  * clareava para o azul. Aqui ela sobe por três paradas da paleta do site —
- * --bg (#1b1108) no escuro, --leather (#5c4128) no corpo da fumaça, e --gold
- * (#b3854e) só nas cristas.
+ * --bg (#15120A) no escuro, --leather (#544930) no corpo da fumaça, e o
+ * champanhe só nas cristas.
+ *
+ * A crista NÃO é o --gold puro (#D4B973), e o motivo é medido: o champanhe tem
+ * luminância 0.50 contra 0.21 do bronze que ele substituiu — 2,4x. Ligado
+ * direto, o fundo deixava de ser fumaça e virava um campo cáqui atrás do
+ * formulário, que é exatamente o que a regra abaixo proíbe. #948251 é o mesmo
+ * champanhe escurecido a 70%, que devolve a luminância 0.21 do original. Mesma
+ * família de cor, mesmo peso visual de antes.
  *
  * Três e não duas de propósito. Interpolando direto de --bg para --gold, metade
  * da tela vira um campo dourado chapado, e style.css é explícito sobre isso:
@@ -122,9 +129,9 @@ function hexParaRgb(hex: string): [number, number, number] {
  */
 export function SmokeyBackground({
   backdropBlurAmount = "sm",
-  color = "#b3854e",
-  baseColor = "#1b1108",
-  midColor = "#5c4128",
+  color = "#948251",
+  baseColor = "#15120A",
+  midColor = "#544930",
   className = "",
 }: SmokeyBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

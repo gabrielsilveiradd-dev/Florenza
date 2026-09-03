@@ -109,8 +109,8 @@ export const categorias: Categoria[] = [
     rotuloFiltro: "Filtrar por material",
     nota: [],
     opcoes: [
-      { slug: "ouro", nome: "Ouro 18K", amostra: "#b3854e" },
-      { slug: "ouro-diamantes", nome: "Ouro + Diamantes", amostra: "#e3c692" },
+      { slug: "ouro", nome: "Ouro 18K", amostra: "#D4B973" },
+      { slug: "ouro-diamantes", nome: "Ouro + Diamantes", amostra: "#E5D3A6" },
     ],
   },
   {

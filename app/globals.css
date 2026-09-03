@@ -88,13 +88,13 @@
   align-items: center;
   gap: 3px;
   padding: 4px;
-  border: 1px solid rgba(227, 198, 146, .16);
+  border: 1px solid rgba(229, 211, 166, .26);
   border-radius: 999px;
-  background: rgba(243, 239, 232, .04);
+  background: rgba(240, 234, 222, .04);
   transition: border-color .25s ease;
 }
 .nav__links:hover,
-.nav__acoes:hover { border-color: rgba(227, 198, 146, .3); }
+.nav__acoes:hover { border-color: rgba(229, 211, 166, .42); }
 
 /* `.nav__inner` é `space-between`. Com três filhos os links cairiam no centro;
    o `margin-left: auto` mantém links e ações encostados à direita, que é a
@@ -129,7 +129,7 @@
 }
 .nav .nav__pilula:hover {
   opacity: 1;
-  background: rgba(243, 239, 232, .08);
+  background: rgba(240, 234, 222, .08);
   color: var(--gold-bright);
 }
 .nav__pilula-icone { flex: none; }
@@ -144,7 +144,7 @@
 .nav .nav__pilula.is-ativa {
   opacity: 1;
   color: var(--gold-bright);
-  background: rgba(227, 198, 146, .1);
+  background: rgba(229, 211, 166, .16);
 }
 
 .nav .nav__pilula.is-ativa::after {
@@ -181,7 +181,7 @@
      sólido, que é o que o marca como a ação principal do bloco. */
   border: 0;
   border-radius: 999px;
-  background: rgba(227, 198, 146, .14);
+  background: rgba(229, 211, 166, .22);
   color: var(--gold-bright);
   opacity: 1;
   transition: background-color .2s ease, color .2s ease;
@@ -189,7 +189,7 @@
 
 .nav__acoes .nav__entrar:hover {
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
 }
 
 .nav__carrinho {
@@ -204,7 +204,7 @@
   opacity: .85;
   transition: opacity .2s ease, background-color .2s ease;
 }
-.nav__carrinho:hover { opacity: 1; background: rgba(243, 239, 232, .09); }
+.nav__carrinho:hover { opacity: 1; background: rgba(240, 234, 222, .09); }
 
 /* O selo da contagem: dourado sobre o marrom da barra, sem cor nova. */
 .nav__carrinho-conta {
@@ -217,7 +217,7 @@
   border: 1.5px solid var(--bg);
   border-radius: 999px;
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
   font-size: 10px;
   line-height: 14px;
   text-align: center;
@@ -262,16 +262,16 @@
   height: 38px;
   margin-right: 4px;
   padding: 0;
-  border: 1px solid rgba(227, 198, 146, .16);
+  border: 1px solid rgba(229, 211, 166, .26);
   border-radius: 999px;
-  background: rgba(243, 239, 232, .04);
+  background: rgba(240, 234, 222, .04);
   color: var(--text);
   cursor: pointer;
   transition: background-color .2s ease, border-color .2s ease, color .2s ease;
 }
 .nav__hamburguer:hover {
-  background: rgba(243, 239, 232, .09);
-  border-color: rgba(227, 198, 146, .3);
+  background: rgba(240, 234, 222, .09);
+  border-color: rgba(229, 211, 166, .42);
   color: var(--gold-bright);
 }
 
@@ -348,7 +348,7 @@
 .menuMobile__fundo {
   position: absolute;
   inset: 0;
-  background: rgba(27, 17, 8, .55);
+  background: rgba(21, 18, 10, .55);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   animation: menuMobileFundo .28s ease both;
@@ -356,10 +356,10 @@
 
 .menuMobile__painel {
   position: relative;
-  background: rgba(27, 17, 8, .97);
+  background: rgba(21, 18, 10, .97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(227, 198, 146, .14);
+  border-bottom: 1px solid rgba(229, 211, 166, .22);
   padding: 22px 20px 28px;
   max-height: calc(100dvh - var(--nav-h));
   overflow-y: auto;
@@ -416,10 +416,10 @@
   transition: background-color .2s ease, color .2s ease;
 }
 .menuMobile__item:hover,
-.menuMobile__item:focus-visible { background: rgba(243, 239, 232, .06); }
+.menuMobile__item:focus-visible { background: rgba(240, 234, 222, .06); }
 
 .menuMobile__item.is-ativa {
-  background: rgba(227, 198, 146, .1);
+  background: rgba(229, 211, 166, .16);
   color: var(--gold-bright);
 }
 
@@ -465,7 +465,7 @@
 .footer .footer__nota {
   margin: 20px 0 0;
   padding-top: 16px;
-  border-top: 1px solid rgba(227, 198, 146, .14);
+  border-top: 1px solid rgba(229, 211, 166, .22);
   max-width: 30ch;
   font-family: var(--font-sans);
   font-size: 11.5px;

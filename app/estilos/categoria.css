@@ -30,7 +30,7 @@
   max-width: 100%;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 24px 26px rgba(42, 30, 19, .28));
+  filter: drop-shadow(0 24px 26px rgba(20, 18, 15, .28));
 }
 
 .categoryPage__title {
@@ -120,7 +120,7 @@
   height: 9px;
   border-radius: 50%;
   background: var(--swatch, var(--gold));
-  box-shadow: 0 0 0 1px rgba(42, 30, 19, .25);
+  box-shadow: 0 0 0 1px rgba(20, 18, 15, .25);
 }
 
 .categoryPage__count {
@@ -145,7 +145,7 @@
 .ringCard__media--produto {
   aspect-ratio: 5 / 4;
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(255, 250, 240, .9), transparent 62%),
+    radial-gradient(ellipse at 50% 45%, rgba(240, 234, 222, .9), transparent 62%),
     var(--ivory);
 }
 
@@ -158,7 +158,7 @@
   height: auto;
   object-fit: contain;
   /* Sombra sob a peça recortada: sem ela o anel flutua sobre o marfim. */
-  filter: drop-shadow(0 14px 16px rgba(42, 30, 19, .22));
+  filter: drop-shadow(0 14px 16px rgba(20, 18, 15, .22));
 }
 
 /* ---------- Código interno da peça ---------- */
@@ -183,8 +183,8 @@
   width: 100%;
   margin-top: 16px;
   padding: 12px 22px;
-  border: 1px solid rgba(42, 30, 19, .4);
-  color: var(--ink);
+  border: 1px solid rgba(125, 99, 48, .45);
+  color: var(--gold-ink);
   background: none;
   text-decoration: none;
   font-family: var(--font-sans);
@@ -197,9 +197,9 @@
 }
 
 .ringCard__buy:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--ivory);
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
 }
 
 .ringCard__buy svg { width: 14px; height: 14px; }

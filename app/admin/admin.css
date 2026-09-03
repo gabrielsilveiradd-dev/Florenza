@@ -84,7 +84,7 @@
 .adm__aba.is-active {
   background: var(--gold);
   border-color: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
 }
 .adm__aba-conta {
   display: inline-flex;
@@ -95,11 +95,11 @@
   padding: 0 6px;
   border-radius: 999px;
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
   font-size: 10px;
   letter-spacing: 0;
 }
-.adm__aba.is-active .adm__aba-conta { background: #fffaf2; color: var(--gold-ink); }
+.adm__aba.is-active .adm__aba-conta { background: var(--ivory); color: var(--gold-ink); }
 
 /* ---------- Cartão de indicador (KPI) ---------- */
 .adm-card {
@@ -206,7 +206,7 @@
 }
 .adm-input::placeholder { color: var(--ink-dim); opacity: .7; }
 .adm-input:focus {
-  outline: 2px solid rgba(179, 133, 78, .45);
+  outline: 2px solid rgba(212, 185, 115, .45);
   outline-offset: 1px;
   border-color: var(--gold-line);
 }
@@ -218,7 +218,7 @@
   min-height: 40px;
   padding: 0 20px;
   background: var(--gold);
-  color: #fffaf2;
+  color: var(--ink);
   font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -282,7 +282,7 @@
   align-items: flex-start;
   gap: 12px;
   border: 1px solid var(--gold-line);
-  background: rgba(227, 198, 146, .22);
+  background: rgba(229, 211, 166, .22);
   padding: 16px 18px;
   font-size: 13px;
   line-height: 1.6;
@@ -291,7 +291,7 @@
 .adm-aviso strong { color: var(--gold-ink); }
 .adm-aviso code {
   font-size: 12px;
-  background: rgba(42, 30, 19, .07);
+  background: rgba(20, 18, 15, .07);
   padding: 1px 5px;
 }
 .adm-erro { margin-top: 12px; font-size: 12.5px; color: #a3312c; }
@@ -312,7 +312,7 @@
   z-index: 5;
   border: 1px solid var(--hairline);
   background: var(--ivory);
-  box-shadow: 0 12px 28px -18px rgba(42, 30, 19, .5);
+  box-shadow: 0 12px 28px -18px rgba(20, 18, 15, .5);
   padding: 9px 12px;
   font-size: 12px;
   white-space: nowrap;
