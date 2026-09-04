@@ -332,6 +332,15 @@
    continua visível — a gaveta é uma extensão dela, não uma tela nova. */
 .menuMobile {
   position: fixed;
+  /* As quatro linhas separadas antes do atalho não são redundância: `inset`
+     só existe do Chrome 87 e do Safari 14.1 para cá. Num aparelho anterior a
+     declaração inteira cai, a gaveta perde as quatro amarras e vira uma
+     caixinha do tamanho do conteúdo encaixada no fluxo da barra — estreita, e
+     com os nomes das categorias quebrando linha. */
+  top: var(--nav-h);
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: var(--nav-h) 0 0;
   z-index: 99;
   display: flex;
@@ -359,6 +368,11 @@
 
 .menuMobile__fundo {
   position: absolute;
+  /* Mesmo motivo do bloco acima. */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   background: rgba(21, 18, 10, .55);
   backdrop-filter: blur(2px);
@@ -373,8 +387,21 @@
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(229, 211, 166, .22);
   padding: 22px 20px 28px;
+  /* A linha de `vh` é o plano B de quem não tem `dvh` (Safari abaixo de 15.4,
+     Samsung Internet antigo): lá o `calc` com `dvh` é declaração inválida e é
+     descartada, e sem teto de altura o painel passa por baixo da dobra. Onde
+     `dvh` existe, a segunda linha vence e a barra de endereço deixa de contar
+     como altura útil. */
+  max-height: calc(100vh - var(--nav-h));
   max-height: calc(100dvh - var(--nav-h));
   overflow-y: auto;
+  /* Chegar ao fim da lista não pode virar rolagem da página atrás da gaveta. */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Se ainda assim sobrar rolagem, que a barrinha apareça — e na cor da casa.
+     Ela era a única pista de que havia mais abaixo, e não aparecia. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(229, 211, 166, .38) transparent;
   animation: menuMobileAbre .3s cubic-bezier(.22, .61, .36, 1) both;
 }
 
@@ -454,6 +481,63 @@
 }
 
 .menuMobile__lista--simples .menuMobile__nome { font-size: 17px; }
+
+/* ---------------------------------------------------------------------------
+   TELA DEITADA: a gaveta encolhe, em vez de rolar
+   ---------------------------------------------------------------------------
+   Em pé a conta fecha com folga: os cinco destinos somam 428px e o celular
+   oferece ~736. Deitado ela inverte — sobram entre 244px e 299px, a lista
+   passa a rolar e o corte cai no meio de um item.
+
+   E é aí que o desenho engana: metade de um item não se lê como "tem mais
+   abaixo", se lê como defeito. Sem barra de rolagem visível, quem abre o menu
+   vê uma categoria e não tem por que supor que existem outras duas.
+
+   A correção não é rolar melhor, é caber. Deitado falta altura e sobra
+   largura — a mais estreita das telas deitadas tem 568px —, então os dois
+   blocos passam a dividir a linha e os respiros encolhem. Os cinco destinos
+   ficam à vista de uma vez, com os nomes inteiros e as frases no lugar.
+
+   Nada disto alcança a tela em pé: as condições de altura abaixo são falsas
+   lá, e a gaveta de retrato segue exatamente como está. */
+@media (max-width: 860px) and (max-height: 520px) {
+  .menuMobile__painel { padding: 14px 18px 18px; }
+  .menuMobile__rotulo { margin-bottom: 6px; }
+  .menuMobile__rotulo:not(:first-child) { margin-top: 16px; }
+  /* 48px continua acima dos 44 que o dedo pede. */
+  .menuMobile__item { min-height: 48px; padding: 7px 12px; }
+  /* A frase de descoberta é a primeira a sair quando falta altura: ela é
+     convite, e convite não vale o preço de empurrar o nome de uma categoria
+     para fora da tela. Volta na última regra deste bloco, onde a largura
+     permite. */
+  .menuMobile__frase { display: none; }
+}
+
+@media (max-width: 860px) and (max-height: 520px) and (min-width: 540px) {
+  .menuMobile__painel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 22px;
+    align-content: start;
+  }
+  /* Os quatro filhos do painel, na ordem em que o componente os escreve:
+     rótulo "Categorias", as três categorias, rótulo "A Florenza", os outros
+     dois. Colocados à mão porque o par de cada coluna tem que ficar junto —
+     o fluxo automático da grade separaria rótulo e lista. */
+  .menuMobile__painel > :nth-child(1) { grid-area: 1 / 1; }
+  .menuMobile__painel > :nth-child(2) { grid-area: 2 / 1; }
+  .menuMobile__painel > :nth-child(3) { grid-area: 1 / 2; margin-top: 0; }
+  .menuMobile__painel > :nth-child(4) { grid-area: 2 / 2; }
+}
+
+/* A frase volta quando há largura para ela caber numa linha só — a partir de
+   ~700px são ~380px por coluna, e a mais longa das três ocupa ~210px. Medido,
+   e não estimado: em 568px de tela a coluna cai para 250px, as três frases
+   quebram em duas linhas e o item engorda de 48px para 72px, que é
+   exatamente a altura que a tela deitada não tem para dar. */
+@media (max-width: 860px) and (max-height: 520px) and (min-width: 700px) {
+  .menuMobile__frase { display: block; }
+}
 
 /* Nota do rodapé.
  *
