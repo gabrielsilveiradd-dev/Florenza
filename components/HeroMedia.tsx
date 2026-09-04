@@ -67,12 +67,32 @@ export function HeroMedia() {
 
   return (
     <div className="hero__media" id="heroMedia" ref={mediaRef}>
-      {/* No celular a hero entra em cross-fade com o vídeo em tela cheia: o PNG
-          de 1,6 MB (6 MB descomprimidos) era o item mais pesado dessa
-          composição. A versão mobile é o mesmo quadro em 1100px / JPEG q72 =
-          39 KB. O desktop segue com o PNG original. */}
+      {/* A versão do celular não é a mesma foto encolhida — é um RECORTE
+          RETRATO, e a diferença é o que resolvia a nitidez.
+
+          herome.png é paisagem 16:9. O celular é retrato, e com `object-fit:
+          cover` ele aproveitava só uma fatia vertical: num iPhone 15 sobravam
+          286x619 px reais para preencher 1179x2556, ampliação de 4,13x. No
+          notebook a mesma foto aparece a 0,96x — daí a hero do PC parecer de
+          outra qualidade. Não era compressão, era geometria.
+
+          O recorte 1:2 sai do PNG original (não do JPEG já degradado) na
+          região que o celular mostra, e derruba a ampliação para 1,36x. O
+          `object-position: 62% center` da media query de 860px continua
+          valendo: com o quadro já retrato sobra tão pouco a deslocar que não
+          precisou mudar uma linha de CSS.
+
+          Os dois tamanhos com descritor `w` existem para o navegador escolher
+          pelo DPR do aparelho — antes o `srcSet` sem descritor entregava o
+          mesmo arquivo para tela 2x e 3x. Gerados por
+          tools/preparar-imagens.py. */}
       <picture>
-        <source media="(max-width: 860px)" srcSet="/herome-mobile.jpg" />
+        <source
+          media="(max-width: 860px)"
+          srcSet="/herome-mobile.webp 940w, /herome-mobile-620.webp 620w"
+          sizes="100vw"
+          type="image/webp"
+        />
         <img
           className="hero__img"
           src="/herome.png"

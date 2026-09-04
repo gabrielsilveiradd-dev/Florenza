@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Gem } from "@/components/GemDefs";
 import { CATEGORIAS_NAV } from "@/lib/navegacao";
 
 /**
@@ -31,8 +30,18 @@ export function Footer() {
       <div className="footer__grid">
         <div className="footer__brand">
           <span className="footer__mark">
-            <Gem className="footer__gem" />
-            <span className="footer__word">Florenza</span>
+            {/* Mesmo arquivo da barra, já em cache quando o rodapé aparece.
+                Sobre `<img>` em vez de next/image, ver Navbar.tsx. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="footer__marca"
+              src="/logo-marca.webp"
+              alt="Florenza"
+              width={382}
+              height={224}
+              loading="lazy"
+              decoding="async"
+            />
           </span>
           <p className="footer__tagline">
             Joias que contam histórias que duram para sempre.

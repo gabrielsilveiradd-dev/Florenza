@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BotaoCarrinho } from "@/components/BotaoCarrinho";
 import { BotaoConta } from "@/components/BotaoConta";
-import { Gem } from "@/components/GemDefs";
 import { MenuMobile } from "@/components/MenuMobile";
 import { NavCategorias } from "@/components/NavCategorias";
 
@@ -39,9 +38,23 @@ export function Navbar() {
             de graça do fluxo, sem `order` no CSS. */}
         <MenuMobile />
 
+        {/* `alt` vazio de propósito: o nome da marca já está no `aria-label` do
+            link, e repeti-lo aqui faria o leitor de tela anunciar "Florenza"
+            duas vezes no mesmo elemento. */}
         <Link className="nav__logo" href="/#top" aria-label="Florenza — início">
-          <Gem className="nav__gem" />
-          <span className="nav__word">Florenza</span>
+          {/* `<img>` e não `next/image` de propósito, como no resto do projeto:
+              é um arquivo só, 256px e 12,6 KB, igual em toda página e em todo
+              aparelho. next/image cobraria uma transformação por tamanho na
+              Vercel para entregar exatamente o mesmo byte. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="nav__marca"
+            src="/logo-marca.webp"
+            alt=""
+            width={382}
+            height={224}
+            decoding="async"
+          />
         </Link>
 
         <NavCategorias />

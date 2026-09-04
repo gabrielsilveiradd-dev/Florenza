@@ -1,10 +1,10 @@
 /**
  * Os ícones da nav, desenhados para este site.
  *
- * Não vieram de biblioteca de propósito. O losango da marca (`GemDefs`) tem
- * traço fino, canto reto e nenhum preenchimento chapado — colar ao lado dele um
- * conjunto de ícones genéricos, de traço mais grosso e cantos arredondados,
- * deixaria a barra com duas caligrafias. Todos aqui seguem a mesma régua:
+ * Não vieram de biblioteca de propósito. O selo da marca tem traço fino e
+ * desenho enxuto — colar ao lado dele um conjunto de ícones genéricos, de
+ * traço mais grosso e cantos arredondados, deixaria a barra com duas
+ * caligrafias. Todos aqui seguem a mesma régua:
  * viewBox 24, traço 1.3, sem preenchimento, `currentColor` para herdarem a cor
  * do estado (normal, hover, ativo) sem uma linha de CSS extra.
  *

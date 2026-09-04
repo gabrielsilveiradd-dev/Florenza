@@ -70,7 +70,7 @@
    SOBRE A ESPECIFICIDADE, que aqui não é detalhe: layout.tsx importa este
    arquivo ANTES de estilos/style.css, e as regras dos dois são CSS comum sem
    camada. No empate vence quem vem depois — o style.css. Como ele estiliza
-   `.nav__links`, `.nav__links a` e `.nav__word`, todo seletor abaixo que
+   `.nav__links`, `.nav__links a` e `.nav__marca`, todo seletor abaixo que
    disputa com ele tem dois níveis: (0,2,0) ganha de (0,1,1) e de (0,1,0)
    independentemente da ordem de importação.
 
@@ -293,8 +293,7 @@
    linha, mas por `display: none`: quem responde pela navegação nesta faixa é a
    gaveta, e ela tem o mesmo conteúdo com os rótulos por extenso. */
 @media (max-width: 860px) {
-  .nav .nav__gem { width: 17px; }
-  .nav__logo .nav__word { font-size: 21px; }
+  .nav .nav__marca { height: 38px; }
   .nav .nav__inner { padding: 0 12px; }
 
   .nav__hamburguer { display: inline-flex; }
