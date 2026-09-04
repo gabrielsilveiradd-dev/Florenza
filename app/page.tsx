@@ -92,22 +92,25 @@ export default function Home() {
             (O CSS `.categorySection` continua em estilos/aliancas.css,
             intocado; ele simplesmente deixou de casar com algo.) */}
 
-        {/* Encerramento editorial — peça curta, autoplay, em loop, sem prender a
-            navegação. */}
-        <section className="symbolsShowcase">
-          <div className="symbolsShowcase__inner js-reveal">
-            <video
-              className="symbolsShowcase__video"
-              src="/simbolos-marcas.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label="Símbolos de amor entrelaçados em veludo, formando a frase Marcas para sempre"
-            />
-          </div>
-        </section>
+        {/* Aqui ficava o encerramento editorial: uma seção só com
+            simbolos-marcas.mp4 em autoplay e loop. Saiu depois de comparar a
+            home com e sem ela.
+
+            Ela não carregava informação — era respiro entre o catálogo e o
+            "Como funciona" — e custava caro por isso: 4 MB, o arquivo mais
+            pesado do site. Não entrava no carregamento inicial (`preload` era
+            "metadata"), mas o VideoAutoplay começa a puxar o vídeo 600px antes
+            de a seção entrar em cena, então quem rolava a home até o fim
+            baixava os 4 MB inteiros.
+
+            A emenda que sobrou é limpa: .rings3d-section encosta direto no
+            .fluxo, que já traz 120px de respiro próprio no topo. O corte de
+            escuro para creme é a mesma transição que o site usa em outros
+            pontos.
+
+            O CSS .symbolsShowcase continua em estilos/aliancas.css, intocado,
+            e o arquivo public/simbolos-marcas.mp4 continua no repositório —
+            nada impede de trazer a seção de volta. */}
 
         {/* COMO FUNCIONA — as quatro etapas reais da compra, e a resposta à
             pergunta que a vitrine sozinha deixava no ar: "e depois que eu
