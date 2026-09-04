@@ -338,6 +338,19 @@
   flex-direction: column;
 }
 
+/* SEM ESTA REGRA A GAVETA FICA ABERTA PARA SEMPRE.
+   O componente esconde o painel com o atributo `hidden`, que age pela folha
+   do NAVEGADOR (`[hidden] { display: none }`). Regra de autor vence regra do
+   navegador seja qual for a especificidade — então o `display: flex` acima
+   anulava o `hidden`, e a gaveta cobria a tela desde o carregamento: o
+   hambúrguer só trocava o ícone, e a animação de abertura rodava uma vez, no
+   load, sem nunca mais disparar.
+
+   Declarar `display: none` aqui, no autor, é o que devolve o controle ao
+   atributo. E é o que faz as animações voltarem a rodar a cada abertura:
+   sair de `display: none` reinicia a animação. */
+.menuMobile[hidden] { display: none; }
+
 /* Acima de 860px a gaveta não existe, mesmo que algum estado a deixe aberta:
    a barra completa já está lá, e as duas juntas seriam navegação dobrada. */
 @media (min-width: 861px) {
