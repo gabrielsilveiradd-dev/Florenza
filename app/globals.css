@@ -332,16 +332,33 @@
    continua visível — a gaveta é uma extensão dela, não uma tela nova. */
 .menuMobile {
   position: fixed;
-  /* As quatro linhas separadas antes do atalho não são redundância: `inset`
-     só existe do Chrome 87 e do Safari 14.1 para cá. Num aparelho anterior a
-     declaração inteira cai, a gaveta perde as quatro amarras e vira uma
-     caixinha do tamanho do conteúdo encaixada no fluxo da barra — estreita, e
-     com os nomes das categorias quebrando linha. */
   top: var(--nav-h);
   right: 0;
-  bottom: 0;
   left: 0;
-  inset: var(--nav-h) 0 0;
+
+  /* AQUI NÃO PODE ENTRAR `bottom: 0` — NEM DENTRO DE UM `inset`.
+     Foi isto que quebrou a gaveta no iPhone enquanto o computador mostrava
+     tudo certo, e vale registrar por quê.
+
+     Um elemento com `backdrop-filter` diferente de `none` passa a ser o
+     bloco de contenção dos descendentes `position: fixed`. A `.nav` tem
+     `backdrop-filter: blur(10px)`, em estilos/style.css, e esta gaveta é
+     filha dela. O Safari cumpre essa regra; o Chrome não — e o emulador de
+     celular do Chrome é Chrome, então ele nunca mostrou o defeito.
+
+     No Safari, então, as amarras deixavam de ser a tela e passavam a ser a
+     barra, que tem 76px de altura: `top: 76px` com `bottom: 0` dava
+     76 − 76 = ZERO de altura. O painel, que pode encolher até zero porque
+     tem `overflow-y: auto`, sobrava com os 51px do próprio respiro — uma
+     faixa com uma categoria cortada ao meio.
+
+     Altura explícita resolve nos dois casos: sob a barra, `top: 76px`
+     continua caindo na borda de baixo dela, que é onde a gaveta começa, e a
+     altura deixa de depender de onde fica o `bottom` do bloco de contenção.
+     A primeira linha é o plano B de quem não tem `dvh`. */
+  height: calc(100vh - var(--nav-h));
+  height: calc(100dvh - var(--nav-h));
+
   z-index: 99;
   display: flex;
   flex-direction: column;
@@ -368,7 +385,10 @@
 
 .menuMobile__fundo {
   position: absolute;
-  /* Mesmo motivo do bloco acima. */
+  /* Longhands e atalho juntos: `inset` só existe do Chrome 87 e do Safari
+     14.1 para cá, e num aparelho anterior a declaração cai inteira. Aqui
+     o bloco de contenção é a própria gaveta, então não há a armadilha
+     descrita acima. */
   top: 0;
   right: 0;
   bottom: 0;
