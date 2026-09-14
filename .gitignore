@@ -14,6 +14,8 @@ next-env.d.ts
 # Ferramentas
 /.playwright-mcp/
 /.vercel
+# Estado local do `supabase link` (projeto ligado, endereço do pooler) — é desta máquina.
+/supabase/.temp/
 
 # Mídia de origem, fora do git de propósito
 #

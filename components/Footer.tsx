@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { LOJA, linkWhatsApp } from "@/lib/loja";
 import { CATEGORIAS_NAV } from "@/lib/navegacao";
+import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 
 /**
  * O rodapé — fechamento da página e segunda porta para as três categorias.
@@ -17,14 +19,24 @@ import { CATEGORIAS_NAV } from "@/lib/navegacao";
  * aprende que o site promete o que não tem. Todos foram removidos, e o rodapé
  * ficou com o que existe.
  *
- * A prop `colecoes` também saiu. Ela servia para o rodapé mudar de conteúdo
- * entre a home e as categorias — agora a lista é a mesma em todo lugar, que é
- * o ponto de ter uma lista só (`lib/navegacao.ts`).
+ * O QUE VOLTOU: termos, trocas e privacidade — agora com página de verdade, e
+ * exigidos de quem vende pela internet (Decreto 7.962/2013). Entraram nas
+ * listas que já existiam, sem coluna nova: a grade do rodapé fica como está.
+ *
+ * Os dados da empresa (razão social, CNPJ, endereço) vêm de `lib/loja.ts` e só
+ * aparecem preenchidos. Em produção, faltando algum, o build para — ver lá.
  *
  * O `id="contato"` fica: é o destino de "Atendimento" na barra do topo e no
  * menu do celular.
  */
 export function Footer() {
+  const whatsapp = linkWhatsApp();
+  const empresa = [
+    LOJA.razaoSocial || LOJA.nomeFantasia,
+    LOJA.cnpj && `CNPJ ${LOJA.cnpj}`,
+    LOJA.endereco,
+  ].filter(Boolean).join(" · ");
+
   return (
     <footer className="footer" id="contato">
       <div className="footer__grid">
@@ -66,6 +78,9 @@ export function Footer() {
                 página "Sobre" ainda não existe; quando existir, entra aqui. */}
             <li><Link href="/#como-funciona">Como funciona</Link></li>
             <li><Link href="/#categoryShowcase">Descubra sua joia</Link></li>
+            <li><Link href="/termos-de-compra">Termos de compra</Link></li>
+            <li><Link href="/trocas-e-devolucoes">Trocas e devoluções</Link></li>
+            <li><Link href="/privacidade">Privacidade</Link></li>
           </ul>
         </div>
 
@@ -74,20 +89,23 @@ export function Footer() {
           <ul className="footer__list">
             <li><Link href="/conta">Minha conta</Link></li>
             <li><Link href="/carrinho">Meu carrinho</Link></li>
+            {/* Só com número publicado em lib/loja.ts: "WhatsApp" que não leva a
+                lugar nenhum seria o mesmo problema que este rodapé resolveu. */}
+            {whatsapp && (
+              <li><a href={whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+            )}
+            {LOJA.email && <li><a href={`mailto:${LOJA.email}`}>{LOJA.email}</a></li>}
           </ul>
-          {/* O acerto por WhatsApp é o que o site já diz na página da peça e na
-              confirmação do pedido. Não há número publicado no projeto, então
-              aqui vai a informação sem o link — dizer "WhatsApp" e não levar a
-              lugar nenhum seria o mesmo problema que este rodapé acabou de
-              resolver. */}
           <p className="footer__nota">
-            O pagamento é combinado por WhatsApp depois que o pedido chega.
+            {pagamentoOnlineAtivo()
+              ? "Pagamento com Pix ou cartão pelo Mercado Pago."
+              : "O pagamento é combinado por WhatsApp depois que o pedido chega."}
           </p>
         </div>
       </div>
 
       <div className="footer__inner">
-        <p>&copy; 2026 Florenza Joalheria. Todos os direitos reservados.</p>
+        <p>&copy; 2026 {empresa}. Todos os direitos reservados.</p>
       </div>
     </footer>
   );

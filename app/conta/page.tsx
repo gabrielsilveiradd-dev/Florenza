@@ -5,9 +5,11 @@ import { BotaoSair } from "@/components/conta/BotaoSair";
 import { DadosDaConta } from "@/components/conta/DadosDaConta";
 import { Footer } from "@/components/Footer";
 import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
+import { descreverMedida } from "@/lib/aros";
 import { formatarPreco } from "@/lib/catalogo";
 import { STATUS_DO_PEDIDO } from "@/lib/conta";
 import { lerPerfil, listarMeusPedidos } from "@/lib/conta-servidor";
+import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -83,6 +85,7 @@ export default async function PaginaConta({
   }
 
   const [perfil, pedidos] = await Promise.all([lerPerfil(), listarMeusPedidos()]);
+  const online = pagamentoOnlineAtivo();
   const primeiroNome = (perfil?.nome ?? "").trim().split(" ")[0];
 
   return (
@@ -132,29 +135,24 @@ export default async function PaginaConta({
                     {/* Mesmo componente da tela de confirmação. Quem voltou dias
                         depois reencontra a tela que viu na compra, com uma etapa
                         a mais acesa — em vez de uma lista diferente. */}
-                    <StatusDoPedido
-                      pedido={{
-                        numero: p.numero,
-                        status: p.status,
-                        criadoEm: p.criadoEm,
-                        pagoEm: p.pagoEm,
-                        enviadoEm: p.enviadoEm,
-                        entregueEm: p.entregueEm,
-                        codigoRastreio: p.codigoRastreio,
-                        transportadora: p.transportadora,
-                      }}
-                    />
+                    <StatusDoPedido pagamentoOnline={online} pedido={p} />
 
                     <ul className="ped-itens">
-                      {p.itens.map((i) => (
-                        <li key={i.sku}>
-                          <span>
-                            {i.quantidade > 1 && `${i.quantidade}× `}
-                            {i.nome}
-                          </span>
-                          <span>{formatarPreco(i.precoCentavos * i.quantidade)}</span>
-                        </li>
-                      ))}
+                      {p.itens.map((i, indice) => {
+                        const medida = descreverMedida(i.aros, i.tamanho, i.tamanhoPar);
+                        return (
+                          // Índice na chave: a mesma peça pode aparecer em duas
+                          // linhas, uma por medida.
+                          <li key={`${i.sku}-${indice}`}>
+                            <span>
+                              {i.quantidade > 1 && `${i.quantidade}× `}
+                              {i.nome}
+                              {medida && <span className="ped-itens__medida">{medida}</span>}
+                            </span>
+                            <span>{formatarPreco(i.precoCentavos * i.quantidade)}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     <dl className="ped-contas">
@@ -173,6 +171,12 @@ export default async function PaginaConta({
                         <dd>{formatarPreco(p.totalCentavos)}</dd>
                       </div>
                     </dl>
+
+                    <div className="ped-acoes">
+                      <Link className="ped-acao" href={`/conta/pedido/${p.numero}`}>
+                        {p.status === "aguardando_pagamento" && online ? "Ver e pagar" : "Ver pedido"}
+                      </Link>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -3,39 +3,63 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { BotaoPagar } from "@/components/pedido/BotaoPagar";
 import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
+import { descreverMedida } from "@/lib/aros";
+import { linkWhatsApp } from "@/lib/loja";
 
 export type PedidoConfirmado = {
   numero: number;
-  itens: Array<{ sku: string; nome: string; precoCentavos: number; quantidade: number }>;
+  itens: Array<{
+    chave: string;
+    nome: string;
+    precoCentavos: number;
+    quantidade: number;
+    aros: number;
+    tamanho: number | null;
+    tamanhoPar: number | null;
+  }>;
   subtotalCentavos: number;
   descontoCentavos: number;
   totalCentavos: number;
   cupomCodigo: string | null;
   criadoEm: string;
+  expiraEm: string | null;
+  /** O pedido nasceu, mas a cobrança no Mercado Pago não abriu. */
+  erroPagamento: string | null;
 };
 
 const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const formatar = (centavos: number) => moeda.format(centavos / 100);
+const dataHora = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit", month: "long", hour: "2-digit", minute: "2-digit",
+});
 
 /**
- * A tela logo depois de fechar o pedido.
+ * A tela logo depois de fechar o pedido — quando ela aparece.
+ *
+ * Com o Mercado Pago ligado e a cobrança aberta, a pessoa vai direto para a
+ * página de pagamento e volta em /conta/pedido/[numero]; esta tela só aparece
+ * se a cobrança não abriu. Sem o Mercado Pago, é aqui que ela termina.
  *
  * Mantém o vocabulário visual do carrinho de propósito — cartão de canto
  * arredondado, mesma paleta, mesma tipografia. A pessoa acabou de sair de lá, e
  * uma tela de confirmação que parece de outro site faz duvidar se a compra
  * passou.
  *
- * A linha do tempo é o MESMO componente da aba de pedidos da conta. Quem voltar
- * dias depois para conferir a entrega reencontra exatamente esta tela, com uma
- * etapa a mais acesa.
- *
  * O que ela NÃO promete: nada de "pagamento aprovado". O pedido nasce em
- * 'aguardando pagamento' e o acerto é por WhatsApp — dizer o contrário aqui
- * seria mentir para o cliente na tela mais importante da compra.
+ * 'aguardando pagamento', e dizer o contrário seria mentir para o cliente na
+ * tela mais importante da compra.
  */
-export function ConfirmacaoDoPedido({ pedido }: { pedido: PedidoConfirmado }) {
+export function ConfirmacaoDoPedido({
+  pedido,
+  pagamentoOnline,
+}: {
+  pedido: PedidoConfirmado;
+  pagamentoOnline: boolean;
+}) {
   const semMovimento = useReducedMotion();
+  const whatsapp = linkWhatsApp(`Olá! Acabei de fazer o pedido #${pedido.numero} no site.`);
 
   return (
     <motion.div
@@ -51,14 +75,11 @@ export function ConfirmacaoDoPedido({ pedido }: { pedido: PedidoConfirmado }) {
               <p className="ped-rotulo">Código do pedido</p>
               <p className="ped-numero">#{pedido.numero}</p>
             </div>
-            {/* Não diz "confirmação enviada para o seu e-mail": este sistema
-                não manda e-mail de pedido. Prometer na tela o que não acontece
-                faz o cliente esperar por uma mensagem que nunca chega, e
-                depois desconfiar do resto. */}
             <p className="ped-rotulo">Guarde este número</p>
           </div>
 
           <StatusDoPedido
+            pagamentoOnline={pagamentoOnline}
             pedido={{
               numero: pedido.numero,
               status: "aguardando_pagamento",
@@ -68,16 +89,23 @@ export function ConfirmacaoDoPedido({ pedido }: { pedido: PedidoConfirmado }) {
               entregueEm: null,
               codigoRastreio: null,
               transportadora: null,
+              motivoCancelamento: null,
             }}
           />
 
           <ul className="ped-itens">
-            {pedido.itens.map((i) => (
-              <li key={i.sku}>
-                <span>{i.quantidade > 1 && `${i.quantidade}× `}{i.nome}</span>
-                <span>{formatar(i.precoCentavos * i.quantidade)}</span>
-              </li>
-            ))}
+            {pedido.itens.map((i) => {
+              const medida = descreverMedida(i.aros, i.tamanho, i.tamanhoPar);
+              return (
+                <li key={i.chave}>
+                  <span>
+                    {i.quantidade > 1 && `${i.quantidade}× `}{i.nome}
+                    {medida && <span className="ped-itens__medida">{medida}</span>}
+                  </span>
+                  <span>{formatar(i.precoCentavos * i.quantidade)}</span>
+                </li>
+              );
+            })}
           </ul>
 
           <dl className="ped-contas">
@@ -98,8 +126,8 @@ export function ConfirmacaoDoPedido({ pedido }: { pedido: PedidoConfirmado }) {
           </dl>
 
           <div className="ped-acoes">
-            <Link className="ped-acao ped-acao--principal" href="/conta">
-              Acompanhar na minha conta
+            <Link className="ped-acao ped-acao--principal" href={`/conta/pedido/${pedido.numero}`}>
+              Acompanhar o pedido
               <ArrowRight aria-hidden size={14} />
             </Link>
             <Link className="ped-acao" href="/aneis-formatura">Continuar vendo peças</Link>
@@ -113,21 +141,41 @@ export function ConfirmacaoDoPedido({ pedido }: { pedido: PedidoConfirmado }) {
           O próximo passo
         </h2>
 
-        <p className="chk-nota" style={{ marginTop: 14 }}>
-          A Florenza entra em contato pelo <strong>WhatsApp</strong> para combinar a forma de
-          pagamento e o prazo de produção da peça. Guarde o número{" "}
-          <strong>#{pedido.numero}</strong> — é por ele que o pedido é encontrado.
-        </p>
+        {pedido.erroPagamento ? (
+          <>
+            <p className="chk-erro" role="alert">{pedido.erroPagamento}</p>
+            <div className="ped-acoes" style={{ marginTop: 14 }}>
+              <BotaoPagar numero={pedido.numero} />
+            </div>
+          </>
+        ) : (
+          <p className="chk-nota" style={{ marginTop: 14 }}>
+            A Florenza entra em contato pelo <strong>WhatsApp</strong> para combinar a forma de
+            pagamento. Guarde o número <strong>#{pedido.numero}</strong> — é por ele que o pedido é
+            encontrado.
+          </p>
+        )}
+
+        {pedido.expiraEm && (
+          <p className="chk-nota">
+            As peças ficam reservadas para você até <strong>{dataHora.format(new Date(pedido.expiraEm))}</strong>.
+            Sem pagamento até lá, elas voltam para a vitrine.
+          </p>
+        )}
 
         <p className="chk-nota">
-          Assim que o pagamento for confirmado, o status muda sozinho aqui e na sua conta. O
-          código de rastreio aparece na mesma tela quando a peça for despachada.
+          Quando o pagamento for confirmado, o status muda sozinho na página do pedido. O código de
+          rastreio aparece no mesmo lugar quando a peça for despachada.
         </p>
 
-        <p className="chk-nota">
-          Se você criou conta, pode acompanhar tudo em <Link href="/conta" style={{ color: "var(--gold-ink)" }}>Minha conta</Link> a
-          qualquer momento.
-        </p>
+        {whatsapp && (
+          <div className="ped-acoes" style={{ marginTop: 16 }}>
+            <a className="ped-acao" href={whatsapp} target="_blank" rel="noopener noreferrer">
+              <MessageCircle aria-hidden size={14} />
+              Falar com a Florenza
+            </a>
+          </div>
+        )}
       </aside>
     </motion.div>
   );

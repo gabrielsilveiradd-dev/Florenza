@@ -2,12 +2,13 @@ import { Check, Package, Truck, Home, CreditCard } from "lucide-react";
 import { CopiarCodigo } from "@/components/pedido/CopiarCodigo";
 
 /**
- * A linha do tempo do pedido — uma peça só, usada em dois lugares.
+ * A linha do tempo do pedido — uma peça só, usada em três lugares.
  *
- * Aparece na confirmação logo depois da compra e na aba de pedidos da conta.
- * Ser o mesmo componente não é economia de código: é o que garante que a pessoa
- * reconheça a mesma tela quando voltar dias depois para conferir a entrega. Se
- * fossem duas implementações, elas divergiriam na primeira mudança.
+ * Aparece na confirmação logo depois da compra, na lista de pedidos da conta e
+ * na página do pedido. Ser o mesmo componente não é economia de código: é o que
+ * garante que a pessoa reconheça a mesma tela quando voltar dias depois para
+ * conferir a entrega. Se fossem implementações diferentes, elas divergiriam na
+ * primeira mudança.
  *
  * `cancelado` não é uma etapa: é a interrupção da linha. Por isso não entra na
  * régua e tem tratamento próprio — mostrá-lo como "quinto passo" sugeriria que
@@ -15,17 +16,32 @@ import { CopiarCodigo } from "@/components/pedido/CopiarCodigo";
  */
 
 export const ETAPAS = [
-  { chave: "aguardando_pagamento", rotulo: "Pedido recebido", icone: CreditCard,
-    dica: "Estamos combinando o pagamento com você." },
-  { chave: "pago", rotulo: "Pagamento confirmado", icone: Check,
-    dica: "Recebemos o valor e a produção entra na fila." },
-  { chave: "em_producao", rotulo: "Em produção", icone: Package,
-    dica: "A peça está sendo preparada à mão." },
-  { chave: "enviado", rotulo: "A caminho", icone: Truck,
-    dica: "Despachada. O código de rastreio aparece aqui." },
-  { chave: "entregue", rotulo: "Entregue", icone: Home,
-    dica: "A peça chegou. Boa sorte com ela." },
+  { chave: "aguardando_pagamento", rotulo: "Pedido recebido", icone: CreditCard },
+  { chave: "pago", rotulo: "Pagamento confirmado", icone: Check },
+  { chave: "em_producao", rotulo: "Em preparo", icone: Package },
+  { chave: "enviado", rotulo: "A caminho", icone: Truck },
+  { chave: "entregue", rotulo: "Entregue", icone: Home },
 ] as const;
+
+/* A dica da primeira etapa depende de como se paga. Com o Mercado Pago ligado,
+ * "estamos combinando o pagamento com você" seria mentira: a pessoa paga
+ * sozinha, e o que ela espera é a confirmação. */
+function dicaDaEtapa(chave: string, pagamentoOnline: boolean): string {
+  switch (chave) {
+    case "aguardando_pagamento":
+      return pagamentoOnline
+        ? "Aguardando a confirmação do pagamento."
+        : "Estamos combinando o pagamento com você.";
+    case "pago":
+      return "Recebemos o valor e a sua peça entra em preparo.";
+    case "em_producao":
+      return "A peça está sendo preparada à mão para o envio.";
+    case "enviado":
+      return "Despachada. O código de rastreio aparece aqui.";
+    default:
+      return "A peça chegou. Que ela conte muitas histórias.";
+  }
+}
 
 export type PedidoParaStatus = {
   numero: number;
@@ -36,6 +52,7 @@ export type PedidoParaStatus = {
   entregueEm: string | null;
   codigoRastreio: string | null;
   transportadora: string | null;
+  motivoCancelamento: string | null;
 };
 
 const dataHora = new Intl.DateTimeFormat("pt-BR", {
@@ -46,7 +63,13 @@ function quando(iso: string | null) {
   return iso ? dataHora.format(new Date(iso)) : null;
 }
 
-export function StatusDoPedido({ pedido }: { pedido: PedidoParaStatus }) {
+export function StatusDoPedido({
+  pedido,
+  pagamentoOnline = false,
+}: {
+  pedido: PedidoParaStatus;
+  pagamentoOnline?: boolean;
+}) {
   const cancelado = pedido.status === "cancelado";
   const atual = ETAPAS.findIndex((e) => e.chave === pedido.status);
   // Status desconhecido não deve apagar a régua inteira: na dúvida, mostra ao
@@ -66,6 +89,7 @@ export function StatusDoPedido({ pedido }: { pedido: PedidoParaStatus }) {
       <div className="ped-status ped-status--cancelado">
         <p className="ped-status__cancelado-titulo">Pedido cancelado</p>
         <p className="ped-status__dica">
+          {pedido.motivoCancelamento ? `${pedido.motivoCancelamento} ` : ""}
           As peças voltaram para o estoque. Se foi engano, fale com a Florenza pelo WhatsApp.
         </p>
       </div>
@@ -93,7 +117,7 @@ export function StatusDoPedido({ pedido }: { pedido: PedidoParaStatus }) {
                 {datas[etapa.chave] && (
                   <p className="ped-trilha__data">{datas[etapa.chave]}</p>
                 )}
-                {agora && <p className="ped-trilha__dica">{etapa.dica}</p>}
+                {agora && <p className="ped-trilha__dica">{dicaDaEtapa(etapa.chave, pagamentoOnline)}</p>}
               </div>
             </li>
           );

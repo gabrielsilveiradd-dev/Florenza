@@ -33,6 +33,10 @@ Não há testes nem formatter configurados.
 - Cancelar devolve estoque; sair de 'cancelado' desconta de novo.
 - Cupom: **o navegador manda o código, nunca o valor.** `conferir_cupom()` é previsão para a tela; `criar_pedido()` recalcula do zero. `cupons` não é legível por `anon`, e código inexistente ou desativado dão a mesma resposta.
 - Vitrine e carrinho são **aviso, não autorização**.
+- **Compra só com conta.** `criar_pedido()` exige `auth.uid()`, e cliente **não tem INSERT** em `pedidos`/`pedido_itens` — as policies antigas deixavam criar pedido "pago" por qualquer valor direto na API. Pedido de cliente nasce só pela função; venda manual, pelo painel (policy de admin).
+- Reserva de **48 h** (`expira_em`, espelhada em `RESERVA_HORAS` de `lib/loja.ts`). `expirar_pedidos_vencidos()` roda a cada 10 min no pg_cron: cancela, devolve estoque e uso do cupom. Cartão `in_process`/`authorized` segura a reserva. Limites: 10 por peça, 20 linhas, 3 pedidos aguardando por conta.
+- Cupom passa por `avaliar_cupom()` (EXECUTE de ninguém): validade no fuso de São Paulo; `so_primeira_compra` e `um_por_cliente` conferidos por **conta OU CPF**. Cancelar devolve o uso.
+- **Pago, só o banco marca.** `registrar_pagamento()` exige o segredo do Vault (`florenza_pagamentos`), que o servidor tem em `PAGAMENTO_SEGREDO_BANCO`. A prova é `GET /v1/payments/{id}` do Mercado Pago — nem o corpo do webhook nem a URL de retorno valem. Valor a menor, estorno e contestação viram `pagamentos.pendencia` para a equipe, não mudança de status.
 - Categoria e produto usam `export const revalidate = 60`: sem isso o HTML congela no build e o site oferece "Comprar" em peça esgotada.
 
 ## Banco (`FLORENZA`, jydcgsxzinrguounnmpi, Postgres 17)
@@ -64,9 +68,20 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 - Consultas em `lib/conta-servidor.ts`, separadas de `lib/conta.ts` porque este é importado por componente de cliente e aquele puxa `next/headers` — juntos, o build quebra.
 - **Nenhuma consulta filtra por `user_id`**: quem filtra é a RLS. Repetir o filtro daria a impressão de que ele é a proteção.
 - **Cartão não entra neste banco** — "forma de pagamento" é preferência declarada.
-- Logado, nome/telefone/e-mail não são editáveis no checkout (senão o mesmo cliente aparece com três grafias). Endereço é o único campo livre.
-- A confirmação **não promete o que não acontece**: sem "pagamento aprovado", sem e-mail de pedido — o acerto é por WhatsApp.
+- Nome/telefone/e-mail/CPF não são editáveis no checkout (senão o mesmo cliente aparece com três grafias); o que a conta ainda não tem é pedido uma vez e gravado nela. Endereço completo é livre a cada pedido.
+- CPF: `cpf_valido()` no banco (CHECK em `profiles` e `pedidos`), espelhado em `lib/documentos.ts` só por cortesia.
+- Medida do aro: `produtos.aros` (0, 1 ou 2) decide quantos seletores a página da peça mostra; `tamanho`/`tamanho_par` nulos em `pedido_itens` = "não sei ainda". No carrinho, a linha é `sku|tamanho|tamanhoPar`. Escolher "Não sei ainda" abre `GuiaDeMedidas` (`<dialog>` nativo; tabela pela regra brasileira, aro = circunferência − 40 mm), e tocar numa linha preenche o seletor.
+- A confirmação **não promete o que não acontece**: nada de "pagamento aprovado" antes da confirmação real, e toda copy sobre pagamento depende de `pagamentoOnlineAtivo()`.
+- `/conta/pedido/[numero]` também sincroniza o pagamento na volta do Mercado Pago — o webhook não chega no localhost e não tem hora marcada.
 - Datas de etapa vêm da trigger `pedidos_carimba_etapas`, nunca digitadas.
+
+## Pagamento, avisos e dados da loja
+
+- `lib/pagamento/`: `config.ts` (liga com `MP_ACCESS_TOKEN` + `PAGAMENTO_SEGREDO_BANCO`), `mercado-pago.ts` (preferência, consulta, assinatura do webhook), `sincronizar.ts`. Rotas: `POST /api/pedidos`, `POST /api/pedidos/[numero]/pagamento`, `POST /api/mercadopago/webhook`.
+- Segredo é **só servidor** — nenhum `NEXT_PUBLIC_` além da URL do site. Lista em `.env.local.example`.
+- `lib/avisos.ts` (Resend + webhook) **nunca derruba o pedido**: roda em `after()`, erro vai para o log.
+- `lib/loja.ts`: razão social, CNPJ, endereço, contatos, entrega. Rodapé e páginas legais leem de lá. Vazio, o build de produção **avisa no log** — era erro até 14/09/2026, quando se decidiu publicar antes de ter os dados; a lei (Decreto 7.962/2013) continua exigindo.
+- `/termos-de-compra`, `/trocas-e-devolucoes`, `/privacidade`: texto-base escrito a partir do que o código faz. Mudou a regra no código, muda o texto.
 
 ## Deploy
 
@@ -86,10 +101,10 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 ## Pendências
 
 - **Ninguém é admin ainda**: o painel só abre após `update public.profiles set role = 'admin'`.
-- Upload de foto pelo painel não está ligado — hoje a foto entra pelo script Python.
 - "Entrar com Google" exige habilitar o provedor em Authentication → Providers.
-- Mercado Pago fica para o Módulo 2.
-- Sem os tipos gerados do banco, há um cast em `lib/admin/listas.ts`.
-- Rastreio, transportadora, presente e mensagem do cartão ainda não aparecem em `PedidosSection` — só pelo SQL Editor.
+- Mercado Pago: código pronto, falta a conta — credenciais, segredo no Vault e webhook (DEPLOY.md).
+- `lib/loja.ts` vazio: o site está no ar com "a preencher" nas páginas legais. Textos legais precisam de revisão de advogado.
+- Sem os tipos gerados do banco, há casts em `lib/admin/listas.ts` e `lib/conta-servidor.ts`.
+- `supabase/aplicar-tudo.sql` está desatualizado (não tem as migrations de 14/09/2026) — use `db push`.
 - Projeto em us-east-2, não São Paulo (~120 ms a mais por consulta).
 - Pense duas vezes antes de commitar mídia.

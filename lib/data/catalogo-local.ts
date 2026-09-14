@@ -35,6 +35,12 @@ export type Produto = {
    * pedra e lapidação. Quando é `null`, o card compõe — ver RingCard.
    */
   alt: string | null;
+  /**
+   * Quantas medidas de aro a peça pede: 0 sem aro, 1 um tamanho, 2 par (um
+   * tamanho para cada pessoa). É da peça, não da categoria — entre as alianças
+   * de prata há avulsas e pares.
+   */
+  aros: number;
   estoque: number;
   ativo: boolean;
 };
@@ -171,6 +177,7 @@ const formatura = (
   precoCentavos,
   ...fotoFormatura(sku),
   alt: null,
+  aros: 1,
   estoque: 5,
   ativo: true,
 });
@@ -221,6 +228,9 @@ const prata = (
   // Nulo de propósito: o RingCard compõe o alt de metal + largura, como já faz
   // para os anéis de formatura. Escrever à mão 14 vezes só criaria divergência.
   alt: null,
+  // Mesma regra da migration que criou a coluna: ficha que começa por "Par" é
+  // vendida como par, com duas medidas.
+  aros: descricao.startsWith("Par ") ? 2 : 1,
   estoque: 5,
   ativo: true,
 });
@@ -279,6 +289,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/3mm.png",
     imagemSmUrl: null,
     alt: "Aliança Essence, ouro 18K, 3mm, acabamento polido",
+    aros: 1,
     estoque: 5,
     ativo: true,
   },
@@ -298,6 +309,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/5mm.png",
     imagemSmUrl: null,
     alt: "Aliança Aurea, ouro 18K, 5mm, detalhe de coração cravejado",
+    aros: 1,
     estoque: 5,
     ativo: true,
   },
@@ -317,6 +329,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/3mmprata.png",
     imagemSmUrl: null,
     alt: "Aliança Elo, prata 925, 3mm, acabamento diagonal texturizado",
+    aros: 1,
     estoque: 5,
     ativo: true,
   },
@@ -336,6 +349,7 @@ export const produtos: Produto[] = [
     imagemUrl: "/modelosalianca/6mmprata.png",
     imagemSmUrl: null,
     alt: "Aliança Éter, prata 925, 6mm, friso dourado e detalhe de coração",
+    aros: 1,
     estoque: 5,
     ativo: true,
   },

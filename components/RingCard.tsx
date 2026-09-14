@@ -124,6 +124,9 @@ export function RingCard({
             precoCentavos: produto.precoCentavos,
             imagemUrl: produto.imagemUrl,
             estoque: produto.estoque,
+            aros: produto.aros,
+            tamanho: null,
+            tamanhoPar: null,
           }}
         />
       </div>

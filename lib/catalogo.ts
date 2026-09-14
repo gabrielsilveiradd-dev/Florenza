@@ -27,7 +27,7 @@ export type { Categoria, Produto, OpcaoFiltro } from "@/lib/data/catalogo-local"
 const COLUNAS_PRODUTO =
   "sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, " +
   "largura_mm, material, descricao, preco_centavos, imagem_url, imagem_sm_url, " +
-  "alt, estoque, ativo";
+  "alt, aros, estoque, ativo";
 
 type LinhaProduto = {
   sku: string;
@@ -45,6 +45,7 @@ type LinhaProduto = {
   imagem_url: string | null;
   imagem_sm_url: string | null;
   alt: string | null;
+  aros: number;
   estoque: number;
   ativo: boolean;
 };
@@ -85,6 +86,7 @@ function paraFicha(linha: LinhaProduto): Produto {
     imagemUrl: linha.imagem_url ?? "",
     imagemSmUrl: linha.imagem_sm_url,
     alt: linha.alt,
+    aros: linha.aros,
     estoque: linha.estoque,
     ativo: linha.ativo,
   };

@@ -13,21 +13,13 @@
  * a tela não mudar a cada recarga e uma captura poder ser comparada com outra.
  */
 import { produtos } from "@/lib/data/catalogo-local";
+// Só o tipo: apagado na compilação, então listas.ts importar este arquivo e
+// este importar o tipo de lá não vira dependência circular em runtime.
+import type { CupomAdmin, PedidoAdmin } from "@/lib/admin/listas";
 
-export type PedidoDemo = {
-  id: string;
-  numero: number;
-  nome: string;
-  email: string | null;
-  telefone: string | null;
-  cidade: string | null;
-  uf: string | null;
-  origem: string;
-  status: string;
-  total_centavos: number;
-  created_at: string;
-  itens: { sku: string; nome: string; preco_centavos: number; quantidade: number }[];
-};
+/* Mesmo formato do pedido real, para a ficha do painel ter o que mostrar. CPF
+ * fica vazio de propósito: nem de exemplo o projeto carrega número de CPF. */
+export type PedidoDemo = PedidoAdmin;
 
 /* Distribuição desenhada à mão em vez de sorteada: reproduz a concentração real
  * do varejo brasileiro (Sudeste pesado, Norte ralo). Um sorteio uniforme pintaria
@@ -90,22 +82,51 @@ function construirPedidos(): PedidoDemo[] {
         nome: produto.nome,
         preco_centavos: produto.precoCentavos,
         quantidade,
+        aros: produto.aros,
+        // Um em cada quatro "não sabe a medida" — o caso que a ficha precisa
+        // deixar à vista para a equipe confirmar antes de enviar.
+        tamanho: produto.aros >= 1 && i % 4 !== 0 ? 14 + (i % 8) : null,
+        tamanho_par: produto.aros === 2 && i % 4 !== 0 ? 18 + (i % 6) : null,
       };
       const nome = NOMES[i % NOMES.length];
+      const status = STATUS[i % STATUS.length];
+      const criadoEm = dataDoPedido(i, total);
+      const valor = produto.precoCentavos * quantidade;
+      const despachado = status === "enviado" || status === "entregue";
 
       lista.push({
         id: `demo-${i}`,
         numero: 1000 + i,
         nome,
         email: `${nome.split(" ")[0].toLowerCase()}@exemplo.com`,
-        telefone: null,
+        telefone: i % 2 === 0 ? `(11) 9 8765-${String(4000 + i)}` : null,
+        cpf: null,
+        cep: null,
+        logradouro: i % 3 === 0 ? "Rua das Acácias" : null,
+        endereco_numero: i % 3 === 0 ? String(100 + i) : null,
+        complemento: null,
+        bairro: i % 3 === 0 ? "Centro" : null,
         cidade,
         uf,
         origem: ORIGENS[i % ORIGENS.length],
-        status: STATUS[i % STATUS.length],
-        total_centavos: produto.precoCentavos * quantidade,
-        created_at: dataDoPedido(i, total),
+        status,
+        subtotal_centavos: valor,
+        desconto_centavos: 0,
+        cupom_codigo: null,
+        total_centavos: valor,
+        presente: i % 5 === 0,
+        mensagem_presente: i % 10 === 0 ? "Parabéns pela formatura!" : null,
+        observacoes: i % 7 === 0 ? "Entregar depois das 18h." : null,
+        codigo_rastreio: despachado ? `QB${String(123456700 + i)}BR` : null,
+        transportadora: despachado ? "Correios" : null,
+        expira_em:
+          status === "aguardando_pagamento"
+            ? new Date(new Date(criadoEm).getTime() + 48 * 3600_000).toISOString()
+            : null,
+        motivo_cancelamento: status === "cancelado" ? "Reserva vencida sem pagamento." : null,
+        created_at: criadoEm,
         itens: [item],
+        pagamentos: [],
       });
       i++;
     }
@@ -140,3 +161,34 @@ export const CLIENTES_DEMO: ClienteDemo[] = PEDIDOS_DEMO.slice(0, 22).map((pedid
   created_at: pedido.created_at,
   observacoes: i % 3 === 0 ? "Cadastrada no balcão da loja." : null,
 }));
+
+export const CUPONS_DEMO: CupomAdmin[] = [
+  {
+    codigo: "BEMVINDO10",
+    descricao: "10% na primeira compra",
+    tipo: "percentual",
+    valor: 10,
+    minimo_centavos: 0,
+    validade_ate: null,
+    limite_usos: null,
+    usos: 4,
+    ativo: true,
+    so_primeira_compra: true,
+    um_por_cliente: true,
+    created_at: "2026-08-14T12:00:00.000Z",
+  },
+  {
+    codigo: "FORMATURA150",
+    descricao: "R$ 150 em anéis de formatura acima de R$ 2.000",
+    tipo: "valor",
+    valor: 15000,
+    minimo_centavos: 200000,
+    validade_ate: "2026-12-31",
+    limite_usos: 50,
+    usos: 0,
+    ativo: false,
+    so_primeira_compra: false,
+    um_por_cliente: true,
+    created_at: "2026-09-01T12:00:00.000Z",
+  },
+];

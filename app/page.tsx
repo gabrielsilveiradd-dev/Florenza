@@ -3,6 +3,7 @@ import { ComoFunciona } from "@/components/ComoFunciona";
 import { Footer } from "@/components/Footer";
 import { HeroMedia } from "@/components/HeroMedia";
 import { Rings3D } from "@/components/Rings3D";
+import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 
 // Só a home usa a seção 3D — igual ao <link> que existia apenas em index.html.
 import "./estilos/rings-3d.css";
@@ -117,7 +118,7 @@ export default function Home() {
             clico em comprar?". Vem depois dos produtos de propósito: quem
             ainda não se interessou por uma peça não tem por que ler o
             processo. */}
-        <ComoFunciona />
+        <ComoFunciona pagamentoOnline={pagamentoOnlineAtivo()} />
       </main>
 
       <Footer />

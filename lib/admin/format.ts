@@ -33,6 +33,26 @@ export function formatarEixoValor(centavos: number): string {
 
 export const formatarData = (iso: string) => data.format(new Date(iso));
 
+/**
+ * Reais digitados → centavos. Aceita o jeito brasileiro ("2.420,00", "2420,5")
+ * e o do teclado numérico ("2420.50"). "2.420" sem vírgula é dois mil
+ * quatrocentos e vinte: ninguém digita preço de joia com três casas decimais.
+ * `null` quando não é um valor positivo — e o valor nunca passa por float
+ * guardado, só pelo arredondamento final.
+ */
+export function reaisParaCentavos(texto: string): number | null {
+  const limpo = texto.trim().replace(/R\$|\s/g, "");
+  let normal = limpo;
+  if (limpo.includes(",")) normal = limpo.replace(/\./g, "").replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(limpo)) normal = limpo.replace(/\./g, "");
+  if (!/^\d+(\.\d{1,2})?$/.test(normal)) return null;
+  const centavos = Math.round(Number(normal) * 100);
+  return centavos > 0 ? centavos : null;
+}
+
+/** "31/12/2026" a partir de uma coluna `date` ("2026-12-31"), sem passar por fuso. */
+export const formatarDia = (dia: string) => dia.split("-").reverse().join("/");
+
 export const formatarPercentual = (valor: number) => `${Math.round(valor)}%`;
 
 /** Plural sem gambiarra de "(s)". */

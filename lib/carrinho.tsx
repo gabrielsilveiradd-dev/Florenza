@@ -19,6 +19,10 @@ import { createContext, useCallback, useContext, useMemo, useSyncExternalStore }
  * chamar setState dentro de efeito, o que dispararia renderização em cascata. E
  * vem de brinde o que o outro desenho não dava: abrir o site em duas abas
  * mantém o mesmo carrinho nas duas, porque o evento `storage` avisa.
+ *
+ * UMA LINHA É PEÇA + MEDIDA, não só peça. O mesmo anel de formatura em aro 16 e
+ * em aro 20 são duas linhas — é o que chega à bancada. Por isso as operações
+ * recebem a `chave` da linha, e o teto de estoque é por PEÇA, somando as linhas.
  */
 export type ItemCarrinho = {
   sku: string;
@@ -38,21 +42,37 @@ export type ItemCarrinho = {
    * autorizar.
    */
   estoque: number;
+  /** 0 sem aro, 1 um tamanho, 2 par. */
+  aros: number;
+  /** Nulo = "não sei ainda"; ignorado quando a peça não tem aro. */
+  tamanho: number | null;
+  tamanhoPar: number | null;
 };
+
+/** Identidade da linha: a peça e as medidas escolhidas. */
+export function chaveDoItem(item: Pick<ItemCarrinho, "sku" | "tamanho" | "tamanhoPar">): string {
+  return `${item.sku}|${item.tamanho ?? "-"}|${item.tamanhoPar ?? "-"}`;
+}
+
+export type FichaDoBanco = { estoque: number; aros: number };
 
 type Carrinho = {
   itens: ItemCarrinho[];
   quantidadeTotal: number;
   totalCentavos: number;
   adicionar: (item: Omit<ItemCarrinho, "quantidade">, quantidade?: number) => void;
-  mudarQuantidade: (sku: string, quantidade: number) => void;
-  remover: (sku: string) => void;
+  mudarQuantidade: (chave: string, quantidade: number) => void;
+  /** Trocar a medida de uma linha. Se cair numa medida que já está no carrinho, as duas se juntam. */
+  mudarMedida: (chave: string, tamanho: number | null, tamanhoPar: number | null) => void;
+  remover: (chave: string) => void;
   esvaziar: () => void;
   /**
-   * Reconfere o estoque contra o banco e apara o que passou do teto.
-   * SKU ausente do mapa é peça que saiu do catálogo: vira estoque 0.
+   * Reconfere estoque e número de aros contra o banco e apara o que passou do
+   * teto. SKU ausente do mapa é peça que saiu do catálogo: vira estoque 0.
    */
-  sincronizarEstoque: (estoquePorSku: Record<string, number>) => void;
+  sincronizarEstoque: (fichas: Record<string, FichaDoBanco>) => void;
+  /** Quantas unidades da peça há no carrinho, somando todas as medidas. */
+  quantidadeDaPeca: (sku: string) => number;
   /** Falso no servidor e durante a hidratação; evita a lista piscar "vazio". */
   pronto: boolean;
 };
@@ -67,6 +87,8 @@ const VAZIO: ItemCarrinho[] = [];
  * entraria em laço infinito. Por isso o cache do texto cru ao lado do valor. */
 let cacheTexto: string | null = null;
 let cacheValor: ItemCarrinho[] = VAZIO;
+
+const numeroOuNulo = (valor: unknown) => (typeof valor === "number" ? valor : null);
 
 function lerSnapshot(): ItemCarrinho[] {
   const texto = window.localStorage.getItem(CHAVE);
@@ -90,15 +112,16 @@ function lerSnapshot(): ItemCarrinho[] {
               typeof i.precoCentavos === "number" &&
               typeof i.quantidade === "number"
           )
-          // `estoque` não existia nas versões anteriores do carrinho, e quem
-          // tinha peça guardada continua com o JSON antigo no navegador. Sem
-          // este ajuste, `Math.min(quantidade, undefined)` daria NaN e a
-          // quantidade sumiria da tela. Na dúvida, o teto é o que já está no
-          // carrinho: não tira nada de ninguém e impede somar mais até a
-          // página de carrinho reconferir com o banco.
+          // Carrinhos de versões anteriores não tinham `estoque` nem medida. Na
+          // dúvida o teto é o que já está no carrinho, e `aros` 0 até o
+          // carrinho reconferir com o banco — que devolve o número certo e faz
+          // aparecer o seletor de medida, em "não sei ainda".
           .map((i) => ({
             ...i,
             estoque: typeof i.estoque === "number" ? i.estoque : i.quantidade,
+            aros: typeof i.aros === "number" ? i.aros : 0,
+            tamanho: numeroOuNulo(i.tamanho),
+            tamanhoPar: numeroOuNulo(i.tamanhoPar),
           }))
       : VAZIO;
   } catch {
@@ -120,6 +143,22 @@ function assinar(aoMudar: () => void) {
 function gravar(itens: ItemCarrinho[]) {
   window.localStorage.setItem(CHAVE, JSON.stringify(itens));
   window.dispatchEvent(new Event(EVENTO_LOCAL));
+}
+
+const somaDaPeca = (itens: ItemCarrinho[], sku: string, exceto?: string) =>
+  itens
+    .filter((i) => i.sku === sku && chaveDoItem(i) !== exceto)
+    .reduce((s, i) => s + i.quantidade, 0);
+
+/** Junta linhas que acabaram com a mesma chave (medida trocada, peça que deixou de ser par). */
+function consolidar(itens: ItemCarrinho[]): ItemCarrinho[] {
+  const porChave = new Map<string, ItemCarrinho>();
+  for (const item of itens) {
+    const chave = chaveDoItem(item);
+    const existente = porChave.get(chave);
+    porChave.set(chave, existente ? { ...existente, quantidade: existente.quantidade + item.quantidade } : item);
+  }
+  return [...porChave.values()];
 }
 
 const ContextoCarrinho = createContext<Carrinho | null>(null);
@@ -145,65 +184,101 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
     (item: Omit<ItemCarrinho, "quantidade">, quantidade = 1) => {
       if (item.estoque <= 0) return;
       alterar((atuais) => {
-        const existente = atuais.find((i) => i.sku === item.sku);
-        if (existente) {
-          return atuais.map((i) =>
-            i.sku === item.sku
-              ? {
-                  ...i,
-                  // O estoque também se atualiza: a página que chamou acabou de
-                  // ler do banco, e esse número é mais novo que o guardado.
-                  estoque: item.estoque,
-                  quantidade: Math.min(i.quantidade + quantidade, item.estoque),
-                }
-              : i
+        const cabe = Math.max(0, item.estoque - somaDaPeca(atuais, item.sku));
+        if (cabe === 0) return atuais;
+
+        const chave = chaveDoItem(item);
+        // O estoque de todas as linhas da peça se atualiza: a página que chamou
+        // acabou de ler do banco, e esse número é mais novo que o guardado.
+        const atualizados = atuais.map((i) =>
+          i.sku === item.sku ? { ...i, estoque: item.estoque, aros: item.aros } : i
+        );
+        const soma = Math.min(quantidade, cabe);
+
+        if (atualizados.some((i) => chaveDoItem(i) === chave)) {
+          return atualizados.map((i) =>
+            chaveDoItem(i) === chave ? { ...i, quantidade: i.quantidade + soma } : i
           );
         }
-        return [...atuais, { ...item, quantidade: Math.min(quantidade, item.estoque) }];
+        return [...atualizados, { ...item, quantidade: soma }];
       });
     },
     [alterar]
   );
 
   const mudarQuantidade = useCallback(
-    (sku: string, quantidade: number) => {
-      alterar((atuais) =>
-        quantidade <= 0
-          ? atuais.filter((i) => i.sku !== sku)
-          : atuais.map((i) =>
-              i.sku === sku ? { ...i, quantidade: Math.min(quantidade, i.estoque) } : i
-            )
-      );
+    (chave: string, quantidade: number) => {
+      alterar((atuais) => {
+        const alvo = atuais.find((i) => chaveDoItem(i) === chave);
+        if (!alvo) return atuais;
+        if (quantidade <= 0) return atuais.filter((i) => chaveDoItem(i) !== chave);
+        const teto = Math.max(0, alvo.estoque - somaDaPeca(atuais, alvo.sku, chave));
+        return atuais.map((i) =>
+          chaveDoItem(i) === chave ? { ...i, quantidade: Math.min(quantidade, teto) } : i
+        );
+      });
+    },
+    [alterar]
+  );
+
+  const mudarMedida = useCallback(
+    (chave: string, tamanho: number | null, tamanhoPar: number | null) => {
+      alterar((atuais) => {
+        if (!atuais.some((i) => chaveDoItem(i) === chave)) return atuais;
+        return consolidar(
+          atuais.map((i) => (chaveDoItem(i) === chave ? { ...i, tamanho, tamanhoPar } : i))
+        );
+      });
     },
     [alterar]
   );
 
   const remover = useCallback(
-    (sku: string) => alterar((atuais) => atuais.filter((i) => i.sku !== sku)),
+    (chave: string) => alterar((atuais) => atuais.filter((i) => chaveDoItem(i) !== chave)),
     [alterar]
   );
 
   const esvaziar = useCallback(() => alterar(() => []), [alterar]);
 
   const sincronizarEstoque = useCallback(
-    (estoquePorSku: Record<string, number>) => {
+    (fichas: Record<string, FichaDoBanco>) => {
       alterar((atuais) => {
+        // O teto é por peça: a primeira linha leva o que couber, a seguinte o
+        // que sobrar. `restante` guarda quanto ainda cabe de cada SKU.
+        const restante = new Map<string, number>();
         let mudou = false;
+
         const novos = atuais.map((i) => {
-          const estoque = estoquePorSku[i.sku] ?? 0;
-          const quantidade = Math.min(i.quantidade, estoque);
-          if (estoque === i.estoque && quantidade === i.quantidade) return i;
+          const ficha = fichas[i.sku];
+          const estoque = ficha?.estoque ?? 0;
+          const aros = ficha?.aros ?? i.aros;
+          const cabe = restante.has(i.sku) ? restante.get(i.sku)! : estoque;
+          const quantidade = Math.min(i.quantidade, cabe);
+          restante.set(i.sku, cabe - quantidade);
+
+          // Peça que deixou de ser par (ou de ter aro) perde a medida que não tem.
+          const tamanho = aros >= 1 ? i.tamanho : null;
+          const tamanhoPar = aros === 2 ? i.tamanhoPar : null;
+
+          if (
+            estoque === i.estoque && aros === i.aros && quantidade === i.quantidade &&
+            tamanho === i.tamanho && tamanhoPar === i.tamanhoPar
+          ) {
+            return i;
+          }
           mudou = true;
-          return { ...i, estoque, quantidade };
+          return { ...i, estoque, aros, quantidade, tamanho, tamanhoPar };
         });
         // Devolver o array original quando nada mudou evita gravar no
         // localStorage e disparar o evento a cada visita ao carrinho — o que
         // faria a lista rerrenderizar à toa.
-        return mudou ? novos : atuais;
+        return mudou ? consolidar(novos) : atuais;
       });
     },
     [alterar]
   );
+
+  const quantidadeDaPeca = useCallback((sku: string) => somaDaPeca(itens, sku), [itens]);
 
   const valor = useMemo<Carrinho>(
     () => ({
@@ -212,12 +287,14 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
       totalCentavos: itens.reduce((s, i) => s + i.precoCentavos * i.quantidade, 0),
       adicionar,
       mudarQuantidade,
+      mudarMedida,
       remover,
       esvaziar,
       sincronizarEstoque,
+      quantidadeDaPeca,
       pronto,
     }),
-    [itens, pronto, adicionar, mudarQuantidade, remover, esvaziar, sincronizarEstoque]
+    [itens, pronto, adicionar, mudarQuantidade, mudarMedida, remover, esvaziar, sincronizarEstoque, quantidadeDaPeca]
   );
 
   return <ContextoCarrinho.Provider value={valor}>{children}</ContextoCarrinho.Provider>;

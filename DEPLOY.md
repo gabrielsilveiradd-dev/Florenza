@@ -21,6 +21,114 @@ as fotos originais de 33 MB, que alimentam o script Python e não o site.
 
 ---
 
+## Setembro de 2026 — abrir a loja para vender
+
+O site já está publicado. Esta atualização traz compra com conta, endereço
+completo e CPF, medida do aro, reserva de 48 horas, a ficha completa do pedido
+no painel, edição de preço e estoque, envio de foto, cupons, avisos de pedido,
+páginas legais e o Mercado Pago pronto para ligar. **A ordem abaixo importa.**
+
+### 1. Preencher os dados da loja
+
+Em `lib/loja.ts`: razão social, CNPJ, endereço, e-mail, WhatsApp e como a
+entrega funciona. A lei do comércio eletrônico (Decreto 7.962/2013) exige esses
+dados à vista.
+
+A loja foi publicada em 14/09/2026 **antes** de eles existirem: o build de
+produção deixa um aviso no log (antes era erro) e o que falta aparece marcado
+"a preencher" nas páginas legais. Preencha antes de vender de verdade — é só
+editar o arquivo, commitar e publicar.
+
+Leia também `/termos-de-compra`, `/trocas-e-devolucoes` e `/privacidade`. São
+texto-base, escrito a partir do que o sistema faz — passe pelo advogado ou pelo
+contador antes de abrir.
+
+### 2. Aplicar as migrations e publicar o código — juntos
+
+```bash
+npx supabase db push --linked
+```
+
+Aplica `20260914120000_pedido_entregavel_e_protegido.sql` e
+`20260914120100_pagamentos_mercado_pago.sql`. Cada uma termina numa
+conferência; tudo precisa vir `ok`, com uma exceção esperada: o segredo dos
+pagamentos aparece `PENDENTE` até o passo 5.
+
+**Publique o código logo em seguida.** Entre um passo e outro, o site antigo não
+fecha pedido, porque a função `criar_pedido` mudou de formato. O contrário é
+pior: código novo com banco velho derruba a vitrine, que passa a ler a coluna
+`aros`. Banco primeiro, código logo depois, sem intervalo.
+
+Se a conferência disser que o **pg_cron** não está ligado: Supabase →
+**Database → Extensions → pg_cron → Enable**, e rode o push de novo (a migration
+é idempotente). Sem ele, reserva vencida não volta sozinha para o estoque.
+
+### 3. Conferir o banco e acertar o estoque
+
+Abra `supabase/antes-de-abrir.sql` no SQL Editor e rode bloco a bloco. Ele
+confere as migrations e o agendamento, lista os pedidos de teste (com o comando
+para cancelar e apagar, comentado) e lista o estoque para você acertar com o que
+existe de verdade.
+
+### 4. Testar no site publicado
+
+Com uma conta de cliente: escolha uma aliança em par, as duas medidas, e feche o
+pedido com o cupom `BEMVINDO10`. Em `/admin?aba=pedidos`, abra a **Ficha** e
+confira medidas, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
+
+### 5. Ligar o Mercado Pago
+
+1. Em [mercadopago.com.br/developers](https://www.mercadopago.com.br/developers)
+   → **Suas integrações → Criar aplicação**, para pagamentos online (Checkout
+   Pro).
+2. Invente um segredo aleatório com 32 caracteres ou mais e grave no Supabase,
+   pelo SQL Editor:
+   ```sql
+   select vault.create_secret('COLE-AQUI-O-SEGREDO', 'florenza_pagamentos');
+   ```
+3. No Mercado Pago → **Webhooks → Configurar notificações**: URL
+   `https://SEU-DOMINIO/api/mercadopago/webhook`, evento **Pagamentos**. Guarde a
+   **assinatura secreta** que ele mostra.
+4. Na Vercel → **Settings → Environment Variables**, em Production:
+
+   | Variável | Valor |
+   |---|---|
+   | `MP_ACCESS_TOKEN` | Access Token da aplicação — comece pelo de **teste** (`TEST-…`) |
+   | `PAGAMENTO_SEGREDO_BANCO` | o mesmo segredo do item 2 |
+   | `MP_WEBHOOK_SECRET` | a assinatura secreta do item 3 |
+   | `NEXT_PUBLIC_SITE_URL` | `https://SEU-DOMINIO`, sem barra no fim |
+
+   Nenhuma delas leva `NEXT_PUBLIC_` além da última — com o prefixo, o valor
+   iria parar no navegador.
+5. **Redeploy** — variável nova só vale em build novo.
+6. Compre com um cartão de teste do Mercado Pago. O pedido tem que virar
+   **Pago** sozinho, e a ficha no painel mostra o pagamento. O quadro "Ligações
+   da loja", na aba Pedidos, diz **Teste** enquanto a credencial for de teste.
+7. Deu certo: troque `MP_ACCESS_TOKEN` pela credencial de **produção** e faça
+   redeploy.
+
+Enquanto este passo não for feito, nada quebra: o pedido nasce aguardando
+pagamento e o acerto é por WhatsApp, como hoje.
+
+### 6. Avisos de pedido por e-mail
+
+1. Crie a conta no [resend.com](https://resend.com) e verifique o domínio da
+   loja (os registros DNS que o Resend mostra).
+2. Na Vercel: `RESEND_API_KEY`, `AVISO_EMAIL_REMETENTE`
+   (`Florenza <pedidos@seudominio.com.br>`) e `AVISO_PEDIDO_EMAIL` (quem recebe
+   os avisos na loja). Redeploy.
+3. Opcional: `AVISO_PEDIDO_WEBHOOK_URL` e `AVISO_WEBHOOK_SEGREDO`, para um fluxo
+   do n8n mandar WhatsApp para a loja a cada pedido.
+
+### 7. E-mail de cadastro sem limite
+
+A confirmação de conta sai pelo SMTP embutido do Supabase, que manda poucas
+mensagens por hora. Com o Resend do passo 6: Supabase → **Authentication →
+Emails → SMTP Settings** → host `smtp.resend.com`, porta `465`, usuário `resend`,
+senha = a `RESEND_API_KEY`, remetente do domínio verificado.
+
+---
+
 ## Antes de tudo: os dois valores que você vai colar
 
 Guarde esta caixa aberta, ela é usada duas vezes.
@@ -151,17 +259,12 @@ para alguém:
   retorno `https://jydcgsxzinrguounnmpi.supabase.co/auth/v1/callback`. Enquanto
   não estiver ligado, o botão avisa e manda usar e-mail e senha — ninguém fica
   travado.
-- **Pagamento.** O pedido nasce em "aguardando pagamento" e o combinado é por
-  WhatsApp. O Mercado Pago é o Módulo 2 — o banco já está no formato certo para
-  recebê-lo, é plugar o webhook.
-- **Upload de foto pelo painel.** O formulário existe e o bucket também, mas o
-  envio do arquivo ainda não está ligado. Peça nova hoje entra pelo script
-  Python.
-- **E-mail em volume.** O envio usa o SMTP embutido do Supabase, que tem limite
-  de poucas mensagens por hora e não é para produção. Com movimento de verdade,
-  clientes param de receber o link de confirmação. Quando chegar essa hora,
-  plugue um serviço de e-mail (Resend, Brevo) em **Authentication → Emails →
-  SMTP Settings**.
+- **Pagamento online, enquanto a conta do Mercado Pago não for ligada.** O
+  código está pronto; sem as credenciais, o pedido nasce em "aguardando
+  pagamento" e o combinado é por WhatsApp. Passo 5 lá em cima.
+- **E-mail em volume.** Enquanto o SMTP do passo 7 não for configurado, o
+  cadastro usa o SMTP embutido do Supabase, que manda poucas mensagens por hora.
+  Com movimento de verdade, clientes param de receber o link de confirmação.
 - **Nav no celular.** Em telas de ~390px o logo e os links se sobrepõem. É bug
   de estética e você pediu para não mexer sem falar antes.
 
@@ -184,5 +287,9 @@ entrada e ligue 2FA. Dois minutos, de graça.
 Todo o schema está versionado. No SQL Editor de um projeto novo, cole
 `supabase/aplicar-tudo.sql` inteiro e execute: são as 7 migrations mais o
 catálogo. Termina numa conferência de 16 linhas — todas precisam vir `ok`.
+
+**Esse arquivo parou em agosto de 2026** e não tem as migrations mais recentes.
+Com o projeto novo linkado, prefira `npx supabase db push --linked`, que aplica
+todas as de `supabase/migrations/` na ordem.
 
 Depois troque as duas variáveis da caixa lá de cima pelas do projeto novo.

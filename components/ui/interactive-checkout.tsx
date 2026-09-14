@@ -4,7 +4,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
-import type { ItemCarrinho } from "@/lib/carrinho";
+import { useState } from "react";
+import { GuiaDeMedidas } from "@/components/GuiaDeMedidas";
+import { NAO_SEI, TAMANHOS_DE_ARO, lerEscolha, paraEscolha } from "@/lib/aros";
+import { chaveDoItem, type ItemCarrinho } from "@/lib/carrinho";
 
 /**
  * A lista do carrinho e o painel de resumo.
@@ -37,11 +40,15 @@ const formatar = (centavos: number) => moeda.format(centavos / 100);
 export function ListaDoCarrinho({
   itens,
   mudarQuantidade,
+  mudarMedida,
   remover,
+  quantidadeDaPeca,
 }: {
   itens: ItemCarrinho[];
-  mudarQuantidade: (sku: string, quantidade: number) => void;
-  remover: (sku: string) => void;
+  mudarQuantidade: (chave: string, quantidade: number) => void;
+  mudarMedida: (chave: string, tamanho: number | null, tamanhoPar: number | null) => void;
+  remover: (chave: string) => void;
+  quantidadeDaPeca: (sku: string) => number;
 }) {
   const semMovimento = useReducedMotion();
   const animacao = semMovimento
@@ -53,16 +60,64 @@ export function ListaDoCarrinho({
         transition: { opacity: { duration: 0.2 }, layout: { duration: 0.2 } },
       };
 
+  // A linha e o seletor que abriram o guia de medidas. `par` = o segundo aro.
+  const [guia, setGuia] = useState<{
+    chave: string;
+    par: boolean;
+    destino?: string;
+    peca: string;
+  } | null>(null);
+
   return (
+    <>
     <ul className="chk-lista">
       <AnimatePresence initial={false} mode="popLayout">
         {itens.map((item) => {
+          const chave = chaveDoItem(item);
           const esgotado = item.estoque <= 0;
-          const noLimite = item.quantidade >= item.estoque;
+          // O teto é da peça, somando todas as medidas dela no carrinho.
+          const noLimite = quantidadeDaPeca(item.sku) >= item.estoque;
+          const faltaMedida = item.tamanho === null || (item.aros === 2 && item.tamanhoPar === null);
+
+          const abrirGuia = (par: boolean, chaveDaLinha: string) =>
+            setGuia({
+              chave: chaveDaLinha,
+              par,
+              destino: item.aros === 2 ? (par ? "Aro 2" : "Aro 1") : undefined,
+              peca: item.nome,
+            });
+
+          /* A medida pode ser trocada aqui mesmo. É o conserto para quem
+             escolheu errado na página da peça, e é por onde carrinhos antigos
+             — de antes de existir medida — ganham uma, começando em "não sei
+             ainda". */
+          const seletor = (rotulo: string, valor: number | null, par: boolean) => (
+            <label className="chk-item__medida-campo">
+              <span>{rotulo}</span>
+              <select
+                value={paraEscolha(valor)}
+                onChange={(e) => {
+                  const escolha = lerEscolha(e.target.value);
+                  if (escolha === undefined) return;
+                  const tamanho = par ? item.tamanho : escolha;
+                  const tamanhoPar = par ? escolha : item.tamanhoPar;
+                  mudarMedida(chave, tamanho, tamanhoPar);
+                  // Trocar a medida troca a chave da linha: o guia guarda a nova.
+                  if (escolha === null) abrirGuia(par, chaveDoItem({ sku: item.sku, tamanho, tamanhoPar }));
+                }}
+                aria-label={`${rotulo} de ${item.nome}`}
+              >
+                <option value={NAO_SEI}>Não sei ainda</option>
+                {TAMANHOS_DE_ARO.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+          );
 
           return (
             <motion.li
-              key={item.sku}
+              key={chave}
               layout={!semMovimento}
               className={`chk-item${esgotado ? " is-esgotado" : ""}`}
               {...animacao}
@@ -79,7 +134,7 @@ export function ListaDoCarrinho({
                     type="button"
                     className="chk-item__tirar"
                     aria-label={`Remover ${item.nome}`}
-                    onClick={() => remover(item.sku)}
+                    onClick={() => remover(chave)}
                   >
                     <X aria-hidden size={13} />
                   </button>
@@ -100,12 +155,30 @@ export function ListaDoCarrinho({
                   </p>
                 )}
 
+                {item.aros > 0 && (
+                  <div className="chk-item__medida">
+                    {seletor(item.aros === 2 ? "Aro 1" : "Aro", item.tamanho, false)}
+                    {item.aros === 2 && seletor("Aro 2", item.tamanhoPar, true)}
+                    {/* O select já parado em "Não sei ainda" não dispara onChange
+                        ao escolher a mesma opção — daí o caminho de volta ao guia. */}
+                    {faltaMedida && (
+                      <button
+                        type="button"
+                        className="chk-item__medida-guia"
+                        onClick={() => abrirGuia(item.aros === 2 && item.tamanho !== null, chave)}
+                      >
+                        Como medir
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 <div className="chk-item__base">
                   <div className="chk-qtd">
                     <button
                       type="button"
                       aria-label={`Menos um ${item.nome}`}
-                      onClick={() => mudarQuantidade(item.sku, item.quantidade - 1)}
+                      onClick={() => mudarQuantidade(chave, item.quantidade - 1)}
                     >
                       <Minus aria-hidden size={12} />
                     </button>
@@ -114,7 +187,7 @@ export function ListaDoCarrinho({
                       type="button"
                       aria-label={`Mais um ${item.nome}`}
                       disabled={noLimite}
-                      onClick={() => mudarQuantidade(item.sku, item.quantidade + 1)}
+                      onClick={() => mudarQuantidade(chave, item.quantidade + 1)}
                     >
                       <Plus aria-hidden size={12} />
                     </button>
@@ -130,6 +203,23 @@ export function ListaDoCarrinho({
         })}
       </AnimatePresence>
     </ul>
+
+    <GuiaDeMedidas
+      aberto={guia !== null}
+      aoFechar={() => setGuia(null)}
+      destino={guia?.destino}
+      peca={guia?.peca}
+      aoEscolher={
+        guia
+          ? (n) => {
+              const linha = itens.find((i) => chaveDoItem(i) === guia.chave);
+              if (!linha) return;
+              mudarMedida(guia.chave, guia.par ? linha.tamanho : n, guia.par ? n : linha.tamanhoPar);
+            }
+          : undefined
+      }
+    />
+    </>
   );
 }
 

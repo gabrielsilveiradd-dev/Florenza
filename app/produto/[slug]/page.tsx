@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BotaoComprar } from "@/components/BotaoComprar";
+import { ComprarComMedida } from "@/components/ComprarComMedida";
 import { Footer } from "@/components/Footer";
 import {
   buscarCategoria, buscarProduto, formatarPreco, linhaDoMaterial, listarTodosOsProdutos,
 } from "@/lib/catalogo";
+import { RESERVA_HORAS, linkWhatsApp } from "@/lib/loja";
+import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 
 import "../produto.css";
 
@@ -64,6 +66,8 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
 
   const categoria = await buscarCategoria(produto.categoriaSlug);
   const retrato = categoria?.variante === "foto";
+  const pagamentoOnline = pagamentoOnlineAtivo();
+  const whatsapp = linkWhatsApp(`Olá! Tenho interesse na peça ${produto.nome}.`);
 
   // Só as linhas que a peça realmente tem: anel de formatura mostra pedra e
   // lapidação, aliança mostra largura. Uma tabela com "—" em metade das linhas
@@ -76,6 +80,7 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
     ...(produto.larguraMm != null
       ? ([["Largura", `${produto.larguraMm} mm`]] as Array<[string, string]>)
       : []),
+    ...(produto.aros === 2 ? ([["Venda", "Par — duas alianças"]] as Array<[string, string]>) : []),
   ];
 
   return (
@@ -117,7 +122,7 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
             </ul>
 
             <div className="pdp__acoes">
-              <BotaoComprar
+              <ComprarComMedida
                 className="pdp__comprar"
                 produto={{
                   sku: produto.sku,
@@ -126,12 +131,20 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                   precoCentavos: produto.precoCentavos,
                   imagemUrl: produto.imagemUrl,
                   estoque: produto.estoque,
+                  aros: produto.aros,
                 }}
               />
               {produto.estoque <= 0 ? (
                 <p className="pdp__estoque">
-                  Esta peça está sem unidades no momento. Fale com a Florenza pelo WhatsApp
-                  para saber do próximo lote ou encomendar uma igual.
+                  Esta peça está sem unidades no momento.{" "}
+                  {whatsapp ? (
+                    <a href={whatsapp} target="_blank" rel="noopener noreferrer">
+                      Fale com a Florenza pelo WhatsApp
+                    </a>
+                  ) : (
+                    "Fale com a Florenza pelo WhatsApp"
+                  )}{" "}
+                  para saber do próximo lote.
                 </p>
               ) : produto.estoque <= 2 ? (
                 <p className="pdp__estoque">
@@ -142,9 +155,16 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
               ) : null}
             </div>
 
+            {/* "Peça feita sob encomenda" saiu: o estoque é real, a peça existe e
+                a vitrine mostra quantas restam. Prometer encomenda e depois
+                recusar por falta de estoque seria as duas coisas ao mesmo tempo. */}
             <p className="pdp__nota">
-              Peça feita sob encomenda. O pagamento é combinado por WhatsApp depois que o
-              pedido chega — não há cobrança automática neste site.
+              {pagamentoOnline
+                ? "Pagamento com Pix ou cartão pelo Mercado Pago, logo depois de fechar o pedido."
+                : "O pagamento é combinado por WhatsApp depois que o pedido chega — não há cobrança automática neste site."}{" "}
+              A peça fica reservada para você por {RESERVA_HORAS} horas. Veja os{" "}
+              <Link href="/termos-de-compra">termos de compra</Link> e a{" "}
+              <Link href="/trocas-e-devolucoes">política de trocas</Link>.
             </p>
           </div>
         </div>

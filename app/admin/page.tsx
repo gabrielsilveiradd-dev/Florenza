@@ -2,19 +2,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  BadgeDollarSign, Gem, LayoutDashboard, MapPin, Package, ReceiptText,
-  ShieldAlert, TriangleAlert, Users, Wallet,
+  BadgeDollarSign, Gem, LayoutDashboard, MapPin, Package, PlugZap, ReceiptText,
+  ShieldAlert, Ticket, TriangleAlert, Users, Wallet,
 } from "lucide-react";
-import { StatCard } from "@/components/admin/Primitivos";
+import { SectionCard, StatCard } from "@/components/admin/Primitivos";
 import { VendasSection } from "@/components/admin/VendasSection";
 import { PedidosSection } from "@/components/admin/PedidosSection";
 import { ClientesSection } from "@/components/admin/ClientesSection";
 import { CatalogoSection } from "@/components/admin/CatalogoSection";
+import { CuponsSection } from "@/components/admin/CuponsSection";
 import { carregarDashboard } from "@/lib/admin/dashboard-data";
 import {
-  listarCategoriasAdmin, listarClientesAdmin, listarPedidosAdmin, listarProdutosAdmin,
+  listarCategoriasAdmin, listarClientesAdmin, listarCuponsAdmin, listarPedidosAdmin, listarProdutosAdmin,
 } from "@/lib/admin/listas";
 import { formatarPreco } from "@/lib/admin/format";
+import { avisosConfigurados } from "@/lib/avisos";
+import { camposDaLojaPendentes } from "@/lib/loja";
+import { mercadoPagoEmTeste, pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,10 +34,84 @@ const ABAS = [
   { id: "vendas", rotulo: "Vendas", icone: LayoutDashboard },
   { id: "pedidos", rotulo: "Pedidos", icone: ReceiptText },
   { id: "catalogo", rotulo: "Catálogo", icone: Gem },
+  { id: "cupons", rotulo: "Cupons", icone: Ticket },
   { id: "clientes", rotulo: "Clientes", icone: Users },
 ] as const;
 
 type AbaId = (typeof ABAS)[number]["id"];
+
+/**
+ * O que está ligado e o que não está, dito na aba onde faz diferença.
+ *
+ * Só booleanos saem daqui — nenhum valor de variável de ambiente chega à tela.
+ * Serve para a equipe não descobrir pelo cliente que o aviso de pedido não
+ * chegava, ou que o Mercado Pago ainda estava com a credencial de teste.
+ */
+function LigacoesDaLoja() {
+  const avisos = avisosConfigurados();
+  const online = pagamentoOnlineAtivo();
+  const faltam = camposDaLojaPendentes();
+
+  const itens = [
+    {
+      rotulo: "Pagamento online",
+      ok: online && !mercadoPagoEmTeste(),
+      selo: online ? (mercadoPagoEmTeste() ? "Teste" : "Ligado") : "Desligado",
+      detalhe: online
+        ? mercadoPagoEmTeste()
+          ? "Mercado Pago com credencial de TESTE — nenhum pagamento é real."
+          : "Mercado Pago recebendo Pix e cartão."
+        : "Pedidos ficam aguardando pagamento e o acerto é por WhatsApp.",
+    },
+    {
+      rotulo: "Aviso de pedido novo (e-mail)",
+      ok: avisos.emailParaLoja,
+      selo: avisos.emailParaLoja ? "Ligado" : "Desligado",
+      detalhe: avisos.emailParaLoja
+        ? "A loja recebe um e-mail a cada pedido e a cada pagamento confirmado."
+        : "Sem aviso: confira esta aba para ver pedidos novos.",
+    },
+    {
+      rotulo: "E-mail para o cliente",
+      ok: avisos.emailParaCliente,
+      selo: avisos.emailParaCliente ? "Ligado" : "Desligado",
+      detalhe: avisos.emailParaCliente
+        ? "O cliente recebe o resumo do pedido e a confirmação do pagamento."
+        : "O cliente acompanha só pela página do pedido.",
+    },
+    {
+      rotulo: "Webhook (n8n / WhatsApp)",
+      ok: avisos.webhook,
+      selo: avisos.webhook ? "Ligado" : "Desligado",
+      detalhe: avisos.webhook ? "Cada pedido novo é enviado ao fluxo configurado." : "Nenhum fluxo externo recebe os pedidos.",
+    },
+    {
+      rotulo: "Dados da loja",
+      ok: faltam.length === 0,
+      selo: faltam.length === 0 ? "Completos" : "Incompletos",
+      detalhe:
+        faltam.length === 0
+          ? "CNPJ, endereço e contatos à vista no rodapé e nas políticas."
+          : `Faltam em lib/loja.ts: ${faltam.join(", ")}. Sem eles o site não publica em produção.`,
+    },
+  ];
+
+  return (
+    <SectionCard icone={PlugZap} titulo="Ligações da loja">
+      <ul className="adm-ligacoes">
+        {itens.map((i) => (
+          <li className="adm-ligacao" key={i.rotulo}>
+            <span className={`adm-tag ${i.ok ? "adm-tag--pago" : "adm-tag--aguardando"}`}>{i.selo}</span>
+            <div>
+              <p className="adm-lista__nome">{i.rotulo}</p>
+              <p className="adm-lista__meta">{i.detalhe}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </SectionCard>
+  );
+}
 
 export default async function PaginaAdmin({
   searchParams,
@@ -67,12 +145,13 @@ export default async function PaginaAdmin({
   const pedida = (await searchParams).aba;
   const aba: AbaId = ABAS.some((a) => a.id === pedida) ? (pedida as AbaId) : "vendas";
 
-  const [dados, pedidos, clientes, produtos, categorias] = await Promise.all([
+  const [dados, pedidos, clientes, produtos, categorias, cupons] = await Promise.all([
     carregarDashboard(),
     listarPedidosAdmin(),
     listarClientesAdmin(),
     listarProdutosAdmin(),
     listarCategoriasAdmin(),
+    listarCuponsAdmin(),
   ]);
 
   const aguardando = pedidos.filter((p) => p.status === "aguardando_pagamento").length;
@@ -153,8 +232,14 @@ export default async function PaginaAdmin({
         </div>
       )}
 
-      {aba === "pedidos" && <PedidosSection pedidos={pedidos} demo={demo} />}
+      {aba === "pedidos" && (
+        <div className="flex flex-col gap-7">
+          <LigacoesDaLoja />
+          <PedidosSection pedidos={pedidos} demo={demo} />
+        </div>
+      )}
       {aba === "catalogo" && <CatalogoSection produtos={produtos} categorias={categorias} demo={demo} />}
+      {aba === "cupons" && <CuponsSection cupons={cupons} demo={demo} />}
       {aba === "clientes" && <ClientesSection clientes={clientes} demo={demo} />}
     </main>
   );

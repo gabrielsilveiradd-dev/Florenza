@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { criarConta, entrarComSenha, enviarLinkDeRecuperacao } from "@/lib/supabase/auth";
 
@@ -147,6 +148,13 @@ export function ContaFormulario({ redirect, demo }: { redirect: string; demo: bo
           {enviando && <Loader2 aria-hidden size={15} className="animate-spin" />}
           {modo === "entrar" ? "Entrar" : "Criar conta"}
         </button>
+
+        {modo === "criar" && (
+          <p className="conta__nota">
+            Ao criar a conta, você concorda com os <Link href="/termos-de-compra">termos de compra</Link> e
+            com a <Link href="/privacidade">política de privacidade</Link>.
+          </p>
+        )}
 
         {modo === "entrar" && (
           <button type="button" className="conta__link" onClick={recuperarSenha} disabled={demo}>

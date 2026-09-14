@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, Loader2, Lock, Mail, Phone, User } from "lucide-react";
 import {
   criarConta,
@@ -482,6 +483,16 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
           {modo === "entrar" ? "Entrar" : "Criar conta"}
           <ArrowRight aria-hidden size={16} className="entrar__seta" />
         </button>
+
+        {/* LGPD: quem cria a conta precisa saber, antes, o que é feito com os
+            dados. O Google também cria conta, por isso a nota fica acima dele. */}
+        {modo === "criar" && (
+          <p className="entrar__rodape" style={{ marginTop: 14 }}>
+            Ao criar a conta, você concorda com os{" "}
+            <Link className="entrar__link" href="/termos-de-compra">termos de compra</Link> e com a{" "}
+            <Link className="entrar__link" href="/privacidade">política de privacidade</Link>.
+          </p>
+        )}
 
         <div className="entrar__divisor">
           <span>ou continue com</span>

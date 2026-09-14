@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Checkout } from "@/components/Checkout";
 import { Footer } from "@/components/Footer";
 import { lerPerfil } from "@/lib/conta-servidor";
+import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -42,18 +43,8 @@ export default async function PaginaCarrinho() {
         </div>
         <Checkout
           demo={demo}
-          conta={
-            usuario && perfil
-              ? {
-                  nome: perfil.nome,
-                  telefone: perfil.telefone,
-                  email: usuario.email ?? "",
-                  cep: perfil.cep,
-                  cidade: perfil.cidade,
-                  uf: perfil.uf,
-                }
-              : null
-          }
+          pagamentoOnline={pagamentoOnlineAtivo()}
+          conta={usuario && perfil ? { ...perfil, email: usuario.email ?? "" } : null}
         />
       </main>
       <Footer />

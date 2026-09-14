@@ -335,3 +335,104 @@
   .adm-form { flex-direction: column; align-items: stretch; }
   .adm-campo { width: 100%; }
 }
+
+/* ==========================================================================
+   ACRÉSCIMOS — ficha do pedido, edição do catálogo, cupons e ligações.
+   Nada acima foi alterado. Cores: tokens, e os mesmos tons de status e de
+   erro que este arquivo já usa.
+   ========================================================================== */
+a.adm-botao { text-decoration: none; }
+.adm-botao--perigo:hover { border-color: rgba(163, 49, 44, .45); color: #a3312c; }
+
+.adm-seta { transition: transform .25s; }
+.adm-seta.is-aberta { transform: rotate(180deg); }
+
+.adm-busca { position: relative; min-width: 240px; }
+.adm-busca svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-dim); pointer-events: none; }
+.adm-busca .adm-input { min-height: 34px; padding-left: 31px; }
+
+.adm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+.adm-check input { accent-color: var(--gold-ink); }
+
+/* ---------- Ficha do pedido ---------- */
+.adm-ficha { flex: 1 1 100%; margin-top: 2px; padding-top: 16px; border-top: 1px solid var(--hairline); }
+.adm-ficha__grade { display: grid; gap: 20px 28px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.adm-ficha__bloco { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.adm-ficha__bloco p { margin: 0; line-height: 1.55; overflow-wrap: anywhere; }
+.adm-ficha__titulo {
+  margin: 0 0 6px;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.adm-ficha__acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.adm-ficha__bloco .adm-ficha__destaque {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--gold);
+  background: rgba(229, 211, 166, .2);
+  font-size: 12.5px;
+}
+.adm-ficha__itens { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.adm-ficha__itens li { display: flex; justify-content: space-between; gap: 12px; }
+.adm-ficha__itens li > span:first-child { min-width: 0; }
+.adm-ficha__itens .adm-lista__meta { display: block; }
+.adm-ficha__alerta { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.5; color: #a3312c; }
+.adm-ficha__contas {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--hairline);
+  font-size: 12.5px;
+}
+.adm-ficha__contas div { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-dim); }
+.adm-ficha__contas dd { margin: 0; }
+.adm-ficha__contas .is-total { font-size: 13.5px; color: var(--ink); }
+.adm-ficha__reserva { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 12px; }
+.adm-ficha__rodape {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* ---------- Catálogo: edição na linha e foto ---------- */
+.adm-produto__edicao { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.adm-produto__edicao .adm-input { min-height: 34px; padding: 5px 9px; }
+.adm-produto__edicao .adm-input[aria-invalid="true"] { border-color: rgba(163, 49, 44, .5); }
+
+.adm-foto { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.adm-foto img,
+.adm-foto__vazia {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  object-fit: contain;
+}
+.adm-foto__vazia { display: grid; place-items: center; color: var(--ink-dim); }
+.adm-foto__rotulo { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); transition: color .25s; }
+.adm-foto:hover .adm-foto__rotulo { color: var(--gold-ink); }
+.adm-foto input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.adm-foto:focus-within img,
+.adm-foto:focus-within .adm-foto__vazia { outline: 2px solid rgba(212, 185, 115, .45); outline-offset: 1px; }
+
+/* ---------- Ligações da loja ---------- */
+.adm-ligacoes { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin: 0; padding: 0; list-style: none; }
+.adm-ligacao { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--hairline); background: var(--ivory); }
+.adm-ligacao .adm-tag { margin-top: 2px; }
+.adm-ligacao p { margin: 0; }

@@ -313,3 +313,15 @@
   .conta__titulo--painel { font-size: 28px; }
   .conta__pedido-itens li { flex-direction: column; gap: 2px; }
 }
+
+/* ---------- Página de um pedido ---------- */
+.conta__voltar {
+  font-size: 10.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-decoration: none;
+  transition: color .25s;
+}
+.conta__voltar:hover { color: var(--gold-ink); }
+.conta__nota a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 2px; }

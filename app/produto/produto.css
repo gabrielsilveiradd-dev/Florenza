@@ -330,3 +330,220 @@
   color: var(--gold-ink);
   margin-top: 14px;
 }
+
+/* ---------- Medida do aro ----------
+ * Acréscimo: a escolha do tamanho mora dentro de `.pdp__acoes`, que é flex em
+ * linha. `flex-basis: 100%` põe o bloco numa linha própria, acima do botão,
+ * sem mexer nas regras de lá. */
+.pdp__medida { flex: 1 1 100%; min-width: 0; margin: 0; padding: 0; border: 0; }
+.pdp__medida-titulo {
+  padding: 0;
+  font-size: 10.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.pdp__medida-campos { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.pdp__medida-campo { display: flex; flex-direction: column; gap: 7px; min-width: 132px; }
+.pdp__medida-rotulo {
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.pdp__medida-select {
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  font-size: 14px;
+  color: var(--ink);
+}
+.pdp__medida-select:focus {
+  outline: 2px solid rgba(212, 185, 115, .45);
+  outline-offset: 1px;
+  border-color: var(--gold-line);
+}
+.pdp__medida-select[aria-invalid="true"] { border-color: rgba(163, 49, 44, .55); }
+.pdp__medida-dica { margin-top: 10px; font-size: 12px; line-height: 1.6; color: var(--ink-dim); max-width: 52ch; }
+.pdp__medida-erro { margin-top: 8px; font-size: 12.5px; color: #8c2a26; }
+
+.pdp__estoque a,
+.pdp__nota a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 2px; }
+
+.pdp__medida-guia {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--gold-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---------- Guia de medidas ----------
+ * Acréscimo: o popup do "Não sei ainda". Mora aqui porque a página da peça e o
+ * carrinho importam este arquivo. É um <dialog> nativo, no top layer — fica
+ * acima da nav sem disputar z-index. Reset escopado com :where(), sem cor nova. */
+html:has(.guia[open]) { overflow: hidden; }
+
+:where(.guia) :where(h2, h3, p, ol, ul, table) { margin: 0; }
+:where(.guia) button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.guia {
+  width: min(880px, calc(100vw - 32px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--gold-line);
+  border-radius: 16px;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  box-shadow: 0 24px 70px rgba(21, 19, 14, .28);
+  overflow: hidden;
+}
+.guia::backdrop { background: rgba(21, 19, 14, .52); }
+.guia__caixa {
+  display: flex;
+  flex-direction: column;
+  max-height: min(calc(100vh - 32px), 780px);
+  max-height: min(calc(100dvh - 32px), 780px);
+}
+
+.guia__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.guia__eyebrow { font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink); }
+.guia__titulo { margin-top: 6px; font-family: var(--font-serif); font-weight: 400; font-size: 28px; line-height: 1.15; }
+.guia__fechar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  color: var(--ink-dim);
+  transition: border-color .2s, color .2s;
+}
+.guia__fechar:hover { border-color: var(--gold-line); color: var(--ink); }
+
+.guia__corpo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  gap: 26px;
+  padding: 20px 24px;
+}
+.guia__subtitulo { font-family: var(--font-serif); font-weight: 400; font-size: 19px; color: var(--ink); }
+.guia__subtitulo--dicas { margin-top: 22px; }
+.guia__passos { margin-top: 12px; padding-left: 20px; display: grid; gap: 10px; font-size: 13.5px; line-height: 1.65; }
+.guia__passos,
+.guia__passos li { list-style: decimal; }
+.guia__dicas,
+.guia__dicas li { list-style: disc; }
+.guia__passos li::marker { color: var(--gold-ink); }
+.guia__passos strong { font-weight: 600; }
+.guia__dicas { margin-top: 10px; padding-left: 18px; display: grid; gap: 7px; font-size: 12.5px; line-height: 1.6; color: var(--ink-dim); }
+.guia__dicas li::marker { color: var(--gold); }
+.guia__nota { margin-top: 8px; font-size: 11.5px; line-height: 1.6; color: var(--ink-dim); }
+
+.guia__secao--tabela { display: flex; flex-direction: column; min-height: 0; }
+/* `clip`, e não `hidden`: arredonda os cantos sem virar contêiner de rolagem,
+   senão o cabeçalho da tabela deixa de grudar no topo. */
+.guia__rolagem { margin-top: 10px; border: 1px solid var(--hairline); border-radius: 10px; overflow: clip; }
+.guia__tabela { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.guia__tabela th,
+.guia__tabela td { padding: 7px 14px; border-bottom: 1px solid var(--hairline); text-align: left; font-weight: 400; }
+.guia__tabela td { text-align: right; color: var(--ink-dim); }
+.guia__tabela thead th {
+  background: var(--ivory-soft);
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.guia__tabela thead th:not(:first-child) { text-align: right; }
+.guia__tabela tbody tr:last-child > * { border-bottom: 0; }
+.guia__tabela tbody th { font-family: var(--font-serif); font-size: 17px; font-variant-numeric: lining-nums; color: var(--gold-ink); }
+/* A linha inteira é o alvo do toque: o ::after do botão cobre a <tr>. */
+.guia__tabela tr { position: relative; }
+.guia__escolher::after { content: ""; position: absolute; inset: 0; }
+.guia__escolher:focus-visible { outline: none; }
+.guia__tabela tbody tr:has(.guia__escolher):hover { background: rgba(229, 211, 166, .28); }
+.guia__tabela tbody tr:has(.guia__escolher:focus-visible) { outline: 2px solid rgba(212, 185, 115, .6); outline-offset: -2px; }
+
+.guia__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 14px 24px 18px;
+  border-top: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+}
+.guia__rodape p { flex: 1 1 260px; font-size: 12px; line-height: 1.6; color: var(--ink-dim); }
+.guia__acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+.guia__acao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .2s, background-color .2s;
+}
+.guia__acao:hover { border-color: var(--gold-line); background: rgba(229, 211, 166, .18); }
+.guia__acao--principal { border-color: var(--gold); background: var(--gold); }
+.guia__acao--principal:hover { border-color: var(--gold-ink); background: var(--gold-ink); }
+
+/* Tela larga: instruções à esquerda, tabela à direita rolando sozinha. */
+@media (min-width: 760px) {
+  .guia__corpo {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 32px;
+    overflow: hidden;
+    padding: 22px 28px;
+  }
+  .guia__secao { min-height: 0; overflow-y: auto; }
+  .guia__secao--tabela { overflow: visible; }
+  .guia__rolagem { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  /* Só aqui a tabela rola dentro de si. No celular quem rola é o corpo, que tem
+     padding — e o sticky grudaria com um vão por cima, deixando linha à mostra. */
+  .guia__tabela thead th { position: sticky; top: 0; z-index: 1; }
+}
+
+@media (max-width: 560px) {
+  .guia__topo { padding: 18px 18px 14px; }
+  .guia__titulo { font-size: 23px; }
+  .guia__corpo { padding: 16px 18px; }
+  .guia__rodape { padding: 12px 18px 16px; }
+  .guia__acoes { width: 100%; }
+  .guia__acao { flex: 1 1 auto; }
+}
