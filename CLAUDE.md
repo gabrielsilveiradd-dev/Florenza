@@ -106,7 +106,7 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 - **Ninguém é admin ainda**: o painel só abre após `update public.profiles set role = 'admin'`.
 - "Entrar com Google" exige habilitar o provedor em Authentication → Providers.
 - Mercado Pago: código pronto, falta a conta — credenciais, segredo no Vault e webhook (DEPLOY.md).
-- **Frete fictício** até escolher transportadora. A migration `20260914140000_frete_e_medida_obrigatoria.sql` **não está aplicada** em produção e sobe junto com o código — a assinatura de `criar_pedido` mudou e as consultas leem as colunas `frete_*`.
+- **Frete fictício no ar** (desde 16/09/2026) até escolher transportadora: o cliente paga os valores do bloco 10 de `antes-de-abrir.sql`.
 - Domínio: fica `florenza-virid.vercel.app` (Vercel ligada ao GitHub). Sem domínio próprio o Resend não envia (não se verifica `vercel.app`). Os e-mails de conta saem pelo SMTP de um Gmail da loja — DEPLOY.md, passo 7. **Nas páginas da conta Google só o dono mexe, à mão**: o primeiro Gmail foi suspenso por "suspeita de bots" no dia em que foi criado, depois de configurado por automação. Enquanto o SMTP apontar para uma conta sem senha de app válida, todo cadastro no site dá erro 500 ("Error sending confirmation email").
 - `lib/loja.ts` vazio: o site está no ar com "a preencher" nas páginas legais. Textos legais precisam de revisão de advogado.
 - Sem os tipos gerados do banco, há casts em `lib/admin/listas.ts` e `lib/conta-servidor.ts`.

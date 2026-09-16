@@ -50,19 +50,18 @@ npx supabase db push --linked --dry-run   # lista o que vai subir, sem aplicar
 npx supabase db push --linked
 ```
 
-`20260914120000_pedido_entregavel_e_protegido.sql` e
-`20260914120100_pagamentos_mercado_pago.sql` já foram aplicadas em 14/09/2026. A
-que falta é **`20260914140000_frete_e_medida_obrigatoria.sql`**: tabela de frete,
-medida do aro obrigatória e `criar_pedido` recebendo a forma de envio. Cada
-migration termina numa conferência; tudo precisa vir `ok`, com duas exceções
+Todas as migrations do repositório estão aplicadas: `20260914120000` e
+`20260914120100` em 14/09/2026, e **`20260914140000_frete_e_medida_obrigatoria.sql`**
+(frete, medida obrigatória, `criar_pedido` com `p_frete`) em 16/09/2026, minutos
+antes do push do código. O `--dry-run` deve dizer que não há nada para subir.
+Cada migration termina numa conferência; tudo precisa vir `ok`, com duas exceções
 esperadas: o segredo dos pagamentos fica `PENDENTE` até o passo 5, e os
 **valores de frete** ficam `PENDENTE` enquanto forem os fictícios.
 
-**Publique o código logo em seguida.** Entre um passo e outro, o site publicado
-não fecha pedido, porque `criar_pedido` mudou de formato outra vez (ganhou
-`p_frete`). O contrário é pior: código novo com banco velho quebra a conta e o
-painel, que passam a ler as colunas `frete_*`, e o carrinho não consegue cotar
-frete. Banco primeiro, código logo depois, sem intervalo.
+**Regra para a próxima migration que mude o formato de uma função ou coluna
+lida pelo site:** banco primeiro, código logo depois, sem intervalo. Com o banco
+novo e o código velho, só a função que mudou falha. Com o código novo e o banco
+velho, quebram todas as telas que leem o que ainda não existe.
 
 Se a conferência disser que o **pg_cron** não está ligado: Supabase →
 **Database → Extensions → pg_cron → Enable**, e rode o push de novo (a migration
