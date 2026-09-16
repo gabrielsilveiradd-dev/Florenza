@@ -176,11 +176,10 @@ Outros detalhes do e-mail:
   definitivo, se um dia houver domínio, é o Resend (host `smtp.resend.com`,
   usuário `resend`, senha = a `RESEND_API_KEY`).
 
-**Ao publicar a tela de nova senha** (`/conta/nova-senha`), troque também o texto
-do template "Reset password", que hoje descreve o comportamento antigo ("Entrar na
-minha conta"). Botão "Criar nova senha", e o texto dizendo que o link leva à
-escolha de uma senha nova. Troque antes do código e o e-mail promete uma tela
-que ainda não existe.
+O template "Reset password" já fala da tela de nova senha (`/conta/nova-senha`,
+publicada em 16/09/2026): assunto "Crie uma nova senha na Florenza", botão "Criar
+nova senha". Ele avisa que o link só funciona no mesmo navegador em que a troca foi
+pedida. É o limite do fluxo PKCE atual.
 
 ---
 
