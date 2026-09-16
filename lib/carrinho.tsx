@@ -44,7 +44,10 @@ export type ItemCarrinho = {
   estoque: number;
   /** 0 sem aro, 1 um tamanho, 2 par. */
   aros: number;
-  /** Nulo = "não sei ainda"; ignorado quando a peça não tem aro. */
+  /**
+   * Nulo = medida ainda não escolhida: o carrinho aceita, o fechamento do pedido
+   * não. Ignorado quando a peça não tem aro.
+   */
   tamanho: number | null;
   tamanhoPar: number | null;
 };
@@ -115,7 +118,7 @@ function lerSnapshot(): ItemCarrinho[] {
           // Carrinhos de versões anteriores não tinham `estoque` nem medida. Na
           // dúvida o teto é o que já está no carrinho, e `aros` 0 até o
           // carrinho reconferir com o banco — que devolve o número certo e faz
-          // aparecer o seletor de medida, em "não sei ainda".
+          // aparecer o seletor de medida, ainda vazio.
           .map((i) => ({
             ...i,
             estoque: typeof i.estoque === "number" ? i.estoque : i.quantidade,

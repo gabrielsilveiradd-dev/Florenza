@@ -280,6 +280,15 @@
 }
 .entrar__link:hover { color: #fff; border-color: rgba(255, 255, 255, .6); }
 
+/* ---------- Nova senha (/conta/nova-senha) ----------
+ * Mesmo cartão, sem o alternador de abas. É ele que separava o texto do
+ * formulário, então a nova senha começa um pouco mais abaixo. */
+.entrar__sub + .entrar__form { margin-top: 34px; }
+.entrar__email { font-weight: 500; color: var(--text); overflow-wrap: anywhere; }
+/* Link com cara de botão ("Pedir um novo link", "Ir para minha conta"): ocupa a
+   largura do cartão como o botão do formulário. */
+.entrar__botao--link { display: flex; margin-top: 30px; text-decoration: none; }
+
 @media (max-width: 420px) {
   .entrar__caixa { padding: 30px 22px 26px; border-radius: 14px; }
   .entrar__titulo { font-size: 29px; }

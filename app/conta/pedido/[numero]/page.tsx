@@ -10,6 +10,7 @@ import { formatarPreco } from "@/lib/catalogo";
 import { STATUS_DO_PAGAMENTO, STATUS_DO_PEDIDO, enderecoEmUmaLinha } from "@/lib/conta";
 import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { formatarCpf } from "@/lib/documentos";
+import { descreverPrazo, valorDoFrete } from "@/lib/frete";
 import { linkWhatsApp } from "@/lib/loja";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { sincronizarPagamento } from "@/lib/pagamento/sincronizar";
@@ -72,6 +73,7 @@ export default async function PaginaDoPedido({
   const reservaVencida = Boolean(pedido.expiraEm && new Date(pedido.expiraEm) <= new Date());
   const recusado = aguardando && (busca.status === "rejected" || busca.status === "failure");
   const endereco = enderecoEmUmaLinha(pedido);
+  const prazo = descreverPrazo(pedido.fretePrazoMinDias, pedido.fretePrazoMaxDias);
   const whatsapp = linkWhatsApp(`Olá! Quero falar sobre o meu pedido #${pedido.numero}.`);
 
   return (
@@ -145,6 +147,12 @@ export default async function PaginaDoPedido({
                   <dd>− {formatarPreco(pedido.descontoCentavos)}</dd>
                 </div>
               )}
+              {pedido.freteNome && (
+                <div>
+                  <dt>Frete · {pedido.freteNome}</dt>
+                  <dd>{valorDoFrete(pedido.freteCentavos)}</dd>
+                </div>
+              )}
               <div className="ped-contas__total">
                 <dt>Total</dt>
                 <dd>{formatarPreco(pedido.totalCentavos)}</dd>
@@ -155,6 +163,12 @@ export default async function PaginaDoPedido({
               <p className="ped-bloco__titulo">Entrega</p>
               <p>{pedido.nome}{pedido.cpf && ` · CPF ${formatarCpf(pedido.cpf)}`}</p>
               {endereco && <p>{endereco}</p>}
+              {pedido.freteNome && (
+                <p className="ped-status__dica">
+                  Envio {pedido.freteNome.toLowerCase()}
+                  {prazo && ` · chega em ${prazo} depois da postagem`}
+                </p>
+              )}
               {pedido.presente && (
                 <p className="ped-status__dica">
                   Para presente, sem valores na embalagem

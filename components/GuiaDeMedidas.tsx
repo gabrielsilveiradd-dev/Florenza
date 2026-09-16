@@ -3,16 +3,16 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import { TAMANHOS_DE_ARO } from "@/lib/aros";
+import { TAMANHOS_DE_ARO, medidasDoAro } from "@/lib/aros";
 import { linkWhatsApp } from "@/lib/loja";
 
 /**
- * GUIA DE MEDIDAS — abre quando alguém escolhe "Não sei ainda" (na página da
- * peça ou na linha do carrinho) e pelo "Veja como medir".
+ * GUIA DE MEDIDAS — abre pelo "Veja como medir" (página da peça e carrinho) e
+ * pelo rodapé da lista do seletor de medida.
  *
- * "Não sei ainda" continua sendo resposta válida: fechar o guia sem escolher
- * mantém essa opção. O guia existe para que menos gente precise dela — cada
- * medida a combinar é uma conversa a mais antes de a peça sair.
+ * A medida é obrigatória para fechar o pedido, e este guia é o que torna isso
+ * justo com quem não sabe o próprio aro: explica como medir em casa, e tocar
+ * numa linha da tabela já escolhe aquele número no seletor que abriu o guia.
  *
  * É um `<dialog>` nativo com `showModal()`: o navegador cuida de prender o
  * foco, fechar no Esc, pôr o popup acima da nav e devolver o foco ao seletor
@@ -26,19 +26,7 @@ import { linkWhatsApp } from "@/lib/loja";
 
 const semAssinatura = () => () => {};
 
-/**
- * Numeração brasileira: o número do aro é a circunferência interna em
- * milímetros menos 40 (aro 10 = 50 mm, aro 18 = 58 mm). O diâmetro sai da
- * circunferência — é ele que se mede com a régua num anel que já serve.
- */
-const MEDIDAS = TAMANHOS_DE_ARO.map((aro) => {
-  const circunferencia = aro + 40;
-  return {
-    aro,
-    circunferencia,
-    diametro: (circunferencia / Math.PI).toFixed(1).replace(".", ","),
-  };
-});
+const MEDIDAS = TAMANHOS_DE_ARO.map((aro) => ({ aro, ...medidasDoAro(aro) }));
 
 export function GuiaDeMedidas({
   aberto,
@@ -179,8 +167,8 @@ export function GuiaDeMedidas({
 
         <footer className="guia__rodape">
           <p>
-            Ainda sem certeza? Siga com “Não sei ainda”: a Florenza confirma a medida com você pelo
-            WhatsApp antes de enviar.
+            Ainda em dúvida? Fale com a Florenza antes de fechar o pedido — a peça sai com a medida
+            escolhida.
           </p>
           <div className="guia__acoes">
             {whatsapp && (
@@ -189,7 +177,7 @@ export function GuiaDeMedidas({
               </a>
             )}
             <button type="button" className="guia__acao guia__acao--principal" onClick={fechar}>
-              {aoEscolher ? "Continuar com “Não sei ainda”" : "Entendi"}
+              Entendi
             </button>
           </div>
         </footer>

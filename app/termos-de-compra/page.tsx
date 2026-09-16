@@ -43,8 +43,9 @@ export default function TermosDeCompra() {
           preenche o pedido, o site avisa antes de concluir.
         </li>
         <li>
-          Para anéis e alianças, a medida do aro é escolhida na página da peça. Quem ainda não sabe a
-          medida pode escolher “Não sei ainda”: a Florenza confirma com você antes de enviar.
+          Para anéis e alianças, a medida do aro é escolhida antes de fechar o pedido — na página da
+          peça ou no carrinho — e a peça é preparada nessa medida. O guia de medidas explica como
+          medir em casa; em caso de dúvida, fale com a Florenza antes de comprar.
         </li>
         <li>Há um limite de 10 unidades por peça em cada pedido.</li>
       </ul>
@@ -73,7 +74,10 @@ export default function TermosDeCompra() {
 
       <h2>Cupons de desconto</h2>
       <ul>
-        <li>Vale um cupom por pedido, e o desconto é calculado sobre o valor das peças.</li>
+        <li>
+          Vale um cupom por pedido, e o desconto é calculado sobre o valor das peças — o frete não
+          entra no desconto.
+        </li>
         <li>
           Cupons de primeira compra valem uma única vez por cliente — a conferência é feita pela conta
           e pelo CPF.
@@ -81,11 +85,16 @@ export default function TermosDeCompra() {
         <li>Se o pedido for cancelado, o uso do cupom é devolvido.</li>
       </ul>
 
-      <h2>Preparo e entrega</h2>
+      <h2>Frete, preparo e entrega</h2>
+      <p>
+        O frete e o prazo de entrega são calculados pelo CEP e aparecem no carrinho, com as formas de
+        envio disponíveis, antes de você fechar o pedido. O valor escolhido entra no total, e o prazo
+        conta a partir da postagem.
+      </p>
       {LOJA.entrega ? (
         <p>{LOJA.entrega}</p>
       ) : (
-        <p><span className="inst__pendente">a preencher: prazos de preparo, formas de envio e frete</span></p>
+        <p><span className="inst__pendente">a preencher: prazo de preparo e transportadoras</span></p>
       )}
       <p>
         Cada etapa aparece na página do pedido, em <Link href="/conta">Minha conta</Link>, e o código

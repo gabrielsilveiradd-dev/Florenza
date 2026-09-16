@@ -273,16 +273,31 @@ type Modo = "entrar" | "criar";
  * Clientes do painel exatamente como quem cria por lá; nada é sincronizado
  * depois.
  *
- * As chamadas ao Supabase moram em lib/supabase/auth.ts e não aqui: são as
- * mesmas de ContaFormulario, e o `emailRedirectTo` escrito em dois lugares é o
- * tipo de coisa que diverge em silêncio e só aparece quando um cliente recebe
- * um link para localhost.
+ * É também o formulário de /conta para quem ainda não entrou: as duas telas de
+ * entrada são uma só, para não divergirem no desenho nem no comportamento.
+ *
+ * As chamadas ao Supabase moram em lib/supabase/auth.ts e não aqui: o
+ * `emailRedirectTo` espalhado por componentes é o tipo de coisa que diverge em
+ * silêncio e só aparece quando um cliente recebe um link para localhost.
  */
-export function LoginForm({ redirect = "/", demo = false }: { redirect?: string; demo?: boolean }) {
+export function LoginForm({
+  redirect = "/",
+  demo = false,
+  erroInicial = null,
+}: {
+  redirect?: string;
+  demo?: boolean;
+  /** Recado que a página já traz ao abrir — o link vencido do e-mail, por exemplo. */
+  erroInicial?: string | null;
+}) {
   const [modo, setModo] = useState<Modo>("entrar");
   const [enviando, setEnviando] = useState<"senha" | "google" | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [recado, setRecado] = useState<string | null>(null);
+  // Fica no topo do cartão, e não junto dos erros do formulário: estes aparecem
+  // lá embaixo, depois do botão do Google, onde um recado que já vem com a
+  // página passaria despercebido. Sai quando a pessoa tenta de novo.
+  const [erroDaPagina, setErroDaPagina] = useState(erroInicial);
 
   function trocarModo(novo: Modo) {
     setModo(novo);
@@ -295,6 +310,7 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
     if (demo) return;
     setErro(null);
     setRecado(null);
+    setErroDaPagina(null);
 
     const dados = new FormData(evento.currentTarget);
     const email = String(dados.get("email") ?? "").trim();
@@ -328,10 +344,9 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
       return;
     }
 
-    // `window.location.assign` e não `router.push`, pelo mesmo motivo de
-    // ContaFormulario: a navegação do Next não recarrega o documento, e o
-    // Server Component do destino poderia rodar antes de o cookie de sessão
-    // existir — voltando para o login.
+    // `window.location.assign` e não `router.push`: a navegação do Next não
+    // recarrega o documento, e o Server Component do destino poderia rodar
+    // antes de o cookie de sessão existir — voltando para o login.
     window.location.assign(redirect);
   }
 
@@ -339,6 +354,7 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
     if (demo) return;
     setErro(null);
     setRecado(null);
+    setErroDaPagina(null);
     setEnviando("google");
 
     const { erro } = await entrarComGoogle(redirect);
@@ -357,6 +373,7 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
       return;
     }
     setErro(null);
+    setErroDaPagina(null);
     await enviarLinkDeRecuperacao(email);
     setRecado("Se houver uma conta com esse e-mail, o link de recuperação chegou na caixa de entrada.");
   }
@@ -372,6 +389,8 @@ export function LoginForm({ redirect = "/", demo = false }: { redirect?: string;
           ? "Entre para acompanhar seus pedidos e suas peças favoritas."
           : "Leva um minuto. Depois é só confirmar o e-mail."}
       </p>
+
+      {erroDaPagina && <p className="entrar__erro" role="alert">{erroDaPagina}</p>}
 
       <div className="entrar__abas" role="tablist">
         <button

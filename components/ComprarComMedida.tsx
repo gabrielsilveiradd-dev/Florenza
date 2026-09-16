@@ -3,16 +3,20 @@
 import { useState } from "react";
 import { BotaoComprar } from "@/components/BotaoComprar";
 import { GuiaDeMedidas } from "@/components/GuiaDeMedidas";
-import { NAO_SEI, TAMANHOS_DE_ARO, lerEscolha, type EscolhaDeAro } from "@/lib/aros";
+import { SeletorDeAro } from "@/components/SeletorDeAro";
 import type { ItemCarrinho } from "@/lib/carrinho";
 
 /**
  * O "Comprar" da página da peça, com a medida do aro ao lado.
  *
- * A escolha é obrigatória, mas "Não sei ainda" é uma resposta válida — boa
- * parte de quem compra anel de formatura ou aliança para presente não sabe a
- * medida, e barrar essa pessoa é perder a venda. O que não pode é a medida
- * ficar esquecida: o botão só adiciona depois de uma das opções ser escolhida.
+ * A medida é obrigatória: o botão só adiciona depois de escolhida, e o banco
+ * recusa pedido de peça com aro sem ela. Quem não sabe medir tem o guia — pelo
+ * link embaixo dos seletores ou pelo rodapé da lista de números —, e tocar numa
+ * linha da tabela preenche o seletor.
+ *
+ * Até 14/09/2026 havia "Não sei ainda", e a Florenza confirmava a medida pelo
+ * WhatsApp depois do pedido. Saiu por decisão da loja: a peça precisa sair com a
+ * medida certa, e a conversa depois da compra atrasava o envio.
  *
  * Aliança em par tem dois seletores, um para cada pessoa.
  */
@@ -23,67 +27,56 @@ export function ComprarComMedida({
   produto: Omit<ItemCarrinho, "quantidade" | "tamanho" | "tamanhoPar">;
   className: string;
 }) {
-  const [aro, setAro] = useState<EscolhaDeAro>("");
-  const [aroPar, setAroPar] = useState<EscolhaDeAro>("");
+  const [aro, setAro] = useState<number | null>(null);
+  const [aroPar, setAroPar] = useState<number | null>(null);
   const [avisar, setAvisar] = useState(false);
-  // Quem abriu o guia de medidas: um dos seletores (a tabela escolhe por ele),
-  // o link "Veja como medir" (só consulta) ou ninguém (fechado).
-  const [guia, setGuia] = useState<"aro-1" | "aro-2" | "consulta" | null>(null);
+  // Qual seletor a tabela do guia preenche; `null` = guia fechado.
+  const [guia, setGuia] = useState<"aro-1" | "aro-2" | null>(null);
 
-  const tamanho = lerEscolha(aro);
-  const tamanhoPar = lerEscolha(aroPar);
-  const falta =
-    produto.aros >= 1 && (tamanho === undefined || (produto.aros === 2 && tamanhoPar === undefined));
-
-  const seletor = (
-    id: "aro-1" | "aro-2",
-    rotulo: string,
-    valor: EscolhaDeAro,
-    mudar: (v: EscolhaDeAro) => void
-  ) => (
-    <div className="pdp__medida-campo">
-      <label className="pdp__medida-rotulo" htmlFor={id}>{rotulo}</label>
-      <select
-        className="pdp__medida-select"
-        id={id}
-        value={valor}
-        onChange={(e) => {
-          mudar(e.target.value);
-          if (e.target.value === NAO_SEI) setGuia(id);
-        }}
-        aria-invalid={avisar && valor === "" ? true : undefined}
-      >
-        <option value="">Escolha</option>
-        <option value={NAO_SEI}>Não sei ainda</option>
-        {TAMANHOS_DE_ARO.map((n) => (
-          <option key={n} value={n}>{n}</option>
-        ))}
-      </select>
-    </div>
-  );
+  const par = produto.aros === 2;
+  const falta = produto.aros >= 1 && (aro === null || (par && aroPar === null));
 
   return (
     <>
       {produto.aros > 0 && produto.estoque > 0 && (
         <>
           <fieldset className="pdp__medida" id="medida">
-            <legend className="pdp__medida-titulo">
-              {produto.aros === 2 ? "Tamanho dos aros" : "Tamanho do aro"}
-            </legend>
+            <legend className="pdp__medida-titulo">{par ? "Tamanho dos aros" : "Tamanho do aro"}</legend>
             <div className="pdp__medida-campos">
-              {seletor("aro-1", produto.aros === 2 ? "Aro 1" : "Aro", aro, setAro)}
-              {produto.aros === 2 && seletor("aro-2", "Aro 2", aroPar, setAroPar)}
+              <SeletorDeAro
+                variante="pagina"
+                rotulo={par ? "Aro 1" : "Aro"}
+                valor={aro}
+                aoMudar={setAro}
+                aoPedirGuia={() => setGuia("aro-1")}
+                invalido={avisar && aro === null}
+              />
+              {par && (
+                <SeletorDeAro
+                  variante="pagina"
+                  rotulo="Aro 2"
+                  valor={aroPar}
+                  aoMudar={setAroPar}
+                  aoPedirGuia={() => setGuia("aro-2")}
+                  invalido={avisar && aroPar === null}
+                />
+              )}
             </div>
             <p className="pdp__medida-dica">
               Não sabe a medida?{" "}
-              <button type="button" className="pdp__medida-guia" onClick={() => setGuia("consulta")}>
+              {/* No par, o link aponta para o aro que ainda falta. */}
+              <button
+                type="button"
+                className="pdp__medida-guia"
+                onClick={() => setGuia(par && aro !== null && aroPar === null ? "aro-2" : "aro-1")}
+              >
                 Veja como medir
               </button>{" "}
-              ou escolha “Não sei ainda” — a Florenza confirma com você pelo WhatsApp antes de enviar.
+              — dá para descobrir em casa, com um anel que já serve ou uma tira de papel.
             </p>
             {avisar && falta && (
               <p className="pdp__medida-erro" role="alert">
-                Escolha o tamanho {produto.aros === 2 ? "dos dois aros" : "do aro"} para continuar.
+                Escolha o tamanho {par ? "dos dois aros" : "do aro"} para continuar.
               </p>
             )}
           </fieldset>
@@ -92,12 +85,8 @@ export function ComprarComMedida({
             aberto={guia !== null}
             aoFechar={() => setGuia(null)}
             peca={produto.nome}
-            destino={produto.aros === 2 ? (guia === "aro-2" ? "Aro 2" : "Aro 1") : undefined}
-            aoEscolher={
-              guia === "aro-1" || guia === "aro-2"
-                ? (n) => (guia === "aro-1" ? setAro : setAroPar)(String(n))
-                : undefined
-            }
+            destino={par ? (guia === "aro-2" ? "Aro 2" : "Aro 1") : undefined}
+            aoEscolher={guia ? (n) => (guia === "aro-2" ? setAroPar : setAro)(n) : undefined}
           />
         </>
       )}
@@ -107,7 +96,7 @@ export function ComprarComMedida({
         modo="pagina"
         bloqueado={falta}
         aoBloquear={() => setAvisar(true)}
-        produto={{ ...produto, tamanho: tamanho ?? null, tamanhoPar: tamanhoPar ?? null }}
+        produto={{ ...produto, tamanho: aro, tamanhoPar: par ? aroPar : null }}
       />
     </>
   );

@@ -32,8 +32,9 @@ export type PagamentoAdmin = {
 
 /**
  * O pedido inteiro, como a equipe precisa para despachar: contato, CPF,
- * endereço, medida de cada aro, presente, observações e pagamentos. Antes o
- * painel mostrava nome, cidade e total — o resto só pelo SQL Editor.
+ * endereço, forma de envio, medida de cada aro, presente, observações e
+ * pagamentos. Antes o painel mostrava nome, cidade e total — o resto só pelo
+ * SQL Editor.
  */
 export type PedidoAdmin = {
   id: string;
@@ -54,6 +55,11 @@ export type PedidoAdmin = {
   subtotal_centavos: number;
   desconto_centavos: number;
   cupom_codigo: string | null;
+  /** 0 e sem nome na venda lançada à mão e nos pedidos de antes do frete. */
+  frete_nome: string | null;
+  frete_centavos: number;
+  frete_prazo_min_dias: number | null;
+  frete_prazo_max_dias: number | null;
   total_centavos: number;
   presente: boolean;
   mensagem_presente: string | null;
@@ -111,6 +117,7 @@ export type CupomAdmin = {
 const COLUNAS_PEDIDO =
   "id, numero, nome, email, telefone, cpf, cep, logradouro, endereco_numero, complemento, bairro, " +
   "cidade, uf, origem, status, subtotal_centavos, desconto_centavos, cupom_codigo, total_centavos, " +
+  "frete_nome, frete_centavos, frete_prazo_min_dias, frete_prazo_max_dias, " +
   "presente, mensagem_presente, observacoes, codigo_rastreio, transportadora, expira_em, " +
   "motivo_cancelamento, created_at, " +
   "pedido_itens(sku, nome, preco_centavos, quantidade, aros, tamanho, tamanho_par), " +

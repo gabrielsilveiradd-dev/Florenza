@@ -71,6 +71,10 @@ type LinhaResumo = {
   status: string;
   subtotal_centavos: number;
   desconto_centavos: number;
+  frete_centavos: number;
+  frete_nome: string | null;
+  frete_prazo_min_dias: number | null;
+  frete_prazo_max_dias: number | null;
   total_centavos: number;
   cupom_codigo: string | null;
   created_at: string;
@@ -110,6 +114,7 @@ type LinhaDetalhe = LinhaResumo & {
 
 const COLUNAS_RESUMO =
   "id, numero, status, subtotal_centavos, desconto_centavos, total_centavos, " +
+  "frete_centavos, frete_nome, frete_prazo_min_dias, frete_prazo_max_dias, " +
   "cupom_codigo, created_at, pago_em, enviado_em, entregue_em, expira_em, motivo_cancelamento, " +
   "codigo_rastreio, transportadora, cidade, uf, " +
   "pedido_itens (sku, nome, preco_centavos, quantidade, aros, tamanho, tamanho_par)";
@@ -137,6 +142,10 @@ function paraResumo(p: LinhaResumo): PedidoDaConta {
     status: p.status,
     subtotalCentavos: p.subtotal_centavos,
     descontoCentavos: p.desconto_centavos,
+    freteCentavos: p.frete_centavos,
+    freteNome: p.frete_nome,
+    fretePrazoMinDias: p.frete_prazo_min_dias,
+    fretePrazoMaxDias: p.frete_prazo_max_dias,
     totalCentavos: p.total_centavos,
     cupomCodigo: p.cupom_codigo,
     criadoEm: p.created_at,

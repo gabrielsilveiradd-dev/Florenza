@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CalculadoraDeFrete } from "@/components/CalculadoraDeFrete";
 import { ComprarComMedida } from "@/components/ComprarComMedida";
 import { Footer } from "@/components/Footer";
 import {
@@ -154,6 +155,8 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                 </p>
               ) : null}
             </div>
+
+            {produto.estoque > 0 && <CalculadoraDeFrete />}
 
             {/* "Peça feita sob encomenda" saiu: o estoque é real, a peça existe e
                 a vitrine mostra quantas restam. Prometer encomenda e depois

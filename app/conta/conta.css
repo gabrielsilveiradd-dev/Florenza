@@ -1,4 +1,7 @@
-/* Página de conta — entrar, criar conta, recuperar senha.
+/* Página de conta — a área de quem já entrou: pedidos e dados.
+ *
+ * Entrar, criar conta e trocar senha NÃO moram aqui: desde 16/09/2026 toda tela
+ * de entrada usa o cartão de vidro de app/entrar/entrar.css.
  *
  * Tela nova, então tem CSS próprio; mas nenhuma cor nova: tudo vem das
  * variáveis de estilos/style.css e estilos/aliancas.css, para a página parecer
@@ -21,11 +24,6 @@
   justify-content: center;
   font-family: var(--font-sans);
   color: var(--ink);
-}
-
-.conta__caixa {
-  width: 100%;
-  max-width: 430px;
 }
 
 .conta__eyebrow {
@@ -53,26 +51,6 @@
   text-align: center;
   color: var(--ink-dim);
 }
-
-/* Alternador Entrar / Criar conta */
-.conta__abas {
-  display: flex;
-  gap: 26px;
-  justify-content: center;
-  margin: 34px 0 26px;
-  border-bottom: 1px solid var(--hairline);
-}
-.conta__aba {
-  padding: 0 0 10px;
-  border-bottom: 1px solid transparent;
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  transition: color .25s, border-color .25s;
-}
-.conta__aba:hover { color: var(--ink); }
-.conta__aba.is-active { color: var(--gold-ink); border-color: var(--gold); }
 
 .conta__form { display: flex; flex-direction: column; gap: 16px; }
 
@@ -115,15 +93,6 @@
 .conta__botao:hover { background: var(--gold-ink); }
 .conta__botao:disabled { opacity: .55; cursor: not-allowed; }
 
-.conta__link {
-  align-self: center;
-  font-size: 12px;
-  color: var(--ink-dim);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.conta__link:hover { color: var(--gold-ink); }
-
 .conta__recado {
   margin-top: 18px;
   border: 1px solid var(--gold-line);
@@ -141,16 +110,6 @@
   line-height: 1.6;
   color: #8c2a26;
 }
-.conta__aviso {
-  margin-bottom: 26px;
-  border: 1px solid var(--gold-line);
-  background: rgba(229, 211, 166, .22);
-  padding: 14px 16px;
-  font-size: 12.5px;
-  line-height: 1.6;
-}
-.conta__aviso strong { color: var(--gold-ink); }
-.conta__aviso code { font-size: 12px; background: rgba(20, 18, 15, .07); padding: 1px 5px; }
 
 
 /* ==========================================================================

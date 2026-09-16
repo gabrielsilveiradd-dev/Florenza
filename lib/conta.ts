@@ -15,7 +15,10 @@ export type ItemDoPedido = {
   quantidade: number;
   /** Cópia da ficha no momento da compra: 0 sem aro, 1 um tamanho, 2 par. */
   aros: number | null;
-  /** Nulo numa peça com aro = "não sei ainda", combinado pelo WhatsApp. */
+  /**
+   * Nulo numa peça com aro só em pedido de antes de 14/09/2026, quando havia
+   * "não sei ainda" e a medida era combinada pelo WhatsApp. Hoje o banco exige.
+   */
   tamanho: number | null;
   tamanhoPar: number | null;
 };
@@ -26,6 +29,11 @@ export type PedidoDaConta = {
   status: string;
   subtotalCentavos: number;
   descontoCentavos: number;
+  /** 0 e sem nome em pedido de antes do frete existir. */
+  freteCentavos: number;
+  freteNome: string | null;
+  fretePrazoMinDias: number | null;
+  fretePrazoMaxDias: number | null;
   totalCentavos: number;
   cupomCodigo: string | null;
   criadoEm: string;

@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Gift, Loader2, LogIn } from "lucide-react";
 import { ListaDoCarrinho, ResumoDoCarrinho } from "@/components/ui/interactive-checkout";
 import { ConfirmacaoDoPedido, type PedidoConfirmado } from "@/components/pedido/ConfirmacaoDoPedido";
+import { faltaMedida } from "@/lib/aros";
 import { chaveDoItem, useCarrinho } from "@/lib/carrinho";
 import { buscarCep, cpfValido, formatarCep, formatarCpf } from "@/lib/documentos";
+import { cotarFrete, descreverPrazo, valorDoFrete, type OpcaoDeFrete } from "@/lib/frete";
 import { RESERVA_HORAS } from "@/lib/loja";
 import { createClient } from "@/lib/supabase/client";
 import { UFS } from "@/lib/geo/ufs";
@@ -22,7 +24,12 @@ const formatar = (centavos: number) => moeda.format(centavos / 100);
  * banco a garante: `criar_pedido()` não atende visitante.
  *
  * O endereço é completo porque é para ele que a peça vai, e o CEP continua
- * sendo o que acende o mapa do painel (é dele que sai a UF).
+ * sendo o que acende o mapa do painel (é dele que sai a UF). É também dele que
+ * sai o FRETE: o banco cota pelo CEP, a pessoa escolhe a modalidade, e só a
+ * modalidade vai para o servidor — o valor, `criar_pedido()` procura de novo.
+ *
+ * MEDIDA: peça com aro não fecha sem a medida escolhida. A tela avisa antes; o
+ * banco recusa de qualquer jeito.
  *
  * O pagamento depende do que estiver ligado. Com o Mercado Pago configurado, o
  * fechamento leva direto para a página de pagamento; sem ele, o pedido nasce
@@ -42,6 +49,8 @@ export type ContaDoComprador = {
   cidade: string;
   uf: string;
 };
+
+type Cotacao = { cep: string; opcoes: OpcaoDeFrete[] } | { cep: string; erro: string };
 
 export function Checkout({
   demo,
@@ -92,6 +101,12 @@ export function Checkout({
   const [erroCupom, setErroCupom] = useState<string | null>(null);
   const [conferindoCupom, setConferindoCupom] = useState(false);
 
+  /* Frete. A cotação fica guardada junto com o CEP a que responde: trocar o CEP
+   * deixa a cotação velha de lado sozinho, sem efeito para limpá-la — mesmo
+   * cuidado do cupom derivado logo abaixo. */
+  const [cotacao, setCotacao] = useState<Cotacao | null>(null);
+  const [modalidade, setModalidade] = useState<string | null>(null);
+
   const subtotalCentavos = totalCentavos;
   /* Carrinho vazio (ou todo esgotado) não tem desconto a aplicar. Isto é
    * derivado, e não um `setCupom(null)` dentro de um efeito: zerar estado em
@@ -99,8 +114,17 @@ export function Checkout({
    * fica com duas fontes de verdade para a mesma pergunta. */
   const cupomAtivo = subtotalCentavos > 0 ? cupom : null;
   const descontoCentavos = cupomAtivo?.desconto ?? 0;
-  const totalAPagar = Math.max(0, subtotalCentavos - descontoCentavos);
+
+  const cepDigitos = cep.replace(/\D/g, "");
+  const cotacaoAtual = cotacao?.cep === cepDigitos ? cotacao : null;
+  const opcoesDeFrete = cotacaoAtual && "opcoes" in cotacaoAtual ? cotacaoAtual.opcoes : [];
+  // Sem escolha feita, vale a primeira — a mais em conta, na ordem do banco.
+  const frete = opcoesDeFrete.find((o) => o.modalidade === modalidade) ?? opcoesDeFrete[0] ?? null;
+
+  // O cupom desconta as peças; o frete entra depois, inteiro — como no banco.
+  const totalAPagar = Math.max(0, subtotalCentavos - descontoCentavos) + (frete?.precoCentavos ?? 0);
   const quantidadeTotal = itens.reduce((s, i) => s + i.quantidade, 0);
+  const medidaPendente = itens.some((i) => i.quantidade > 0 && faltaMedida(i));
 
   /* O carrinho vive no localStorage e pode ter semanas: a aba fica aberta, a
    * pessoa volta depois, e nesse meio-tempo a peça pode ter acabado. Ao abrir o
@@ -177,6 +201,27 @@ export function Checkout({
     return () => { ativo = false; };
   }, [codigoAplicado, subtotalCentavos]);
 
+  /* Cotação a cada CEP completo. O estado do formulário vai junto só como
+   * reserva: o banco tira a região do próprio CEP e usa o estado apenas se não
+   * reconhecer a faixa. Quando o ViaCEP preenche o estado, a cotação roda de
+   * novo — a primeira resposta, se chegar depois, é descartada pelo `ativo`. */
+  useEffect(() => {
+    if (demo || cepDigitos.length !== 8) return;
+    let ativo = true;
+
+    (async () => {
+      const resposta = await cotarFrete(cepDigitos, uf);
+      if (!ativo) return;
+      setCotacao(
+        "erro" in resposta
+          ? { cep: cepDigitos, erro: resposta.erro }
+          : { cep: cepDigitos, opcoes: resposta.opcoes }
+      );
+    })();
+
+    return () => { ativo = false; };
+  }, [cepDigitos, uf, demo]);
+
   function aplicarCupom() {
     const limpo = codigoDigitado.trim().toUpperCase();
     if (!limpo) return;
@@ -212,9 +257,17 @@ export function Checkout({
     if (demo || !conta || itens.length === 0) return;
     setErro(null);
 
-    // Cortesia antes da ida ao servidor; quem decide é o banco.
+    // Cortesias antes da ida ao servidor; quem decide é o banco.
     if (!conta.cpf && !cpfValido(cpf)) {
       setErro("Confira o CPF: os dígitos não batem.");
+      return;
+    }
+    if (medidaPendente) {
+      setErro("Escolha a medida do aro de todas as peças antes de fechar o pedido.");
+      return;
+    }
+    if (!frete) {
+      setErro(cepDigitos.length === 8 ? "Escolha a forma de envio." : "Informe o CEP para calcular o frete.");
       return;
     }
 
@@ -222,10 +275,11 @@ export function Checkout({
     const linhas = itens.filter((i) => i.quantidade > 0);
     setEnviando(true);
 
-    /* Repare no que NÃO é mandado: preço, total e valor de desconto. O servidor
-     * repassa para `criar_pedido`, que copia o preço de `produtos` e resolve o
-     * cupom pelo código. O estoque também é conferido lá, com a linha do
-     * produto travada — o limite do carrinho é aviso; a palavra final é esta. */
+    /* Repare no que NÃO é mandado: preço, frete, total e valor de desconto. O
+     * servidor repassa para `criar_pedido`, que copia o preço de `produtos`, o
+     * frete de `fretes` pela modalidade, e resolve o cupom pelo código. O
+     * estoque também é conferido lá, com a linha do produto travada — o limite
+     * do carrinho é aviso; a palavra final é esta. */
     const resposta = await fetch("/api/pedidos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -240,6 +294,7 @@ export function Checkout({
         telefone: conta.telefone ? null : telefone,
         cpf: conta.cpf ? null : cpf,
         cep, logradouro, enderecoNumero, complemento, bairro, cidade, uf,
+        frete: frete.modalidade,
         observacoes: String(dados.get("observacoes") ?? "").trim() || null,
         cupom: cupomAtivo?.codigo ?? null,
         presente,
@@ -279,6 +334,10 @@ export function Checkout({
       })),
       subtotalCentavos,
       descontoCentavos,
+      // O valor do frete é o que o banco gravou, não o da cotação na tela.
+      freteCentavos: resultado.freteCentavos ?? frete.precoCentavos,
+      freteNome: frete.nome,
+      fretePrazo: descreverPrazo(frete.prazoMinDias, frete.prazoMaxDias),
       totalCentavos: resultado.totalCentavos ?? totalAPagar,
       cupomCodigo: cupomAtivo?.codigo ?? null,
       criadoEm: new Date().toISOString(),
@@ -446,6 +505,46 @@ export function Checkout({
               </div>
             </div>
 
+            {/* Depois do endereço, porque é do CEP que o frete sai. */}
+            <fieldset className="chk-frete">
+              <legend className="checkout__rotulo">Forma de envio</legend>
+              {demo ? (
+                <p className="checkout__dica">
+                  O frete é calculado pelo banco, e o Supabase não está conectado nesta cópia.
+                </p>
+              ) : cepDigitos.length !== 8 ? (
+                <p className="checkout__dica">Informe o CEP para ver as formas de envio.</p>
+              ) : !cotacaoAtual ? (
+                <p className="checkout__dica chk-frete__calculando">
+                  <Loader2 aria-hidden size={13} className="animate-spin" />
+                  Calculando o frete…
+                </p>
+              ) : "erro" in cotacaoAtual ? (
+                <p className="chk-cupom__erro" role="alert">{cotacaoAtual.erro}</p>
+              ) : (
+                <div className="chk-frete__opcoes">
+                  {opcoesDeFrete.map((o) => {
+                    const escolhida = frete?.modalidade === o.modalidade;
+                    return (
+                      <label key={o.modalidade} className={`chk-frete__opcao${escolhida ? " is-ativo" : ""}`}>
+                        <input
+                          type="radio" name="frete" value={o.modalidade}
+                          checked={escolhida} onChange={() => setModalidade(o.modalidade)}
+                        />
+                        <span className="chk-frete__texto">
+                          <span className="chk-frete__nome">{o.nome}</span>
+                          <span className="chk-frete__prazo">
+                            Chega em {descreverPrazo(o.prazoMinDias, o.prazoMaxDias)} depois da postagem
+                          </span>
+                        </span>
+                        <span className="chk-frete__preco">{valorDoFrete(o.precoCentavos)}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </fieldset>
+
             {/* Presente é pergunta de joalheria, não enfeite: boa parte das peças
                 é comprada para outra pessoa, e isso muda o que vai na caixa. */}
             <div className={`chk-presente${presente ? " is-ativo" : ""}`}>
@@ -484,6 +583,11 @@ export function Checkout({
         quantidadeTotal={quantidadeTotal}
         subtotalCentavos={subtotalCentavos}
         descontoCentavos={descontoCentavos}
+        frete={
+          frete
+            ? { nome: frete.nome, centavos: frete.precoCentavos }
+            : { pendente: precisaEntrar ? "calculado no fechamento" : cepDigitos.length === 8 ? "a calcular" : "informe o CEP" }
+        }
         totalCentavos={totalAPagar}
         cupom={cupomAtivo}
       >
@@ -528,6 +632,12 @@ export function Checkout({
             {enviando && <Loader2 aria-hidden size={15} className="animate-spin" />}
             {pagamentoOnline ? "Ir para o pagamento" : "Fechar pedido"} · {formatar(totalAPagar)}
           </button>
+        )}
+
+        {medidaPendente && !precisaEntrar && (
+          <p className="chk-nota chk-nota--alerta">
+            Falta escolher a medida do aro de uma peça — o seletor fica na linha dela.
+          </p>
         )}
 
         {subtotalCentavos === 0 ? (

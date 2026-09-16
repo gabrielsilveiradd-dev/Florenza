@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ContaFormulario } from "@/components/ContaFormulario";
 import { BotaoSair } from "@/components/conta/BotaoSair";
 import { DadosDaConta } from "@/components/conta/DadosDaConta";
 import { Footer } from "@/components/Footer";
 import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
+import { LoginForm, SmokeyBackground } from "@/components/ui/login-form";
 import { descreverMedida } from "@/lib/aros";
 import { formatarPreco } from "@/lib/catalogo";
 import { STATUS_DO_PEDIDO } from "@/lib/conta";
 import { lerPerfil, listarMeusPedidos } from "@/lib/conta-servidor";
+import { valorDoFrete } from "@/lib/frete";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 // O acompanhamento do pedido usa o mesmo vocabulário visual do carrinho, de
 // propósito: é a mesma tela que a pessoa viu ao comprar.
 import "../carrinho/checkout.css";
+import "../entrar/entrar.css";
 import "./conta.css";
 
 export const metadata: Metadata = {
@@ -38,10 +40,10 @@ const dia = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", ye
 export default async function PaginaConta({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>;
+  searchParams: Promise<{ redirect?: string; erro?: string }>;
 }) {
   const demo = !supabaseConfigurado();
-  const pedido = (await searchParams).redirect;
+  const { redirect: pedido, erro } = await searchParams;
 
   // Só caminho interno é aceito como destino. Sem esta checagem, um link como
   // /conta?redirect=https://site-falso.com levaria a pessoa para fora logo
@@ -55,32 +57,29 @@ export default async function PaginaConta({
     ? null
     : (await (await createClient()).auth.getUser()).data.user;
 
+  // Sem sessão, /conta é a mesma tela de /entrar — mesmo formulário, mesmo
+  // vidro sobre a fumaça. Duas telas de entrada com desenhos diferentes faziam
+  // o cliente achar que estava em outro site.
   if (!usuario) {
     return (
-      <>
-        <main className="conta">
-          <div className="conta__caixa">
-            <p className="conta__eyebrow">Florenza</p>
-            <h1 className="conta__titulo">Minha conta</h1>
-            <p className="conta__sub">
-              Acompanhe seus pedidos e guarde suas peças favoritas.
-            </p>
-
-            {demo && (
-              <div className="conta__aviso" style={{ marginTop: 26, marginBottom: 0 }}>
-                <strong>Modo demonstração.</strong> O Supabase ainda não está conectado, então
-                não é possível entrar nem criar conta. Basta preencher{" "}
-                <code>NEXT_PUBLIC_SUPABASE_URL</code> e{" "}
-                <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> em <code>.env.local</code>.
-              </div>
-            )}
-
-            <ContaFormulario redirect={redirect} demo={demo} />
-          </div>
-        </main>
-
-        <Footer />
-      </>
+      <main className="entrar">
+        <SmokeyBackground backdropBlurAmount="sm" />
+        <LoginForm
+          redirect={redirect}
+          demo={demo}
+          // O /auth/callback manda para cá quando o link do e-mail não abre
+          // sessão. Sem este recado a pessoa via só o login, sem saber que o
+          // link tinha vencido.
+          // "Outro navegador" não é detalhe: o link carrega um código que só
+          // troca por sessão no navegador que pediu (PKCE). Pedir no navegador
+          // do Instagram e abrir o e-mail no Safari dá este erro.
+          erroInicial={
+            erro === "link_invalido"
+              ? "Esse link expirou, já foi usado ou foi aberto em outro navegador. Se você já confirmou o cadastro, é só entrar. Para trocar a senha, peça um novo link em “Esqueci minha senha” e abra o e-mail no mesmo navegador."
+              : null
+          }
+        />
+      </main>
     );
   }
 
@@ -164,6 +163,12 @@ export default async function PaginaConta({
                         <div>
                           <dt>Desconto{p.cupomCodigo && ` · ${p.cupomCodigo}`}</dt>
                           <dd>− {formatarPreco(p.descontoCentavos)}</dd>
+                        </div>
+                      )}
+                      {p.freteNome && (
+                        <div>
+                          <dt>Frete · {p.freteNome}</dt>
+                          <dd>{valorDoFrete(p.freteCentavos)}</dd>
                         </div>
                       )}
                       <div className="ped-contas__total">

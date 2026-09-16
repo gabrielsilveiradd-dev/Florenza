@@ -46,18 +46,23 @@ contador antes de abrir.
 ### 2. Aplicar as migrations e publicar o código — juntos
 
 ```bash
+npx supabase db push --linked --dry-run   # lista o que vai subir, sem aplicar
 npx supabase db push --linked
 ```
 
-Aplica `20260914120000_pedido_entregavel_e_protegido.sql` e
-`20260914120100_pagamentos_mercado_pago.sql`. Cada uma termina numa
-conferência; tudo precisa vir `ok`, com uma exceção esperada: o segredo dos
-pagamentos aparece `PENDENTE` até o passo 5.
+`20260914120000_pedido_entregavel_e_protegido.sql` e
+`20260914120100_pagamentos_mercado_pago.sql` já foram aplicadas em 14/09/2026. A
+que falta é **`20260914140000_frete_e_medida_obrigatoria.sql`**: tabela de frete,
+medida do aro obrigatória e `criar_pedido` recebendo a forma de envio. Cada
+migration termina numa conferência; tudo precisa vir `ok`, com duas exceções
+esperadas: o segredo dos pagamentos fica `PENDENTE` até o passo 5, e os
+**valores de frete** ficam `PENDENTE` enquanto forem os fictícios.
 
-**Publique o código logo em seguida.** Entre um passo e outro, o site antigo não
-fecha pedido, porque a função `criar_pedido` mudou de formato. O contrário é
-pior: código novo com banco velho derruba a vitrine, que passa a ler a coluna
-`aros`. Banco primeiro, código logo depois, sem intervalo.
+**Publique o código logo em seguida.** Entre um passo e outro, o site publicado
+não fecha pedido, porque `criar_pedido` mudou de formato outra vez (ganhou
+`p_frete`). O contrário é pior: código novo com banco velho quebra a conta e o
+painel, que passam a ler as colunas `frete_*`, e o carrinho não consegue cotar
+frete. Banco primeiro, código logo depois, sem intervalo.
 
 Se a conferência disser que o **pg_cron** não está ligado: Supabase →
 **Database → Extensions → pg_cron → Enable**, e rode o push de novo (a migration
@@ -70,11 +75,18 @@ confere as migrations e o agendamento, lista os pedidos de teste (com o comando
 para cancelar e apagar, comentado) e lista o estoque para você acertar com o que
 existe de verdade.
 
+O **bloco 10** é o frete. Os valores de hoje são **fictícios** — duas
+modalidades (Econômica e Expressa) com preço e prazo por região, só para o
+cliente ver o frete somar no total. Quando a transportadora estiver escolhida,
+troque preço e prazo ali (os comandos estão prontos, comentados), desative o que
+não for usar ou crie uma modalidade nova. Frete grátis é preço `0`.
+
 ### 4. Testar no site publicado
 
 Com uma conta de cliente: escolha uma aliança em par, as duas medidas, e feche o
-pedido com o cupom `BEMVINDO10`. Em `/admin?aba=pedidos`, abra a **Ficha** e
-confira medidas, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
+pedido com o cupom `BEMVINDO10` e uma forma de envio. Confira que o desconto sai
+só das peças e o frete soma no total. Em `/admin?aba=pedidos`, abra a **Ficha** e
+confira medidas, frete, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
 
 ### 5. Ligar o Mercado Pago
 
@@ -87,7 +99,7 @@ confira medidas, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
    select vault.create_secret('COLE-AQUI-O-SEGREDO', 'florenza_pagamentos');
    ```
 3. No Mercado Pago → **Webhooks → Configurar notificações**: URL
-   `https://SEU-DOMINIO/api/mercadopago/webhook`, evento **Pagamentos**. Guarde a
+   `https://florenza-virid.vercel.app/api/mercadopago/webhook`, evento **Pagamentos**. Guarde a
    **assinatura secreta** que ele mostra.
 4. Na Vercel → **Settings → Environment Variables**, em Production:
 
@@ -96,7 +108,7 @@ confira medidas, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
    | `MP_ACCESS_TOKEN` | Access Token da aplicação — comece pelo de **teste** (`TEST-…`) |
    | `PAGAMENTO_SEGREDO_BANCO` | o mesmo segredo do item 2 |
    | `MP_WEBHOOK_SECRET` | a assinatura secreta do item 3 |
-   | `NEXT_PUBLIC_SITE_URL` | `https://SEU-DOMINIO`, sem barra no fim |
+   | `NEXT_PUBLIC_SITE_URL` | `https://florenza-virid.vercel.app`, sem barra no fim |
 
    Nenhuma delas leva `NEXT_PUBLIC_` além da última — com o prefixo, o valor
    iria parar no navegador.
@@ -110,22 +122,66 @@ confira medidas, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
 Enquanto este passo não for feito, nada quebra: o pedido nasce aguardando
 pagamento e o acerto é por WhatsApp, como hoje.
 
-### 6. Avisos de pedido por e-mail
+### 6. Avisos de pedido
 
-1. Crie a conta no [resend.com](https://resend.com) e verifique o domínio da
-   loja (os registros DNS que o Resend mostra).
-2. Na Vercel: `RESEND_API_KEY`, `AVISO_EMAIL_REMETENTE`
-   (`Florenza <pedidos@seudominio.com.br>`) e `AVISO_PEDIDO_EMAIL` (quem recebe
-   os avisos na loja). Redeploy.
-3. Opcional: `AVISO_PEDIDO_WEBHOOK_URL` e `AVISO_WEBHOOK_SEGREDO`, para um fluxo
-   do n8n mandar WhatsApp para a loja a cada pedido.
+A loja fica em `florenza-virid.vercel.app`, **sem domínio próprio** (a Vercel
+importa o repositório do GitHub). Isso muda o plano de e-mail: o Resend só envia
+de domínio verificado, e `vercel.app` não é seu para verificar.
 
-### 7. E-mail de cadastro sem limite
+- **Aviso para a loja, sem domínio:** `AVISO_PEDIDO_WEBHOOK_URL` e
+  `AVISO_WEBHOOK_SEGREDO` na Vercel, apontando para um fluxo do n8n que manda a
+  mensagem no WhatsApp (ou no e-mail) da Florenza a cada pedido e pagamento.
+- **Resend sem domínio:** o remetente de teste `onboarding@resend.dev` só entrega
+  no e-mail da própria conta do Resend. Serve para o aviso da loja
+  (`AVISO_EMAIL_REMETENTE` = `Florenza <onboarding@resend.dev>`,
+  `AVISO_PEDIDO_EMAIL` = o e-mail dessa conta), mas o e-mail para o cliente é
+  recusado — fica só o registro no log da Vercel, o pedido não é afetado.
+- **Com domínio próprio, um dia:** verifique-o no Resend, troque o remetente, e o
+  e-mail para o cliente passa a sair. Nenhuma linha de código muda.
 
-A confirmação de conta sai pelo SMTP embutido do Supabase, que manda poucas
-mensagens por hora. Com o Resend do passo 6: Supabase → **Authentication →
-Emails → SMTP Settings** → host `smtp.resend.com`, porta `465`, usuário `resend`,
-senha = a `RESEND_API_KEY`, remetente do domínio verificado.
+Variável nova só vale depois de um **Redeploy**.
+
+### 7. E-mails de cadastro e de senha — Gmail da loja
+
+O SMTP embutido do Supabase **só entrega para os membros da equipe do projeto**.
+Por isso os e-mails de conta saem de um Gmail da loja.
+
+**O primeiro Gmail foi suspenso pelo Google no mesmo dia em que foi criado**
+("suspeita de bots"). Tinha sido configurado por automação, ganhou senha de app
+na hora e recebeu logins SMTP recusados. Com o Gmail novo:
+
+1. Crie e use a conta **à mão**, pelo celular ou pelo navegador de sempre. Nada
+   de ferramenta automática nas páginas do Google.
+2. Deixe a conta com alguns dias de uso normal antes de ligar o SMTP.
+3. Ligue a verificação em duas etapas e crie uma **senha de app** ("Supabase").
+   Copie as 16 letras **sem os espaços**.
+4. Supabase → **Authentication → Emails → SMTP Settings**: host `smtp.gmail.com`,
+   porta `465`, **Sender email** e **Username** = o Gmail novo, nome "Florenza
+   Joalheria", **Password** = a senha de app. Salve.
+5. Crie uma conta de teste no site com outro e-mail e veja o link chegar. Se não
+   chegar, o motivo aparece em **Logs → Auth** no Supabase, na linha `/signup`.
+
+Enquanto o SMTP apontar para uma conta sem senha de app válida, **todo cadastro
+dá erro 500** ("Error sending confirmation email", e o registro mostra
+`535 Username and Password not accepted`). A saída provisória é desligar
+**Confirm email** em Authentication → Sign In / Providers → Email.
+
+Outros detalhes do e-mail:
+- **Templates** "Confirm sign up" e "Reset password" estão em português, no mesmo
+  visual dos avisos de pedido. Os dois usam `{{ .ConfirmationURL }}`, que passa
+  pelo `/auth/callback` do site. Os outros modelos ficam em inglês: o site não usa.
+- **Se a senha da conta Google mudar,** a senha de app morre junto e os e-mails
+  param sem aviso. Gere outra e cole em SMTP Settings.
+- Com SMTP próprio, o limite começa em 30 e-mails por hora (**Rate Limits**), e o
+  Gmail envia cerca de 500 por dia. Sobra para uma loja pequena. O caminho
+  definitivo, se um dia houver domínio, é o Resend (host `smtp.resend.com`,
+  usuário `resend`, senha = a `RESEND_API_KEY`).
+
+**Ao publicar a tela de nova senha** (`/conta/nova-senha`), troque também o texto
+do template "Reset password", que hoje descreve o comportamento antigo ("Entrar na
+minha conta"). Botão "Criar nova senha", e o texto dizendo que o link leva à
+escolha de uma senha nova. Troque antes do código e o e-mail promete uma tela
+que ainda não existe.
 
 ---
 
@@ -262,9 +318,12 @@ para alguém:
 - **Pagamento online, enquanto a conta do Mercado Pago não for ligada.** O
   código está pronto; sem as credenciais, o pedido nasce em "aguardando
   pagamento" e o combinado é por WhatsApp. Passo 5 lá em cima.
-- **E-mail em volume.** Enquanto o SMTP do passo 7 não for configurado, o
-  cadastro usa o SMTP embutido do Supabase, que manda poucas mensagens por hora.
-  Com movimento de verdade, clientes param de receber o link de confirmação.
+- **Cadastro de cliente parado até o Gmail novo.** O SMTP ainda aponta para o
+  Gmail suspenso, e todo cadastro dá erro 500. O passo 7 resolve.
+- **Frete de verdade.** A cotação por CEP funciona, mas os valores são
+  fictícios até a escolha da transportadora (passo 3, bloco 10). Não há
+  etiqueta nem rastreio automático: o código de rastreio continua digitado no
+  painel.
 - **Nav no celular.** Em telas de ~390px o logo e os links se sobrepõem. É bug
   de estética e você pediu para não mexer sem falar antes.
 

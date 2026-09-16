@@ -6,8 +6,10 @@ import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { GuiaDeMedidas } from "@/components/GuiaDeMedidas";
-import { NAO_SEI, TAMANHOS_DE_ARO, lerEscolha, paraEscolha } from "@/lib/aros";
+import { SeletorDeAro } from "@/components/SeletorDeAro";
+import { faltaMedida } from "@/lib/aros";
 import { chaveDoItem, type ItemCarrinho } from "@/lib/carrinho";
+import { valorDoFrete } from "@/lib/frete";
 
 /**
  * A lista do carrinho e o painel de resumo.
@@ -77,42 +79,30 @@ export function ListaDoCarrinho({
           const esgotado = item.estoque <= 0;
           // O teto é da peça, somando todas as medidas dela no carrinho.
           const noLimite = quantidadeDaPeca(item.sku) >= item.estoque;
-          const faltaMedida = item.tamanho === null || (item.aros === 2 && item.tamanhoPar === null);
+          const semMedida = faltaMedida(item);
 
-          const abrirGuia = (par: boolean, chaveDaLinha: string) =>
+          const abrirGuia = (par: boolean) =>
             setGuia({
-              chave: chaveDaLinha,
+              chave,
               par,
               destino: item.aros === 2 ? (par ? "Aro 2" : "Aro 1") : undefined,
               peca: item.nome,
             });
 
           /* A medida pode ser trocada aqui mesmo. É o conserto para quem
-             escolheu errado na página da peça, e é por onde carrinhos antigos
-             — de antes de existir medida — ganham uma, começando em "não sei
-             ainda". */
+             escolheu errado na página da peça, e é por onde carrinhos antigos —
+             de quando existia "não sei ainda" — ganham uma. Sem ela o pedido
+             não fecha. */
           const seletor = (rotulo: string, valor: number | null, par: boolean) => (
-            <label className="chk-item__medida-campo">
-              <span>{rotulo}</span>
-              <select
-                value={paraEscolha(valor)}
-                onChange={(e) => {
-                  const escolha = lerEscolha(e.target.value);
-                  if (escolha === undefined) return;
-                  const tamanho = par ? item.tamanho : escolha;
-                  const tamanhoPar = par ? escolha : item.tamanhoPar;
-                  mudarMedida(chave, tamanho, tamanhoPar);
-                  // Trocar a medida troca a chave da linha: o guia guarda a nova.
-                  if (escolha === null) abrirGuia(par, chaveDoItem({ sku: item.sku, tamanho, tamanhoPar }));
-                }}
-                aria-label={`${rotulo} de ${item.nome}`}
-              >
-                <option value={NAO_SEI}>Não sei ainda</option>
-                {TAMANHOS_DE_ARO.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </label>
+            <SeletorDeAro
+              variante="carrinho"
+              rotulo={rotulo}
+              descricao={`${rotulo} de ${item.nome}`}
+              valor={valor}
+              invalido={valor === null}
+              aoMudar={(n) => mudarMedida(chave, par ? item.tamanho : n, par ? n : item.tamanhoPar)}
+              aoPedirGuia={() => abrirGuia(par)}
+            />
           );
 
           return (
@@ -142,9 +132,9 @@ export function ListaDoCarrinho({
 
                 {/* Sem o código da peça: ele é chave de logística interna e não
                     diz nada a quem está comprando. Quem precisa de referência
-                    usa o número do pedido. A linha só existe quando há aviso de
-                    estoque para dar. */}
-                {(esgotado || noLimite) && (
+                    usa o número do pedido. A linha só existe quando há aviso a
+                    dar — de estoque ou de medida que falta. */}
+                {(esgotado || noLimite || semMedida) && (
                   <p className="chk-item__sku">
                     {esgotado && <span className="chk-selo">esgotada</span>}
                     {!esgotado && noLimite && (
@@ -152,6 +142,7 @@ export function ListaDoCarrinho({
                         {item.estoque === 1 ? "última peça" : `só há ${item.estoque}`}
                       </span>
                     )}
+                    {semMedida && <span className="chk-selo chk-selo--alerta">falta a medida</span>}
                   </p>
                 )}
 
@@ -159,13 +150,11 @@ export function ListaDoCarrinho({
                   <div className="chk-item__medida">
                     {seletor(item.aros === 2 ? "Aro 1" : "Aro", item.tamanho, false)}
                     {item.aros === 2 && seletor("Aro 2", item.tamanhoPar, true)}
-                    {/* O select já parado em "Não sei ainda" não dispara onChange
-                        ao escolher a mesma opção — daí o caminho de volta ao guia. */}
-                    {faltaMedida && (
+                    {semMedida && (
                       <button
                         type="button"
                         className="chk-item__medida-guia"
-                        onClick={() => abrirGuia(item.aros === 2 && item.tamanho !== null, chave)}
+                        onClick={() => abrirGuia(item.aros === 2 && item.tamanho !== null)}
                       >
                         Como medir
                       </button>
@@ -227,6 +216,7 @@ export function ResumoDoCarrinho({
   quantidadeTotal,
   subtotalCentavos,
   descontoCentavos,
+  frete,
   totalCentavos,
   cupom,
   children,
@@ -234,6 +224,8 @@ export function ResumoDoCarrinho({
   quantidadeTotal: number;
   subtotalCentavos: number;
   descontoCentavos: number;
+  /** A modalidade escolhida, ou o recado de por que ainda não há frete. */
+  frete: { nome: string; centavos: number } | { pendente: string };
   totalCentavos: number;
   cupom: { codigo: string } | null;
   /** O campo de cupom e o botão de fechar, montados por quem chama. */
@@ -265,6 +257,20 @@ export function ResumoDoCarrinho({
             <dd>− {formatar(descontoCentavos)}</dd>
           </div>
         )}
+
+        <div>
+          {"nome" in frete ? (
+            <>
+              <dt>Frete · {frete.nome}</dt>
+              <dd>{valorDoFrete(frete.centavos)}</dd>
+            </>
+          ) : (
+            <>
+              <dt>Frete</dt>
+              <dd className="chk-contas__pendente">{frete.pendente}</dd>
+            </>
+          )}
+        </div>
 
         <div className="chk-contas__total">
           <dt>Total</dt>

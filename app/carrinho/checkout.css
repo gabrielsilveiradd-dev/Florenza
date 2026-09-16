@@ -564,29 +564,14 @@
    Nada acima foi alterado; nenhuma cor nova.
    ========================================================================== */
 
-/* ---------- Medida na linha do carrinho ---------- */
-.chk-item__medida { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-.chk-item__medida-campo {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 10.5px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
-.chk-item__medida-campo select {
-  min-height: 32px;
-  padding: 4px 8px;
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  background: var(--ivory);
-  font-size: 12.5px;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--ink);
-}
-.chk-item__medida-campo select:focus { outline: 2px solid rgba(212, 185, 115, .4); outline-offset: 1px; }
+/* ---------- Medida na linha do carrinho ----------
+ * O seletor em si (.aro) mora em produto.css, que esta página também importa.
+ * Aqui fica só a linha que o acomoda. */
+.chk-item__medida { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 10px; }
+/* O card com a lista de números aberta sobe acima dos de baixo — sem isto o
+   card seguinte, que vem depois no HTML, pintaria por cima da lista. */
+.chk-item:has(.aro.is-aberto) { position: relative; z-index: 3; }
+.chk-selo--alerta { background: rgba(163, 49, 44, .08); color: #8c2a26; }
 .chk-item__medida-guia {
   align-self: center;
   padding: 0;
@@ -647,3 +632,39 @@
 /* O "Pagar agora" é <button>; `.ped-acao` foi escrito para link. */
 button.ped-acao { cursor: pointer; font-family: inherit; }
 button.ped-acao:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ---------- Forma de envio ----------
+ * Mesmo cartão do "É para presente": fio fino, dourado quando escolhido. */
+.chk-frete { min-width: 0; margin: 22px 0 0; padding: 0; border: 0; }
+.chk-frete legend { margin-bottom: 9px; padding: 0; }
+.chk-frete__calculando { display: inline-flex; align-items: center; gap: 7px; }
+.chk-frete__opcoes { display: grid; gap: 8px; }
+.chk-frete__opcao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--ivory-soft);
+  cursor: pointer;
+  transition: border-color .2s, background-color .2s;
+}
+.chk-frete__opcao:hover { border-color: var(--gold-line); }
+.chk-frete__opcao.is-ativo { border-color: var(--gold-line); background: rgba(229, 211, 166, .16); }
+.chk-frete__opcao:has(input:focus-visible) { outline: 2px solid rgba(212, 185, 115, .45); outline-offset: 1px; }
+.chk-frete__opcao input { flex: none; margin: 0; accent-color: var(--gold); }
+.chk-frete__texto { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.chk-frete__nome { font-size: 14px; color: var(--ink); }
+.chk-frete__prazo { font-size: 12px; line-height: 1.45; color: var(--ink-dim); }
+.chk-frete__preco {
+  flex: none;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-variant-numeric: lining-nums;
+  color: var(--gold-ink);
+}
+
+/* Resumo: frete que ainda não tem valor, e o aviso de medida que falta. */
+.chk-contas__pendente { font-size: 12px; font-style: italic; }
+.chk-nota--alerta { color: #8c2a26; }

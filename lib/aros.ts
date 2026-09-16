@@ -2,10 +2,14 @@
  * MEDIDA DO ARO — o vocabulário que a vitrine, o carrinho, a conta e o painel
  * compartilham.
  *
- * `aros` vem da ficha da peça (0 sem aro, 1 um tamanho, 2 par). No carrinho e
- * no pedido, tamanho `null` numa peça com aro é a escolha "não sei ainda": a
- * Florenza confirma a medida pelo WhatsApp. Não é um campo esquecido — a tela
- * obriga a escolher uma das opções, e esta é uma delas.
+ * `aros` vem da ficha da peça (0 sem aro, 1 um tamanho, 2 par). A medida é
+ * OBRIGATÓRIA para fechar o pedido: no carrinho, tamanho `null` numa peça com
+ * aro quer dizer "ainda não escolhido", e `criar_pedido()` recusa. Quem não sabe
+ * medir tem o guia de medidas.
+ *
+ * Até 14/09/2026 havia a opção "Não sei ainda", gravada como tamanho nulo. Os
+ * pedidos daquela época continuam no banco, e `descreverMedida` ainda sabe
+ * chamá-los de "a combinar".
  */
 
 /**
@@ -14,24 +18,22 @@
  */
 export const TAMANHOS_DE_ARO: number[] = Array.from({ length: 27 }, (_, i) => i + 8);
 
-/** O valor do `<select>`: número, "nao-sei" ou "" (ainda não escolhido). */
-export type EscolhaDeAro = string;
-
-export const NAO_SEI = "nao-sei";
-
-/** "" -> undefined (falta escolher) · "nao-sei" -> null · "18" -> 18 */
-export function lerEscolha(valor: EscolhaDeAro): number | null | undefined {
-  if (valor === "") return undefined;
-  if (valor === NAO_SEI) return null;
-  const numero = Number(valor);
-  return Number.isInteger(numero) ? numero : undefined;
+/**
+ * Regra brasileira: o número do aro é a circunferência interna em milímetros
+ * menos 40 (aro 10 = 50 mm, aro 18 = 58 mm). O diâmetro sai da circunferência —
+ * é ele que se mede com a régua num anel que já serve.
+ */
+export function medidasDoAro(aro: number): { circunferencia: number; diametro: string } {
+  const circunferencia = aro + 40;
+  return { circunferencia, diametro: (circunferencia / Math.PI).toFixed(1).replace(".", ",") };
 }
 
-export function paraEscolha(tamanho: number | null): EscolhaDeAro {
-  return tamanho === null ? NAO_SEI : String(tamanho);
+/** Falta escolher alguma medida desta linha do carrinho? */
+export function faltaMedida(item: { aros: number; tamanho: number | null; tamanhoPar: number | null }): boolean {
+  return (item.aros >= 1 && item.tamanho === null) || (item.aros === 2 && item.tamanhoPar === null);
 }
 
-/** "Aro 18", "Aros 16 e 20", "Aro a combinar" — ou `null` para peça sem aro. */
+/** "Aro 18", "Aros 16 e 20" — ou `null` para peça sem aro. "A combinar" só aparece em pedido antigo. */
 export function descreverMedida(
   aros: number | null | undefined,
   tamanho: number | null,

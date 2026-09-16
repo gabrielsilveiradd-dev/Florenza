@@ -9,6 +9,7 @@ import {
   CLASSE_STATUS, ROTULO_ORIGEM, ROTULO_STATUS, formatarData, formatarPreco, reaisParaCentavos,
 } from "@/lib/admin/format";
 import { descreverMedida } from "@/lib/aros";
+import { descreverPrazo, valorDoFrete } from "@/lib/frete";
 import { STATUS_DO_PAGAMENTO, enderecoEmUmaLinha } from "@/lib/conta";
 import { formatarCpf, somenteDigitos } from "@/lib/documentos";
 import { UFS } from "@/lib/geo/ufs";
@@ -431,6 +432,16 @@ function FichaDoPedido({
               <div>
                 <dt>Desconto{pedido.cupom_codigo ? ` · ${pedido.cupom_codigo}` : ""}</dt>
                 <dd>− {formatarPreco(pedido.desconto_centavos)}</dd>
+              </div>
+            )}
+            {pedido.frete_nome && (
+              <div>
+                <dt>
+                  Frete · {pedido.frete_nome}
+                  {pedido.frete_prazo_max_dias !== null &&
+                    ` (${descreverPrazo(pedido.frete_prazo_min_dias, pedido.frete_prazo_max_dias)})`}
+                </dt>
+                <dd>{valorDoFrete(pedido.frete_centavos)}</dd>
               </div>
             )}
             <div className="is-total">

@@ -11,20 +11,22 @@ import { urlDoSite } from "@/lib/url-do-site";
  * Fechar o pedido.
  *
  * Antes o navegador chamava `criar_pedido()` direto. Continua sendo o banco que
- * decide tudo — estoque, preço, cupom, reserva —, e a chamada continua saindo
- * com a sessão de quem compra. O servidor entrou no meio por duas coisas que o
- * navegador não pode fazer:
+ * decide tudo — estoque, preço, frete, cupom, reserva —, e a chamada continua
+ * saindo com a sessão de quem compra. O servidor entrou no meio por duas coisas
+ * que o navegador não pode fazer:
  *
  *   - avisar a Florenza (a chave do serviço de e-mail não vai para o navegador);
  *   - abrir a cobrança no Mercado Pago (o token da loja, menos ainda).
  *
- * O que NÃO é mandado continua não sendo: preço, total, desconto e status.
+ * O que NÃO é mandado continua não sendo: preço, frete, total, desconto e
+ * status. Do frete chega só a modalidade escolhida.
  */
 
 type PedidoCriado = {
   pedido_id: string;
   pedido_numero: number;
   pedido_total_centavos: number;
+  pedido_frete_centavos: number;
   pedido_expira_em: string;
 };
 
@@ -78,6 +80,7 @@ export async function POST(request: Request) {
     p_cupom: texto(corpo.cupom),
     p_presente: corpo.presente === true,
     p_mensagem_presente: texto(corpo.mensagemPresente),
+    p_frete: texto(corpo.frete),
   });
 
   if (error) {
@@ -136,6 +139,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     numero: criado.pedido_numero,
     totalCentavos: criado.pedido_total_centavos,
+    freteCentavos: criado.pedido_frete_centavos,
     expiraEm: criado.pedido_expira_em,
     pagamentoUrl,
     erroPagamento,

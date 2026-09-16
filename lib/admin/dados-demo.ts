@@ -83,8 +83,8 @@ function construirPedidos(): PedidoDemo[] {
         preco_centavos: produto.precoCentavos,
         quantidade,
         aros: produto.aros,
-        // Um em cada quatro "não sabe a medida" — o caso que a ficha precisa
-        // deixar à vista para a equipe confirmar antes de enviar.
+        // Um em cada quatro sem medida — pedido de antes de a medida ser
+        // obrigatória, que a ficha ainda precisa deixar à vista.
         tamanho: produto.aros >= 1 && i % 4 !== 0 ? 14 + (i % 8) : null,
         tamanho_par: produto.aros === 2 && i % 4 !== 0 ? 18 + (i % 6) : null,
       };
@@ -113,6 +113,11 @@ function construirPedidos(): PedidoDemo[] {
         subtotal_centavos: valor,
         desconto_centavos: 0,
         cupom_codigo: null,
+        // Pedidos de demonstração são anteriores ao frete: sem forma de envio.
+        frete_nome: null,
+        frete_centavos: 0,
+        frete_prazo_min_dias: null,
+        frete_prazo_max_dias: null,
         total_centavos: valor,
         presente: i % 5 === 0,
         mensagem_presente: i % 10 === 0 ? "Parabéns pela formatura!" : null,

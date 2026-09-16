@@ -97,3 +97,27 @@ order by codigo;
 --    Usos gastos em teste. Cancelar o pedido (bloco 6) já devolve o uso; este é
 --    para o caso de o contador ter ficado alto por outro motivo.
 -- update public.cupons set usos = 0 where codigo = 'BEMVINDO10';
+
+
+-- 10) Frete --------------------------------------------------------------------
+--     A migration 20260914140000 criou a tabela com VALORES FICTÍCIOS, para a
+--     loja funcionar enquanto os meios de envio não são escolhidos. Troque antes
+--     de vender. Preço em centavos; prazo em dias úteis depois da postagem. O
+--     cliente lê o `nome`; `modalidade` é o código que o carrinho manda.
+select modalidade, nome, regiao, preco_centavos, prazo_min_dias, prazo_max_dias, ordem, ativo
+from public.fretes
+order by ordem, preco_centavos;
+
+-- update public.fretes
+--    set preco_centavos = 2200, prazo_min_dias = 3, prazo_max_dias = 5
+--  where modalidade = 'economica' and regiao = 'Sudeste';
+--
+-- Desligar uma modalidade inteira (some do carrinho na hora):
+-- update public.fretes set ativo = false where modalidade = 'expressa';
+--
+-- Frete grátis numa região:
+-- update public.fretes set preco_centavos = 0 where regiao = 'Sudeste';
+--
+-- Modalidade nova (uma linha por região):
+-- insert into public.fretes (modalidade, regiao, nome, preco_centavos, prazo_min_dias, prazo_max_dias, ordem)
+-- values ('retirada', 'Sudeste', 'Retirada na loja', 0, 0, 1, 0);

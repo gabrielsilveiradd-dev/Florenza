@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BotaoPagar } from "@/components/pedido/BotaoPagar";
 import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
 import { descreverMedida } from "@/lib/aros";
+import { valorDoFrete } from "@/lib/frete";
 import { linkWhatsApp } from "@/lib/loja";
 
 export type PedidoConfirmado = {
@@ -21,6 +22,10 @@ export type PedidoConfirmado = {
   }>;
   subtotalCentavos: number;
   descontoCentavos: number;
+  freteCentavos: number;
+  freteNome: string | null;
+  /** "3 a 6 dias úteis" — o prazo da modalidade escolhida. */
+  fretePrazo: string | null;
   totalCentavos: number;
   cupomCodigo: string | null;
   criadoEm: string;
@@ -119,6 +124,12 @@ export function ConfirmacaoDoPedido({
                 <dd>− {formatar(pedido.descontoCentavos)}</dd>
               </div>
             )}
+            {pedido.freteNome && (
+              <div>
+                <dt>Frete · {pedido.freteNome}</dt>
+                <dd>{valorDoFrete(pedido.freteCentavos)}</dd>
+              </div>
+            )}
             <div className="ped-contas__total">
               <dt>Total</dt>
               <dd>{formatar(pedido.totalCentavos)}</dd>
@@ -160,6 +171,12 @@ export function ConfirmacaoDoPedido({
           <p className="chk-nota">
             As peças ficam reservadas para você até <strong>{dataHora.format(new Date(pedido.expiraEm))}</strong>.
             Sem pagamento até lá, elas voltam para a vitrine.
+          </p>
+        )}
+
+        {pedido.freteNome && pedido.fretePrazo && (
+          <p className="chk-nota">
+            Envio {pedido.freteNome.toLowerCase()}: chega em {pedido.fretePrazo} depois da postagem.
           </p>
         )}
 

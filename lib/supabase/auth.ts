@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * As quatro ações de conta, num lugar só.
+ * As ações de conta, num lugar só.
  *
  * Existem duas telas de entrada — /entrar, de tela cheia, e /conta, que também
  * lista pedidos. Elas têm marcação e visual próprios, mas a conversa com o
@@ -105,8 +105,36 @@ export async function entrarComGoogle(destino: string): Promise<Resultado> {
 
 export async function enviarLinkDeRecuperacao(email: string): Promise<void> {
   const supabase = createClient();
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo: retornoPara("/conta") });
+  // O link do e-mail entra na conta pelo /auth/callback e cai direto na tela de
+  // nova senha. Antes caía em /conta, e a pessoa entrava sem nunca trocar a
+  // senha esquecida — na visita seguinte, precisava de outro link.
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: retornoPara("/conta/nova-senha") });
   // Sem retorno de propósito: quem chama responde a mesma coisa dando certo ou
   // errado. Dizer "esse e-mail não existe" transformaria o formulário num
   // verificador de quem é cliente da joalheria.
+}
+
+/** Grava a nova senha de quem já está com a sessão aberta pelo link de recuperação. */
+export async function trocarSenha(senha: string): Promise<Resultado> {
+  const supabase = createClient();
+  const { error } = await supabase.auth.updateUser({ password: senha });
+
+  if (!error) return { erro: null };
+
+  const codigo = error.code ?? "";
+  const texto = error.message.toLowerCase();
+
+  if (codigo === "same_password") {
+    return { erro: "A nova senha precisa ser diferente da anterior." };
+  }
+  if (codigo === "weak_password" || texto.includes("password should")) {
+    return { erro: "A senha precisa de ao menos 8 caracteres." };
+  }
+  // Sessão que venceu com a tela aberta, ou "troca segura de senha" ligada no
+  // painel do Supabase pedindo login recente: nos dois casos o caminho é um
+  // link novo, que abre uma sessão nova.
+  if (codigo === "reauthentication_needed" || codigo === "session_not_found" || texto.includes("session")) {
+    return { erro: "O acesso por este link expirou. Peça um novo em “Esqueci minha senha”." };
+  }
+  return { erro: "Não foi possível salvar a nova senha. Tente de novo em instantes." };
 }

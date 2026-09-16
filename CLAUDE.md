@@ -22,6 +22,7 @@ Não há testes nem formatter configurados.
 - Cascata aditiva: `style` → `aliancas` → `categoria`. Nenhuma camada redefine a anterior.
 - **Tailwind entra sem preflight**, de propósito — o reset desmontaria o site. Por viver em `@layer utilities`, ele perde de qualquer CSS comum: as utilities servem às telas novas e não alcançam a vitrine nem por acidente.
 - **Não rode `shadcn init`**: ele escreve `@layer base` com `*` e `body`, que é o preflight por outro nome. `components/ui/` é só uma pasta.
+- **Toda tela de entrada e de senha usa o mesmo desenho:** cartão de vidro sobre a fumaça (`SmokeyBackground` + `app/entrar/entrar.css`). Isso vale para `/entrar`, `/conta` sem sessão (renderiza o mesmo `LoginForm`) e `/conta/nova-senha`. Tela nova desse tipo segue igual. `conta.css` fica só para a área logada.
 - Telas novas (`/admin`, `/conta`, `/entrar`) têm CSS próprio e usam os tokens existentes. Reset escopado com `:where()` (especificidade zero), senão `.adm button` vence `.adm-botao`.
 - Exceção única: a nav em `app/globals.css`. Seletor lá precisa de **dois níveis** (`.nav .nav__pilula`) para vencer o `style.css`, importado depois.
 - Bugs visuais conhecidos só se corrigem com aprovação — consertar é mudar estética.
@@ -67,10 +68,12 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 
 - Consultas em `lib/conta-servidor.ts`, separadas de `lib/conta.ts` porque este é importado por componente de cliente e aquele puxa `next/headers` — juntos, o build quebra.
 - **Nenhuma consulta filtra por `user_id`**: quem filtra é a RLS. Repetir o filtro daria a impressão de que ele é a proteção.
+- Links de e-mail (confirmação, recuperação) voltam por `/auth/callback`, que troca o código por sessão. "Esqueci minha senha" leva a `/conta/nova-senha` (`trocarSenha` → `updateUser`). Link vencido ou já usado cai em `/conta?erro=link_invalido`, que explica o que houve. Os textos dos e-mails moram no painel do Supabase (Authentication → Emails → Templates), não no repositório.
 - **Cartão não entra neste banco** — "forma de pagamento" é preferência declarada.
 - Nome/telefone/e-mail/CPF não são editáveis no checkout (senão o mesmo cliente aparece com três grafias); o que a conta ainda não tem é pedido uma vez e gravado nela. Endereço completo é livre a cada pedido.
 - CPF: `cpf_valido()` no banco (CHECK em `profiles` e `pedidos`), espelhado em `lib/documentos.ts` só por cortesia.
-- Medida do aro: `produtos.aros` (0, 1 ou 2) decide quantos seletores a página da peça mostra; `tamanho`/`tamanho_par` nulos em `pedido_itens` = "não sei ainda". No carrinho, a linha é `sku|tamanho|tamanhoPar`. Escolher "Não sei ainda" abre `GuiaDeMedidas` (`<dialog>` nativo; tabela pela regra brasileira, aro = circunferência − 40 mm), e tocar numa linha preenche o seletor.
+- Medida do aro: `produtos.aros` (0, 1 ou 2) decide quantos seletores a página da peça mostra. **A medida é obrigatória** (desde 14/09/2026): `criar_pedido()` recusa peça com aro sem `tamanho`, e par sem `tamanho_par`. Nulo em `pedido_itens` só existe em pedido antigo e aparece como "a combinar". No carrinho, a linha é `sku|tamanho|tamanhoPar` e aceita medida vazia — o fechamento, não. O seletor é `components/SeletorDeAro.tsx` (combobox no padrão APG, sem `<select>` nativo; CSS `.aro` em `app/produto/produto.css`). "Veja como medir" abre `GuiaDeMedidas` (`<dialog>` nativo; regra brasileira, aro = circunferência − 40 mm), e tocar numa linha da tabela preenche o seletor.
+- Frete: tabela `fretes` (modalidade × região), `uf_do_cep()` e `cotar_frete()` (anon pode cotar). **O navegador manda só a modalidade**, como no cupom; `criar_pedido()` confere se o CEP é do estado escolhido, busca preço e prazo pela região da UF e grava `frete_*` no pedido. Total = máx(0, subtotal − desconto) + frete — **cupom não desconta frete**. Cotação na página da peça (`CalculadoraDeFrete`) e no checkout, ambos por `lib/frete.ts`. Os valores atuais são **fictícios** (`supabase/antes-de-abrir.sql`, bloco 10).
 - A confirmação **não promete o que não acontece**: nada de "pagamento aprovado" antes da confirmação real, e toda copy sobre pagamento depende de `pagamentoOnlineAtivo()`.
 - `/conta/pedido/[numero]` também sincroniza o pagamento na volta do Mercado Pago — o webhook não chega no localhost e não tem hora marcada.
 - Datas de etapa vêm da trigger `pedidos_carimba_etapas`, nunca digitadas.
@@ -103,6 +106,8 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 - **Ninguém é admin ainda**: o painel só abre após `update public.profiles set role = 'admin'`.
 - "Entrar com Google" exige habilitar o provedor em Authentication → Providers.
 - Mercado Pago: código pronto, falta a conta — credenciais, segredo no Vault e webhook (DEPLOY.md).
+- **Frete fictício** até escolher transportadora. A migration `20260914140000_frete_e_medida_obrigatoria.sql` **não está aplicada** em produção e sobe junto com o código — a assinatura de `criar_pedido` mudou e as consultas leem as colunas `frete_*`.
+- Domínio: fica `florenza-virid.vercel.app` (Vercel ligada ao GitHub). Sem domínio próprio o Resend não envia (não se verifica `vercel.app`). Os e-mails de conta saem pelo SMTP de um Gmail da loja — DEPLOY.md, passo 7. **Nas páginas da conta Google só o dono mexe, à mão**: o primeiro Gmail foi suspenso por "suspeita de bots" no dia em que foi criado, depois de configurado por automação. Enquanto o SMTP apontar para uma conta sem senha de app válida, todo cadastro no site dá erro 500 ("Error sending confirmation email").
 - `lib/loja.ts` vazio: o site está no ar com "a preencher" nas páginas legais. Textos legais precisam de revisão de advogado.
 - Sem os tipos gerados do banco, há casts em `lib/admin/listas.ts` e `lib/conta-servidor.ts`.
 - `supabase/aplicar-tudo.sql` está desatualizado (não tem as migrations de 14/09/2026) — use `db push`.

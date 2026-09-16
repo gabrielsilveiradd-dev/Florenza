@@ -1,5 +1,6 @@
 import { descreverMedida } from "@/lib/aros";
 import { enderecoEmUmaLinha, type PedidoDetalhado } from "@/lib/conta";
+import { valorDoFrete } from "@/lib/frete";
 import { LOJA, linkWhatsAppDoCliente } from "@/lib/loja";
 
 /**
@@ -31,6 +32,8 @@ export type PedidoParaAviso = {
   totalCentavos: number;
   descontoCentavos: number;
   cupomCodigo: string | null;
+  freteCentavos: number;
+  freteNome: string | null;
   itens: Array<{
     nome: string;
     quantidade: number;
@@ -64,6 +67,8 @@ export function pedidoParaAviso(p: PedidoDetalhado): PedidoParaAviso {
     totalCentavos: p.totalCentavos,
     descontoCentavos: p.descontoCentavos,
     cupomCodigo: p.cupomCodigo,
+    freteCentavos: p.freteCentavos,
+    freteNome: p.freteNome,
     itens: p.itens,
     endereco: enderecoEmUmaLinha(p),
     presente: p.presente,
@@ -157,10 +162,21 @@ function linhasDosItens(pedido: PedidoParaAviso): { html: string; texto: string 
       texto: `- ${i.quantidade}x ${i.nome}${medida ? ` (${medida})` : ""}: ${reais(i.precoCentavos * i.quantidade)}`,
     };
   });
+  // Frete numa linha própria, antes do total — o total do e-mail precisa bater
+  // com a soma que a pessoa lê logo acima.
+  const frete = pedido.freteNome
+    ? {
+        html: `<tr><td style="padding:6px 0;color:${COR.apagada}">Frete · ${esc(pedido.freteNome)}</td><td align="right" style="padding:6px 0;white-space:nowrap;color:${COR.apagada}">${valorDoFrete(pedido.freteCentavos)}</td></tr>`,
+        texto: `Frete (${pedido.freteNome}): ${valorDoFrete(pedido.freteCentavos)}`,
+      }
+    : null;
   return {
-    html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0;border-top:1px solid rgba(125,99,48,.26)">${linhas.map((l) => l.html).join("")}
+    html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0;border-top:1px solid rgba(125,99,48,.26)">${linhas.map((l) => l.html).join("")}${frete ? frete.html : ""}
 <tr><td style="padding:10px 0 0;border-top:1px solid rgba(125,99,48,.26)"><strong>Total</strong>${pedido.descontoCentavos > 0 ? ` <span style="color:${COR.apagada};font-size:12px">(desconto ${esc(pedido.cupomCodigo ?? "")}: −${reais(pedido.descontoCentavos)})</span>` : ""}</td><td align="right" style="padding:10px 0 0;border-top:1px solid rgba(125,99,48,.26)"><strong>${reais(pedido.totalCentavos)}</strong></td></tr></table>`,
-    texto: linhas.map((l) => l.texto).join("\n") + `\nTotal: ${reais(pedido.totalCentavos)}`,
+    texto:
+      linhas.map((l) => l.texto).join("\n") +
+      (frete ? `\n${frete.texto}` : "") +
+      `\nTotal: ${reais(pedido.totalCentavos)}`,
   };
 }
 

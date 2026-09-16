@@ -343,28 +343,8 @@
   text-transform: uppercase;
   color: var(--gold-ink);
 }
+/* Cada campo é um SeletorDeAro (.aro, no fim deste arquivo). */
 .pdp__medida-campos { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
-.pdp__medida-campo { display: flex; flex-direction: column; gap: 7px; min-width: 132px; }
-.pdp__medida-rotulo {
-  font-size: 9.5px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
-.pdp__medida-select {
-  min-height: 46px;
-  padding: 10px 14px;
-  border: 1px solid var(--hairline);
-  background: var(--ivory-soft);
-  font-size: 14px;
-  color: var(--ink);
-}
-.pdp__medida-select:focus {
-  outline: 2px solid rgba(212, 185, 115, .45);
-  outline-offset: 1px;
-  border-color: var(--gold-line);
-}
-.pdp__medida-select[aria-invalid="true"] { border-color: rgba(163, 49, 44, .55); }
 .pdp__medida-dica { margin-top: 10px; font-size: 12px; line-height: 1.6; color: var(--ink-dim); max-width: 52ch; }
 .pdp__medida-erro { margin-top: 8px; font-size: 12.5px; color: #8c2a26; }
 
@@ -383,7 +363,7 @@
 }
 
 /* ---------- Guia de medidas ----------
- * Acréscimo: o popup do "Não sei ainda". Mora aqui porque a página da peça e o
+ * Acréscimo: o popup do "Veja como medir". Mora aqui porque a página da peça e o
  * carrinho importam este arquivo. É um <dialog> nativo, no top layer — fica
  * acima da nav sem disputar z-index. Reset escopado com :where(), sem cor nova. */
 html:has(.guia[open]) { overflow: hidden; }
@@ -547,3 +527,218 @@ html:has(.guia[open]) { overflow: hidden; }
   .guia__acoes { width: 100%; }
   .guia__acao { flex: 1 1 auto; }
 }
+
+/* ---------- Seletor da medida do aro ----------
+ * Acréscimo: substitui o <select> nativo, cuja lista aberta vinha desenhada
+ * pelo sistema. Mora aqui porque a página da peça e o carrinho importam este
+ * arquivo. A caixa segue o campo de cada tela — reta na página, arredondada no
+ * carrinho —, e a lista aberta é a mesma nas duas: números em pequenos aros,
+ * no bege e dourado do guia de medidas. Nenhuma cor nova. */
+.aro { display: flex; flex-direction: column; gap: 7px; min-width: 132px; }
+.aro__rotulo {
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  cursor: pointer;
+  user-select: none;
+}
+.aro__ancora { position: relative; }
+.aro__caixa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.aro__caixa:hover { border-color: var(--gold-line); }
+.aro__caixa:focus-visible,
+.aro.is-aberto .aro__caixa {
+  outline: 2px solid rgba(212, 185, 115, .45);
+  outline-offset: 1px;
+  border-color: var(--gold-line);
+}
+.aro__caixa[aria-invalid="true"] { border-color: rgba(163, 49, 44, .55); }
+.aro__valor {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  color: var(--gold-ink);
+}
+.aro__vazio { font-size: 14px; color: var(--ink-dim); }
+.aro__seta { flex: none; color: var(--ink-dim); transition: transform .2s; }
+.aro.is-aberto .aro__seta { transform: rotate(180deg); }
+
+/* No carrinho: rótulo e caixa na mesma linha, na altura da linha do item. */
+.aro--carrinho { flex-direction: row; align-items: center; min-width: 0; }
+.aro--carrinho .aro__rotulo { font-size: 10.5px; letter-spacing: .1em; }
+.aro--carrinho .aro__caixa {
+  min-height: 32px;
+  min-width: 78px;
+  gap: 8px;
+  padding: 4px 8px 4px 11px;
+  border-radius: 8px;
+  background: var(--ivory);
+}
+.aro--carrinho .aro__valor { font-size: 16px; }
+.aro--carrinho .aro__vazio { font-size: 12.5px; }
+
+.aro__painel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(300px, calc(100vw - 32px));
+  padding: 12px 14px 12px;
+  border: 1px solid var(--gold-line);
+  border-radius: 14px;
+  background: var(--ivory);
+  box-shadow: 0 18px 44px rgba(21, 19, 14, .18);
+  font-family: var(--font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+  animation: aro-abre .16s ease-out;
+}
+.aro__painel.is-acima { top: auto; bottom: calc(100% + 6px); }
+@keyframes aro-abre { from { opacity: 0; transform: translateY(-4px); } }
+
+/* `.aro .` no topo (<p>) e no link do guia (<button>): o carrinho zera margem,
+ * fonte, cor e borda desses elementos com `.chk :where(…)`, que pesa o mesmo que
+ * uma classe e vem depois na cascata. */
+.aro .aro__painel-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 2px 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 11px;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+.aro__painel-numero { flex: none; font-family: var(--font-serif); font-size: 18px; color: var(--ink); }
+
+.aro__grade { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+/* Cada número é um pequeno aro: círculo de fio fino, dourado quando escolhido. */
+.aro__opcao {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-variant-numeric: lining-nums;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .15s, background-color .15s;
+}
+.aro__opcao.is-ativo { border-color: var(--gold-line); background: rgba(229, 211, 166, .35); }
+.aro__opcao.is-escolhido { border-color: var(--gold); background: var(--gold); }
+.aro__opcao.is-escolhido.is-ativo { box-shadow: 0 0 0 2px rgba(212, 185, 115, .45); }
+
+.aro .aro__guia {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 2px 0;
+  border-top: 1px solid var(--hairline);
+  text-align: left;
+  font-size: 12px;
+  color: var(--gold-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.aro .aro__guia:hover { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .aro__painel { animation: none; }
+  .aro__seta, .aro__opcao { transition: none; }
+}
+
+/* ---------- Frete e prazo ----------
+ * Acréscimo: a cotação na página da peça. Mesmo campo reto do formulário e o
+ * mesmo botão de contorno dourado do cupom, para o gesto ser reconhecível. */
+.frete { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--hairline); max-width: 460px; }
+.frete__topo { display: flex; align-items: center; gap: 9px; color: var(--gold-ink); }
+.frete__titulo {
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+}
+.frete__linha { display: flex; gap: 9px; margin-top: 12px; }
+.frete__campo {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.frete__campo:focus {
+  outline: 2px solid rgba(212, 185, 115, .45);
+  outline-offset: 1px;
+  border-color: var(--gold-line);
+}
+.frete__botao {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  padding: 0 18px;
+  border: 1px solid var(--gold);
+  color: var(--gold-ink);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: background-color .25s, opacity .25s;
+}
+.frete__botao:hover:not(:disabled) { background: rgba(229, 211, 166, .22); }
+.frete__botao:disabled { opacity: .6; cursor: progress; }
+.frete__link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.frete__link:hover { color: var(--gold-ink); }
+.frete__erro { margin-top: 12px; font-size: 12.5px; color: #8c2a26; }
+.frete__lugar { margin-top: 16px; font-size: 12px; color: var(--ink-dim); }
+.frete__opcoes { margin-top: 8px; border-top: 1px solid var(--hairline); }
+.frete__opcao {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 16px;
+  row-gap: 2px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.frete__nome { font-size: 14px; color: var(--ink); }
+.frete__prazo { grid-column: 1; font-size: 12px; color: var(--ink-dim); }
+.frete__preco {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-variant-numeric: lining-nums;
+  color: var(--gold-ink);
+}
+.frete__nota { margin-top: 10px; font-size: 11.5px; line-height: 1.6; color: var(--ink-dim); }
