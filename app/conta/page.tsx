@@ -70,12 +70,12 @@ export default async function PaginaConta({
           // O /auth/callback manda para cá quando o link do e-mail não abre
           // sessão. Sem este recado a pessoa via só o login, sem saber que o
           // link tinha vencido.
-          // "Outro navegador" não é detalhe: o link carrega um código que só
-          // troca por sessão no navegador que pediu (PKCE). Pedir no navegador
-          // do Instagram e abrir o e-mail no Safari dá este erro.
+          // Não fala mais em "outro navegador": os links de e-mail levam o
+          // token (`token_hash`) e abrem em qualquer um. Sobra vencido ou já
+          // usado, e cada pedido novo invalida o link anterior.
           erroInicial={
             erro === "link_invalido"
-              ? "Esse link expirou, já foi usado ou foi aberto em outro navegador. Se você já confirmou o cadastro, é só entrar. Para trocar a senha, peça um novo link em “Esqueci minha senha” e abra o e-mail no mesmo navegador."
+              ? "Esse link expirou ou já foi usado. Se você já confirmou o cadastro, é só entrar. Para trocar a senha, peça um novo link em “Esqueci minha senha” e use o e-mail mais recente."
               : null
           }
         />

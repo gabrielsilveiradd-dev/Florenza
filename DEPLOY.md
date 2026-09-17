@@ -167,8 +167,22 @@ dá erro 500** ("Error sending confirmation email", e o registro mostra
 
 Outros detalhes do e-mail:
 - **Templates** "Confirm sign up" e "Reset password" estão em português, no mesmo
-  visual dos avisos de pedido. Os dois usam `{{ .ConfirmationURL }}`, que passa
-  pelo `/auth/callback` do site. Os outros modelos ficam em inglês: o site não usa.
+  visual dos avisos de pedido. Os outros modelos ficam em inglês: o site não usa.
+- **O link do botão** tem de ser montado com o token, e não com
+  `{{ .ConfirmationURL }}`. Assim o link abre em qualquer navegador:
+
+  | Template | `href` do botão | No painel |
+  |---|---|---|
+  | Reset password | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery` | trocado em 17/09/2026 |
+  | Confirm sign up | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email` | **falta**: ainda usa `{{ .ConfirmationURL }}` |
+
+  `{{ .RedirectTo }}` é o `/auth/callback?next=…` que o site mandou, então o link
+  volta para o endereço onde a pessoa estava (site no ar ou localhost). Por isso
+  ele continua com `&`, e não com `?`. O endereço só funciona se estiver em
+  Redirect URLs. Fora da lista, o Supabase troca pelo Site URL, e o link quebra.
+  Com `{{ .ConfirmationURL }}` (fluxo PKCE), o link só funcionava no navegador em
+  que a troca foi pedida. Abrir no celular ou em outro perfil do Chrome dava "link
+  inválido".
 - **Se a senha da conta Google mudar,** a senha de app morre junto e os e-mails
   param sem aviso. Gere outra e cole em SMTP Settings.
 - Com SMTP próprio, o limite começa em 30 e-mails por hora (**Rate Limits**), e o
@@ -178,8 +192,8 @@ Outros detalhes do e-mail:
 
 O template "Reset password" já fala da tela de nova senha (`/conta/nova-senha`,
 publicada em 16/09/2026): assunto "Crie uma nova senha na Florenza", botão "Criar
-nova senha". Ele avisa que o link só funciona no mesmo navegador em que a troca foi
-pedida. É o limite do fluxo PKCE atual.
+nova senha". Desde 17/09/2026, avisa só que o link funciona uma vez e que vale o
+e-mail mais recente. O aviso de "mesmo navegador" saiu junto com a troca do `href`.
 
 ---
 

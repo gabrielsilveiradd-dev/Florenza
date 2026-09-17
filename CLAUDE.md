@@ -68,7 +68,7 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 
 - Consultas em `lib/conta-servidor.ts`, separadas de `lib/conta.ts` porque este é importado por componente de cliente e aquele puxa `next/headers` — juntos, o build quebra.
 - **Nenhuma consulta filtra por `user_id`**: quem filtra é a RLS. Repetir o filtro daria a impressão de que ele é a proteção.
-- Links de e-mail (confirmação, recuperação) voltam por `/auth/callback`, que troca o código por sessão. "Esqueci minha senha" leva a `/conta/nova-senha` (`trocarSenha` → `updateUser`). Link vencido ou já usado cai em `/conta?erro=link_invalido`, que explica o que houve. Os textos dos e-mails moram no painel do Supabase (Authentication → Emails → Templates), não no repositório.
+- Links de e-mail (confirmação, recuperação) voltam por `/auth/callback`. Com `token_hash` + `type`, a rota chama `verifyOtp`, e o link funciona em qualquer navegador. Os templates montam o link assim (DEPLOY.md). Com `code`, a rota usa `exchangeCodeForSession`, o fluxo PKCE do Google, que só funciona no navegador que pediu. "Esqueci minha senha" leva a `/conta/nova-senha` (`trocarSenha` → `updateUser`). Link vencido ou já usado cai em `/conta?erro=link_invalido`, que explica o que houve. Os textos dos e-mails moram no painel do Supabase (Authentication → Emails → Templates), não no repositório.
 - **Cartão não entra neste banco** — "forma de pagamento" é preferência declarada.
 - Nome/telefone/e-mail/CPF não são editáveis no checkout (senão o mesmo cliente aparece com três grafias); o que a conta ainda não tem é pedido uma vez e gravado nela. Endereço completo é livre a cada pedido.
 - CPF: `cpf_valido()` no banco (CHECK em `profiles` e `pedidos`), espelhado em `lib/documentos.ts` só por cortesia.
