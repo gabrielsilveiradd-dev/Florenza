@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CalculadoraDeFrete } from "@/components/CalculadoraDeFrete";
 import { ComprarComMedida } from "@/components/ComprarComMedida";
 import { Footer } from "@/components/Footer";
+import { GaleriaDaPeca } from "@/components/GaleriaDaPeca";
 import {
   buscarCategoria, buscarProduto, formatarPreco, linhaDoMaterial, listarTodosOsProdutos,
 } from "@/lib/catalogo";
@@ -95,16 +96,29 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
         </Link>
 
         <div className="pdp__grade">
-          <div className={`pdp__foto${retrato ? " pdp__foto--retrato" : ""}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={produto.imagemUrl}
-              srcSet={produto.imagemSmUrl ? `${produto.imagemSmUrl} 480w, ${produto.imagemUrl} 960w` : undefined}
-              sizes="(max-width: 860px) 92vw, 520px"
-              alt={produto.alt ?? produto.nome}
-              loading="eager"
-            />
-          </div>
+          <GaleriaDaPeca
+            retrato={retrato}
+            fotos={[
+              {
+                src: produto.imagemUrl,
+                srcSmall: produto.imagemSmUrl,
+                alt: produto.alt ?? produto.nome,
+                cena: retrato,
+                rotulo: "Foto da peça",
+              },
+              ...(produto.imagemUsoUrl
+                ? [
+                    {
+                      src: produto.imagemUsoUrl,
+                      srcSmall: produto.imagemUsoSmUrl ?? null,
+                      alt: `${produto.nome} na mão`,
+                      cena: true,
+                      rotulo: "Foto da peça na mão",
+                    },
+                  ]
+                : []),
+            ]}
+          />
 
           <div>
             <p className="pdp__eyebrow">{categoria?.nome ?? "Florenza"}</p>

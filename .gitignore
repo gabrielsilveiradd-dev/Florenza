@@ -28,6 +28,9 @@ next-env.d.ts
 # Mesmo caso: 20 MB de fotos originais das alianças de prata, que alimentam
 # tools/importar-aliancas-prata.py. A saída dele já está em public/produtos/prata/.
 /alianças de prata/
+# Idem: o PDF do catálogo de ouro (out/2026), que alimenta
+# tools/importar-aliancas-ouro.py. A saída está em public/produtos/ouro/.
+/alianças de ouro/
 
 # Capturas de tela dos testes de navegador
 /*.png

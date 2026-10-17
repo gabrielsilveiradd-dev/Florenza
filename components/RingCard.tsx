@@ -83,6 +83,25 @@ export function RingCard({
           loading="lazy"
           decoding="async"
         />
+        {/* A peça na mão, por cima, aparece ao passar o mouse (só em quem tem
+            mouse — ver .ringCard__img--uso em categoria.css). Alt vazio: é a
+            mesma peça, e o leitor de tela já ouviu o alt da primeira foto. */}
+        {produto.imagemUsoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="ringCard__img ringCard__img--uso"
+            src={produto.imagemUsoUrl}
+            srcSet={
+              produto.imagemUsoSmUrl
+                ? `${produto.imagemUsoSmUrl} 480w, ${produto.imagemUsoUrl} 960w`
+                : undefined
+            }
+            sizes={produto.imagemUsoSmUrl ? "(max-width: 640px) 88vw, 280px" : undefined}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        )}
       </Link>
 
       <div className="ringCard__body">

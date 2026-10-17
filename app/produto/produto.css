@@ -742,3 +742,29 @@ html:has(.guia[open]) { overflow: hidden; }
   color: var(--gold-ink);
 }
 .frete__nota { margin-top: 10px; font-size: 11.5px; line-height: 1.6; color: var(--ink-dim); }
+
+/* ---------- Galeria: foto da peça + peça na mão ----------
+   Entrou com as alianças de ouro (out/2026), as primeiras com duas fotos. A
+   foto de cena preenche a moldura (cover, sem sombra); o recorte segue com o
+   contain + sombra de cima. Com uma foto só, nada disto aparece. */
+.pdp__galeria { display: grid; gap: 12px; }
+.pdp__foto--cena img { width: 100%; height: 100%; object-fit: cover; filter: none; }
+
+.pdp__miniaturas { display: flex; gap: 10px; }
+.pdp__miniatura {
+  width: 76px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-soft);
+  cursor: pointer;
+  overflow: hidden;
+  opacity: .62;
+  transition: opacity .3s ease, border-color .3s ease;
+}
+.pdp__miniatura img { width: 100%; height: 100%; object-fit: contain; padding: 8%; }
+.pdp__miniatura--cena img { object-fit: cover; padding: 0; }
+.pdp__miniatura:hover { opacity: .9; }
+.pdp__miniatura[aria-pressed="true"] { opacity: 1; border-color: var(--gold); }
+.pdp__miniatura:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .pdp__miniatura { transition: none; } }

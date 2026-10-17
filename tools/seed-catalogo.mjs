@@ -92,18 +92,22 @@ on conflict (categoria_slug, slug) do update set
   for (const p of produtos) {
     partes.push(`insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
-   descricao, preco_centavos, imagem_url, imagem_sm_url, alt, estoque, ativo)
+   descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
+   alt, aros, estoque, ativo)
 values
   (${txt(p.sku)}, ${txt(p.slug)}, ${txt(p.categoriaSlug)}, ${txt(p.nome)},
    ${txt(p.metal)}, ${txt(p.pedra)}, ${txt(p.corPedra)}, ${txt(p.lapidacao)}, ${num(p.larguraMm)}, ${txt(p.material)},
-   ${txt(p.descricao)}, ${p.precoCentavos}, ${txt(p.imagemUrl)}, ${txt(p.imagemSmUrl)}, ${txt(p.alt)},
-   ${p.estoque}, ${p.ativo})
+   ${txt(p.descricao)}, ${p.precoCentavos}, ${txt(p.imagemUrl)}, ${txt(p.imagemSmUrl)},
+   ${txt(p.imagemUsoUrl)}, ${txt(p.imagemUsoSmUrl)}, ${txt(p.alt)},
+   ${p.aros}, ${p.estoque}, ${p.ativo})
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
   lapidacao = excluded.lapidacao, largura_mm = excluded.largura_mm, material = excluded.material,
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
-  imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url, alt = excluded.alt;
+  imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
+  imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
+  alt = excluded.alt, aros = excluded.aros;
 
 `);
   }

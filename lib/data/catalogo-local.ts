@@ -30,6 +30,14 @@ export type Produto = {
   imagemUrl: string;
   imagemSmUrl: string | null;
   /**
+   * Segunda foto: a peça em uso, na mão. Opcional porque só as alianças de ouro
+   * têm hoje. O card troca para ela ao passar o mouse e a página da peça a
+   * mostra na galeria. É foto de cena (fundo cheio), então sempre entra com
+   * `cover`, nunca com o `contain` do recorte.
+   */
+  imagemUsoUrl?: string | null;
+  imagemUsoSmUrl?: string | null;
+  /**
    * Texto alternativo da foto. As alianças traziam um alt escrito à mão em cada
    * card do HTML; os anéis de formatura montavam o deles a partir de metal,
    * pedra e lapidação. Quando é `null`, o card compõe — ver RingCard.
@@ -111,12 +119,16 @@ export const categorias: Categoria[] = [
     // fazer a barra aparecer agora seria mudar a página, não migrá-la. Ligar
     // isso depois é trocar `null` por `"material"`.
     filtroCampo: null,
-    variante: "foto",
+    // Passou de `foto` para `produto` quando as 9 alianças do catálogo de
+    // outubro/2026 substituíram as duas antigas: as fotos novas são recortes
+    // com fundo transparente, e `cover` cortaria o aro. A foto na mão, que é
+    // cena, entra pela `imagemUsoUrl` da peça, com corte próprio.
+    variante: "produto",
     rotuloFiltro: "Filtrar por material",
     nota: [],
     opcoes: [
       { slug: "ouro", nome: "Ouro 18K", amostra: "#D4B973" },
-      { slug: "ouro-diamantes", nome: "Ouro + Diamantes", amostra: "#E5D3A6" },
+      { slug: "ouro-zirconias", nome: "Ouro + Zircônias", amostra: "#E5D3A6" },
     ],
   },
   {
@@ -235,6 +247,72 @@ const prata = (
   ativo: true,
 });
 
+/**
+ * As 9 alianças de ouro do catálogo de outubro/2026 (PDF "Site", 18 páginas:
+ * foto do produto + foto na mão de cada par). Fotos geradas por
+ * tools/importar-aliancas-ouro.py em public/produtos/ouro/.
+ *
+ * Todas são vendidas em PAR (`aros: 2`, uma medida para cada pessoa). O peso
+ * que o catálogo traz é "par aproximado", por isso entra na descrição como
+ * aproximado, e não numa coluna que pareceria exata.
+ *
+ * PREÇO: o catálogo não trazia. Enquanto a loja não informar, o valor fica 0 e
+ * a peça fica `ativo: false` — preço zerado não vai para a vitrine, nem aqui
+ * nem no banco (supabase/trocar-aliancas-ouro.sql aborta com preço 0).
+ */
+const fotoOuro = (sku: string) => {
+  const base = `/produtos/ouro/${sku.toLowerCase()}`;
+  return {
+    imagemUrl: `${base}.webp`,
+    imagemSmUrl: `${base}-sm.webp`,
+    imagemUsoUrl: `${base}-mao.webp`,
+    imagemUsoSmUrl: `${base}-mao-sm.webp`,
+  };
+};
+
+const ouro = (
+  sku: string,
+  slug: string,
+  nome: string,
+  larguraMm: number | null,
+  descricao: string,
+  precoCentavos: number,
+  comZirconias = false
+): Produto => ({
+  sku,
+  slug,
+  categoriaSlug: "aliancas-ouro",
+  nome,
+  metal: comZirconias ? "Ouro 18K + Zircônias" : "Ouro 18K",
+  pedra: null,
+  corPedra: null,
+  lapidacao: null,
+  larguraMm,
+  material: comZirconias ? "ouro-zirconias" : "ouro",
+  descricao,
+  precoCentavos,
+  ...fotoOuro(sku),
+  alt: null,
+  aros: 2,
+  // Preço 0 é provisório (17/10/2026): a peça aparece, mas sem estoque, para o
+  // banco recusar a venda — criar_pedido() copia o preço, e venderia por R$ 0.
+  estoque: precoCentavos > 0 ? 5 : 0,
+  ativo: true,
+});
+
+/** Preço do PAR, em centavos. 0 = a loja ainda não informou (vai ao ar sem estoque). */
+const PRECO_OURO: Record<string, number> = {
+  "002": 0,
+  "003": 289000, // mesmo preço da A301 Essence (3 mm, abaulada polida) que saiu do site
+  "005": 0,
+  "033E": 0,
+  "033": 0,
+  "034": 0,
+  ESC3: 0,
+  "6BVL": 0,
+  X: 0,
+};
+
 export const produtos: Produto[] = [
   formatura("3001", "anel-citrino-arabesco", "Anel Citrino Arabesco", "Citrino", "amarela", "Redonda",
     "Citrino redondo cercado por um halo de diamantes, sobre um aro largo com arabescos em alto relevo.", 349000),
@@ -269,50 +347,32 @@ export const produtos: Produto[] = [
   formatura("9257", "anel-rubi-entrelacado", "Anel Rubi Entrelaçado", "Rubi", "vermelha", "Oval",
     "Rubi oval em halo de diamantes, sobre aro entrelaçado — a peça mais imponente da categoria.", 418000),
 
-  // ---------- Alianças ----------
-  // Estavam escritas à mão no HTML, sem SKU. Os códigos abaixo foram criados
-  // agora seguindo o padrão da casa (número curto), porque a chave de negócio
-  // passa a valer também para elas quando o pedido existir.
-  {
-    sku: "A301",
-    slug: "alianca-essence",
-    categoriaSlug: "aliancas-ouro",
-    nome: "Aliança Essence",
-    metal: "Ouro 18K",
-    pedra: null,
-    corPedra: null,
-    lapidacao: null,
-    larguraMm: 3,
-    material: "ouro",
-    descricao: "Acabamento polido, linhas puras e atemporais.",
-    precoCentavos: 289000,
-    imagemUrl: "/modelosalianca/3mm.png",
-    imagemSmUrl: null,
-    alt: "Aliança Essence, ouro 18K, 3mm, acabamento polido",
-    aros: 1,
-    estoque: 5,
-    ativo: true,
-  },
-  {
-    sku: "A501",
-    slug: "alianca-aurea",
-    categoriaSlug: "aliancas-ouro",
-    nome: "Aliança Aurea",
-    metal: "Ouro 18K + Diamantes",
-    pedra: null,
-    corPedra: null,
-    lapidacao: null,
-    larguraMm: 5,
-    material: "ouro-diamantes",
-    descricao: "Detalhe de coração cravejado, brilho que eterniza.",
-    precoCentavos: 469000,
-    imagemUrl: "/modelosalianca/5mm.png",
-    imagemSmUrl: null,
-    alt: "Aliança Aurea, ouro 18K, 5mm, detalhe de coração cravejado",
-    aros: 1,
-    estoque: 5,
-    ativo: true,
-  },
+  // ---------- Ouro 18K (catálogo de outubro/2026) ----------
+  ouro("002", "alianca-petala", "Aliança Pétala", 2.5,
+    "Par fino e abaulado, polido por inteiro: o desenho tradicional na medida mais delicada. Peso aproximado do par: 1,7 g.", PRECO_OURO["002"]),
+  ouro("003", "alianca-essence-ouro", "Aliança Essence", 3,
+    "O clássico abaulado e polido, em três milímetros: linhas puras e atemporais. Peso aproximado do par: 2,3 g.", PRECO_OURO["003"]),
+  ouro("005", "alianca-nobre", "Aliança Nobre", 4,
+    "Quatro milímetros de ouro abaulado e polido, com mais presença no dedo. Peso aproximado do par: 3,7 g.", PRECO_OURO["005"]),
+  ouro("033E", "alianca-brisa", "Aliança Brisa", 3,
+    "Riscas diamantadas em diagonal entre bordas polidas, na versão de três milímetros. Peso aproximado do par: 2,0 g.", PRECO_OURO["033E"]),
+  ouro("033", "alianca-raio", "Aliança Raio", 4,
+    "Riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.", PRECO_OURO["033"]),
+  ouro("034", "alianca-onda", "Aliança Onda", 5,
+    "Perfil côncavo, diamantado em diagonal, com bordas polidas que emolduram o brilho. Peso aproximado do par: 3,4 g.", PRECO_OURO["034"]),
+  ouro("ESC3", "alianca-linear", "Aliança Linear", 3,
+    "Aro reto e polido, de perfil escravo: o ouro sem curva nem relevo. Peso aproximado do par: 2 g.", PRECO_OURO.ESC3),
+  ouro("6BVL", "alianca-esplendor", "Aliança Esplendor", 6,
+    "Par com frisos paralelos; a aliança feminina traz duas fileiras de zircônias, 40 pedras ao todo. Peso aproximado do par: 7,0 g.", PRECO_OURO["6BVL"], true),
+  // Página 17 do catálogo veio sem legenda: código, largura e peso a confirmar.
+  ouro("X", "alianca-celeste", "Aliança Celeste", null,
+    "Par com frisos largos; a aliança feminina tem duas fileiras de zircônias e um ponto de luz ao centro.", PRECO_OURO.X, true),
+
+  // ---------- Alianças de prata antigas ----------
+  // Estavam escritas à mão no HTML, sem SKU. Os códigos foram criados seguindo
+  // o padrão da casa. As duas de ouro (A301 Essence e A501 Aurea) saíram em
+  // 17/10/2026, substituídas pelo catálogo novo — no banco ficam com
+  // `ativo = false`, porque pedido antigo pode apontar para elas.
   {
     sku: "P301",
     slug: "alianca-elo",

@@ -234,3 +234,20 @@
   .categoryPage__header { padding-left: 20px; padding-right: 20px; }
   .categoryPage__catalog .catalog__grid { grid-template-columns: minmax(0, 340px); }
 }
+
+/* ---------- Segunda foto do card: a peça na mão ----------
+   Fica por cima da foto do produto, invisível, e aparece ao passar o mouse.
+   Só em quem tem mouse: no toque não há hover, e um toque precisa abrir a peça,
+   não trocar a foto. É cena (fundo cheio), então usa o cover do .ringCard__img
+   padrão — sem o --produto, que é contain + sombra. */
+.ringCard__img--uso {
+  opacity: 0;
+  transition: opacity .45s ease, transform .55s cubic-bezier(.22, .61, .36, 1);
+}
+@media (hover: hover) {
+  .ringCard:hover .ringCard__img--uso,
+  .ringCard__media:focus-visible .ringCard__img--uso { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ringCard__img--uso { transition: none; }
+}
