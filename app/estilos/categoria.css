@@ -251,3 +251,17 @@
 @media (prefers-reduced-motion: reduce) {
   .ringCard__img--uso { transition: none; }
 }
+
+/* ---------- Recorte centralizado na moldura (fora da Formatura) ----------
+   Imagem position:absolute com width/height auto não estica entre os insets:
+   fica no tamanho intrínseco do srcset (280px, pelo `sizes`), presa ao canto
+   de cima e à esquerda, e passa da moldura de ~278px. As alianças de ouro,
+   recortadas rente à peça, perdiam o aro nas laterais. Largura e altura
+   explícitas, iguais à moldura menos os insets de .ringCard__img--produto
+   (7% 6%), deixam o `contain` centralizar a peça inteira.
+   A Formatura tem o mesmo transbordo, mas fica de fora até ser aprovada a
+   mudança lá: as fotos dela têm folga e o corte quase não aparece. */
+main:not(.categoryPage--formatura) .ringCard__img--produto {
+  width: 88%;
+  height: 86%;
+}
