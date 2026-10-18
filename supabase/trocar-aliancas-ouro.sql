@@ -33,9 +33,9 @@ insert into public.produtos
    alt, aros, estoque, ativo)
 values
   ('002', 'alianca-petala', 'aliancas-ouro', 'Aliança Pétala', 'Ouro 18K', NULL, NULL, NULL,
-   2.5, 'ouro', 'Par fino e abaulado, polido por inteiro: o desenho tradicional na medida mais delicada. Peso aproximado do par: 1,7 g.', 0,
+   2.5, 'ouro', 'Par fino e abaulado, polido por inteiro: o desenho tradicional na medida mais delicada. Peso aproximado do par: 1,7 g.', 189000,
    '/produtos/ouro/002.webp', '/produtos/ouro/002-sm.webp', '/produtos/ouro/002-mao.webp', '/produtos/ouro/002-mao-sm.webp',
-   NULL, 2, 0, true)
+   NULL, 2, 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, largura_mm = excluded.largura_mm, material = excluded.material,
@@ -57,7 +57,7 @@ insert into public.produtos
    alt, aros, estoque, ativo)
 values
   ('003', 'alianca-essence-ouro', 'aliancas-ouro', 'Aliança Essence', 'Ouro 18K', NULL, NULL, NULL,
-   3, 'ouro', 'O clássico abaulado e polido, em três milímetros: linhas puras e atemporais. Peso aproximado do par: 2,3 g.', 289000,
+   3, 'ouro', 'O clássico abaulado e polido, em três milímetros: linhas puras e atemporais. Peso aproximado do par: 2,3 g.', 249000,
    '/produtos/ouro/003.webp', '/produtos/ouro/003-sm.webp', '/produtos/ouro/003-mao.webp', '/produtos/ouro/003-mao-sm.webp',
    NULL, 2, 5, true)
 on conflict (sku) do update set
@@ -81,9 +81,9 @@ insert into public.produtos
    alt, aros, estoque, ativo)
 values
   ('005', 'alianca-nobre', 'aliancas-ouro', 'Aliança Nobre', 'Ouro 18K', NULL, NULL, NULL,
-   4, 'ouro', 'Quatro milímetros de ouro abaulado e polido, com mais presença no dedo. Peso aproximado do par: 3,7 g.', 0,
+   4, 'ouro', 'Quatro milímetros de ouro abaulado e polido, com mais presença no dedo. Peso aproximado do par: 3,7 g.', 396900,
    '/produtos/ouro/005.webp', '/produtos/ouro/005-sm.webp', '/produtos/ouro/005-mao.webp', '/produtos/ouro/005-mao-sm.webp',
-   NULL, 2, 0, true)
+   NULL, 2, 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, largura_mm = excluded.largura_mm, material = excluded.material,
@@ -129,7 +129,7 @@ insert into public.produtos
    alt, aros, estoque, ativo)
 values
   ('033', 'alianca-raio', 'aliancas-ouro', 'Aliança Raio', 'Ouro 18K', NULL, NULL, NULL,
-   4, 'ouro', 'Riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.', 489000,
+   4, 'ouro', 'Riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.', 319000,
    '/produtos/ouro/033.webp', '/produtos/ouro/033-sm.webp', '/produtos/ouro/033-mao.webp', '/produtos/ouro/033-mao-sm.webp',
    NULL, 2, 5, true)
 on conflict (sku) do update set
@@ -153,7 +153,7 @@ insert into public.produtos
    alt, aros, estoque, ativo)
 values
   ('034', 'alianca-onda', 'aliancas-ouro', 'Aliança Onda', 'Ouro 18K', NULL, NULL, NULL,
-   5, 'ouro', 'Perfil côncavo, diamantado em diagonal, com bordas polidas que emolduram o brilho. Peso aproximado do par: 3,4 g.', 374900,
+   5, 'ouro', 'Perfil côncavo, diamantado em diagonal, com bordas polidas que emolduram o brilho. Peso aproximado do par: 3,4 g.', 399000,
    '/produtos/ouro/034.webp', '/produtos/ouro/034-sm.webp', '/produtos/ouro/034-mao.webp', '/produtos/ouro/034-mao-sm.webp',
    NULL, 2, 5, true)
 on conflict (sku) do update set
@@ -201,9 +201,9 @@ insert into public.produtos
    alt, aros, estoque, ativo)
 values
   ('6BVL', 'alianca-esplendor', 'aliancas-ouro', 'Aliança Esplendor', 'Ouro 18K + Zircônias', NULL, NULL, NULL,
-   6, 'ouro-zirconias', 'Par com frisos paralelos; a aliança feminina traz duas fileiras de zircônias, 40 pedras ao todo. Peso aproximado do par: 7,0 g.', 0,
+   6, 'ouro-zirconias', 'Par com frisos paralelos; a aliança feminina traz duas fileiras de zircônias, 40 pedras ao todo. Peso aproximado do par: 7,0 g.', 789000,
    '/produtos/ouro/6bvl.webp', '/produtos/ouro/6bvl-sm.webp', '/produtos/ouro/6bvl-mao.webp', '/produtos/ouro/6bvl-mao-sm.webp',
-   NULL, 2, 0, true)
+   NULL, 2, 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, largura_mm = excluded.largura_mm, material = excluded.material,
@@ -265,4 +265,4 @@ union all
 select 'ouro sem preco (provisorio)', count(*)::text
   from public.produtos where sku in ('002', '003', '005', '033E', '033', '034', 'ESC3', '6BVL', 'X') and preco_centavos = 0;
 
--- Esperado: 9 | 2 | 9 | produto | 0 | 4
+-- Esperado: 9 | 2 | 9 | produto | 0 | 1

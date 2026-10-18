@@ -301,15 +301,17 @@ const ouro = (
 });
 
 /** Preço do PAR, em centavos. 0 = a loja ainda não informou (vai ao ar sem estoque). */
+// Fonte: catálogo "Alianças tradicionais e trabalhadas ouro 18K" da Florenza
+// (18/10/2026). X (pág. 17 do PDF das fotos) não está no catálogo: segue sem preço.
 const PRECO_OURO: Record<string, number> = {
-  "002": 0,
-  "003": 289000, // mesmo preço da A301 Essence (3 mm, abaulada polida) que saiu do site
-  "005": 0,
+  "002": 189000,
+  "003": 249000,
+  "005": 396900,
   "033E": 219000,
-  "033": 489000,
-  "034": 374900,
+  "033": 319000,
+  "034": 399000,
   ESC3: 219900,
-  "6BVL": 0,
+  "6BVL": 789000,
   X: 0,
 };
 
