@@ -305,10 +305,10 @@ const PRECO_OURO: Record<string, number> = {
   "002": 0,
   "003": 289000, // mesmo preço da A301 Essence (3 mm, abaulada polida) que saiu do site
   "005": 0,
-  "033E": 0,
-  "033": 0,
-  "034": 0,
-  ESC3: 0,
+  "033E": 219000,
+  "033": 489000,
+  "034": 374900,
+  ESC3: 219900,
   "6BVL": 0,
   X: 0,
 };
