@@ -110,9 +110,9 @@ export const categorias: Categoria[] = [
   },
   {
     slug: "aliancas-ouro",
-    nome: "Anéis de Ouro",
+    nome: "Alianças de Ouro",
     descricao:
-      "Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações. O ouro 18K é sinônimo de nobreza, beleza e eternidade.",
+      "Peças atemporais, feitas em maquinário para selar promessas que atravessam gerações. O ouro 18K (750) é sinônimo de nobreza, beleza e eternidade.",
     imagemUrl: "/categorias/aliançaouro.png",
     // Sem filtro de propósito: as páginas de aliança nunca tiveram a barra de
     // botões. Os cards já carregam `data-material`, mas nada os acionava — e
@@ -127,15 +127,15 @@ export const categorias: Categoria[] = [
     rotuloFiltro: "Filtrar por material",
     nota: [],
     opcoes: [
-      { slug: "ouro", nome: "Ouro 18K", amostra: "#D4B973" },
+      { slug: "ouro", nome: "Ouro 18K (750)", amostra: "#D4B973" },
       { slug: "ouro-zirconias", nome: "Ouro + Zircônias", amostra: "#E5D3A6" },
     ],
   },
   {
     slug: "aliancas-prata",
-    nome: "Anéis de Prata",
+    nome: "Alianças de Prata",
     descricao:
-      "Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.",
+      "Elegância discreta em prata, para quem escolhe simplicidade com sofisticação. A prata 950 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.",
     imagemUrl: "/categorias/alliançaprata.png",
     filtroCampo: null,
     // Passou de `foto` para `produto` quando as 14 peças de prata 950 entraram.
@@ -152,9 +152,7 @@ export const categorias: Categoria[] = [
     variante: "produto",
     rotuloFiltro: "Filtrar por material",
     nota: [],
-    // O teor deixou de ser um só: P301 e P601 são 925, as 14 novas são 950. O
-    // rótulo do filtro deixa de afirmar um número que vale para 2 de 16 peças.
-    // (A barra não aparece hoje — `filtroCampo` é null —, mas o dado fica certo.)
+    // A barra não aparece hoje (`filtroCampo` é null), mas o dado fica certo.
     opcoes: [{ slug: "prata", nome: "Prata", amostra: "#cfd3d6" }],
   },
 ];
@@ -202,9 +200,8 @@ const formatura = (
  * carrega a diferença é `larguraMm` — é assim que o card monta a linha
  * "PRATA 950 · 4MM" (ver `linhaDoMaterial` em lib/catalogo.ts).
  *
- * PRATA 950, e não 925: o teor está no nome de todos os arquivos de origem, e
- * é maior que o das duas peças antigas (P301 e P601, que são 925). As duas
- * convivem na mesma categoria porque teor é dado da peça, não da vitrine.
+ * PRATA 950: o teor está no nome dos arquivos de origem. P301 e P601 eram
+ * anunciadas como 925 e passaram a 950 em 31/10/2026, por informação da loja.
  *
  * `material: "prata"` continua sendo o valor do filtro, e não o teor —
  * `aliancas-prata` tem `filtroCampo: null`, então nada é filtrado por ele
@@ -240,10 +237,11 @@ const prata = (
   // Nulo de propósito: o RingCard compõe o alt de metal + largura, como já faz
   // para os anéis de formatura. Escrever à mão 14 vezes só criaria divergência.
   alt: null,
-  // Mesma regra da migration que criou a coluna: ficha que começa por "Par" é
-  // vendida como par, com duas medidas.
-  aros: descricao.startsWith("Par ") ? 2 : 1,
-  estoque: 5,
+  // Toda aliança é vendida em par ou por unidade (ver `precoDaUnidade`), e o
+  // preço da ficha é o do par.
+  aros: 2,
+  // Conta alianças, não pares: 10 = 5 pares.
+  estoque: 10,
   ativo: true,
 });
 
@@ -252,7 +250,8 @@ const prata = (
  * foto do produto + foto na mão de cada par). Fotos geradas por
  * tools/importar-aliancas-ouro.py em public/produtos/ouro/.
  *
- * Todas são vendidas em PAR (`aros: 2`, uma medida para cada pessoa). O peso
+ * O preço é o do PAR (`aros: 2`, uma medida para cada pessoa), e cada aliança
+ * também se vende sozinha, pela metade (ver `precoDaUnidade`). O peso
  * que o catálogo traz é "par aproximado", por isso entra na descrição como
  * aproximado, e não numa coluna que pareceria exata.
  *
@@ -283,7 +282,7 @@ const ouro = (
   slug,
   categoriaSlug: "aliancas-ouro",
   nome,
-  metal: comZirconias ? "Ouro 18K + Zircônias" : "Ouro 18K",
+  metal: comZirconias ? "Ouro 18K (750) + Zircônias" : "Ouro 18K (750)",
   pedra: null,
   corPedra: null,
   lapidacao: null,
@@ -296,7 +295,7 @@ const ouro = (
   aros: 2,
   // Preço 0 é provisório (17/10/2026): a peça aparece, mas sem estoque, para o
   // banco recusar a venda — criar_pedido() copia o preço, e venderia por R$ 0.
-  estoque: precoCentavos > 0 ? 5 : 0,
+  estoque: precoCentavos > 0 ? 10 : 0,
   ativo: true,
 });
 
@@ -380,7 +379,7 @@ export const produtos: Produto[] = [
     slug: "alianca-elo",
     categoriaSlug: "aliancas-prata",
     nome: "Aliança Elo",
-    metal: "Prata 925",
+    metal: "Prata 950",
     pedra: null,
     corPedra: null,
     lapidacao: null,
@@ -390,9 +389,9 @@ export const produtos: Produto[] = [
     precoCentavos: 34900,
     imagemUrl: "/modelosalianca/3mmprata.png",
     imagemSmUrl: null,
-    alt: "Aliança Elo, prata 925, 3mm, acabamento diagonal texturizado",
-    aros: 1,
-    estoque: 5,
+    alt: "Aliança Elo, prata 950, 3mm, acabamento diagonal texturizado",
+    aros: 2,
+    estoque: 10,
     ativo: true,
   },
   {
@@ -400,7 +399,7 @@ export const produtos: Produto[] = [
     slug: "alianca-eter",
     categoriaSlug: "aliancas-prata",
     nome: "Aliança Éter",
-    metal: "Prata 925",
+    metal: "Prata 950",
     pedra: null,
     corPedra: null,
     lapidacao: null,
@@ -410,9 +409,9 @@ export const produtos: Produto[] = [
     precoCentavos: 54900,
     imagemUrl: "/modelosalianca/6mmprata.png",
     imagemSmUrl: null,
-    alt: "Aliança Éter, prata 925, 6mm, friso dourado e detalhe de coração",
-    aros: 1,
-    estoque: 5,
+    alt: "Aliança Éter, prata 950, 6mm, friso dourado e detalhe de coração",
+    aros: 2,
+    estoque: 10,
     ativo: true,
   },
 

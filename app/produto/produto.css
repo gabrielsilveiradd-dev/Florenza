@@ -575,3 +575,23 @@
 .pdp__miniatura[aria-pressed="true"] { opacity: 1; border-color: var(--gold); }
 .pdp__miniatura:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .pdp__miniatura { transition: none; } }
+
+/* ---------- Par ou unidade ----------
+ * Acréscimo: a aliança é anunciada pelo par e também se vende sozinha. */
+.pdp__preco-par { font-family: var(--font-sans); font-size: 13px; color: var(--ink-dim); }
+.pdp__preco-unidade { margin-top: 4px; font-size: 13px; color: var(--ink-dim); }
+.pdp__venda-opcoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.pdp__venda-opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 180px;
+  padding: 12px 14px;
+  border: 1px solid var(--hairline);
+  font-size: 13px;
+  cursor: pointer;
+}
+.pdp__venda-opcao:has(input:checked) { border-color: var(--gold-ink); }
+.pdp__venda-opcao:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.pdp__venda-opcao input { margin: 0; accent-color: var(--gold-ink); }
+.pdp__venda-opcao strong { margin-left: auto; font-weight: 500; color: var(--gold-ink); white-space: nowrap; }

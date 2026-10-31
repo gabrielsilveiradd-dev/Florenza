@@ -289,6 +289,7 @@ export function Checkout({
           quantidade: i.quantidade,
           tamanho: i.aros >= 1 ? i.tamanho : null,
           tamanhoPar: i.aros === 2 ? i.tamanhoPar : null,
+          avulsa: i.avulsa === true,
         })),
         nome: conta.nome ? null : nome,
         telefone: conta.telefone ? null : telefone,
@@ -647,13 +648,13 @@ export function Checkout({
           </p>
         ) : pagamentoOnline ? (
           <p className="chk-nota">
-            Depois de fechar, você paga com Pix ou cartão na página segura do PagBank. As peças ficam
-            reservadas para você por {RESERVA_HORAS} horas.
+            Depois de fechar, você paga com Pix ou cartão na página segura do PagBank. Sem pagamento
+            confirmado em {RESERVA_HORAS} horas, o pedido é cancelado automaticamente.
           </p>
         ) : (
           <p className="chk-nota">
-            Nenhum pagamento acontece agora. A Florenza fala com você pelo WhatsApp para combinar o
-            pagamento, e as peças ficam reservadas por {RESERVA_HORAS} horas.
+            Nenhum pagamento acontece agora: a Florenza fala com você para concluir o pagamento. Sem
+            pagamento confirmado em {RESERVA_HORAS} horas, o pedido é cancelado automaticamente.
           </p>
         )}
 

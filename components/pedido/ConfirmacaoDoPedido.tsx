@@ -161,16 +161,15 @@ export function ConfirmacaoDoPedido({
           </>
         ) : (
           <p className="chk-nota" style={{ marginTop: 14 }}>
-            A Florenza entra em contato pelo <strong>WhatsApp</strong> para combinar a forma de
-            pagamento. Guarde o número <strong>#{pedido.numero}</strong> — é por ele que o pedido é
+            A Florenza entra em contato para concluir o pagamento. Guarde o número <strong>#{pedido.numero}</strong> — é por ele que o pedido é
             encontrado.
           </p>
         )}
 
         {pedido.expiraEm && (
           <p className="chk-nota">
-            As peças ficam reservadas para você até <strong>{dataHora.format(new Date(pedido.expiraEm))}</strong>.
-            Sem pagamento até lá, elas voltam para a vitrine.
+            Sem pagamento confirmado até <strong>{dataHora.format(new Date(pedido.expiraEm))}</strong>, o
+            pedido é cancelado automaticamente.
           </p>
         )}
 

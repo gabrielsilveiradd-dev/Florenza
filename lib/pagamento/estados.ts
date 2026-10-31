@@ -41,7 +41,7 @@ export const ROTULO_DO_ESTADO: Record<EstadoDePagamento, string> = {
   pending: "Aguardando confirmação",
   paid: "Pago",
   declined: "Recusado",
-  expired: "Reserva expirada",
+  expired: "Prazo de pagamento vencido",
   refunded: "Estornado",
   partially_refunded: "Estornado em parte",
   in_dispute: "Em contestação",

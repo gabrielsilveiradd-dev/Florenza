@@ -5,7 +5,7 @@ import NumberFlow from "@number-flow/react";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
 import { SeletorDeAro } from "@/components/SeletorDeAro";
-import { faltaMedida } from "@/lib/aros";
+import { aliancasDaLinha, faltaMedida } from "@/lib/aros";
 import { chaveDoItem, type ItemCarrinho } from "@/lib/carrinho";
 import { valorDoFrete } from "@/lib/frete";
 
@@ -65,9 +65,10 @@ export function ListaDoCarrinho({
       <AnimatePresence initial={false} mode="popLayout">
         {itens.map((item) => {
           const chave = chaveDoItem(item);
-          const esgotado = item.estoque <= 0;
+          const ocupa = aliancasDaLinha(1, item.aros);
+          const esgotado = item.estoque < ocupa;
           // O teto é da peça, somando todas as medidas dela no carrinho.
-          const noLimite = quantidadeDaPeca(item.sku) >= item.estoque;
+          const noLimite = quantidadeDaPeca(item.sku) + ocupa > item.estoque;
           const semMedida = faltaMedida(item);
 
           /* A medida pode ser trocada aqui mesmo. É o conserto para quem

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
+import { aliancasDaLinha } from "@/lib/aros";
 
 /**
  * Carrinho — vive no localStorage.
@@ -39,7 +40,7 @@ export type ItemCarrinho = {
    * a semana inteira, e outra pessoa pode levar a última unidade nesse meio
    * tempo. Quem decide de verdade é `criar_pedido()` no banco, que confere com
    * a linha do produto travada. Este número serve para avisar antes, não para
-   * autorizar.
+   * autorizar. Em peça vendida em par, conta alianças: o par ocupa 2.
    */
   estoque: number;
   /** 0 sem aro, 1 um tamanho, 2 par. */
@@ -50,11 +51,16 @@ export type ItemCarrinho = {
    */
   tamanho: number | null;
   tamanhoPar: number | null;
+  /**
+   * Uma aliança só, de uma peça vendida em par. A linha fica com `aros` 1 e o
+   * preço da unidade; o banco recalcula o preço e recusa peça que não é par.
+   */
+  avulsa?: boolean;
 };
 
-/** Identidade da linha: a peça e as medidas escolhidas. */
-export function chaveDoItem(item: Pick<ItemCarrinho, "sku" | "tamanho" | "tamanhoPar">): string {
-  return `${item.sku}|${item.tamanho ?? "-"}|${item.tamanhoPar ?? "-"}`;
+/** Identidade da linha: a peça, as medidas escolhidas e se é par ou unidade. */
+export function chaveDoItem(item: Pick<ItemCarrinho, "sku" | "tamanho" | "tamanhoPar" | "avulsa">): string {
+  return `${item.sku}|${item.tamanho ?? "-"}|${item.tamanhoPar ?? "-"}${item.avulsa ? "|unidade" : ""}`;
 }
 
 export type FichaDoBanco = { estoque: number; aros: number };
@@ -74,7 +80,7 @@ type Carrinho = {
    * teto. SKU ausente do mapa é peça que saiu do catálogo: vira estoque 0.
    */
   sincronizarEstoque: (fichas: Record<string, FichaDoBanco>) => void;
-  /** Quantas unidades da peça há no carrinho, somando todas as medidas. */
+  /** Quanto do estoque da peça o carrinho já ocupa, somando todas as linhas: o par conta 2. */
   quantidadeDaPeca: (sku: string) => number;
   /** Falso no servidor e durante a hidratação; evita a lista piscar "vazio". */
   pronto: boolean;
@@ -125,6 +131,7 @@ function lerSnapshot(): ItemCarrinho[] {
             aros: typeof i.aros === "number" ? i.aros : 0,
             tamanho: numeroOuNulo(i.tamanho),
             tamanhoPar: numeroOuNulo(i.tamanhoPar),
+            avulsa: i.avulsa === true,
           }))
       : VAZIO;
   } catch {
@@ -151,7 +158,7 @@ function gravar(itens: ItemCarrinho[]) {
 const somaDaPeca = (itens: ItemCarrinho[], sku: string, exceto?: string) =>
   itens
     .filter((i) => i.sku === sku && chaveDoItem(i) !== exceto)
-    .reduce((s, i) => s + i.quantidade, 0);
+    .reduce((s, i) => s + aliancasDaLinha(i.quantidade, i.aros), 0);
 
 /** Junta linhas que acabaram com a mesma chave (medida trocada, peça que deixou de ser par). */
 function consolidar(itens: ItemCarrinho[]): ItemCarrinho[] {
@@ -193,10 +200,14 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
         const chave = chaveDoItem(item);
         // O estoque de todas as linhas da peça se atualiza: a página que chamou
         // acabou de ler do banco, e esse número é mais novo que o guardado.
+        // A linha de uma unidade continua com `aros` 1 ao lado da linha do par.
         const atualizados = atuais.map((i) =>
-          i.sku === item.sku ? { ...i, estoque: item.estoque, aros: item.aros } : i
+          i.sku === item.sku
+            ? { ...i, estoque: item.estoque, aros: Boolean(i.avulsa) === Boolean(item.avulsa) ? item.aros : i.aros }
+            : i
         );
-        const soma = Math.min(quantidade, cabe);
+        const soma = Math.min(quantidade, Math.floor(cabe / aliancasDaLinha(1, item.aros)));
+        if (soma === 0) return atuais;
 
         if (atualizados.some((i) => chaveDoItem(i) === chave)) {
           return atualizados.map((i) =>
@@ -215,7 +226,8 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
         const alvo = atuais.find((i) => chaveDoItem(i) === chave);
         if (!alvo) return atuais;
         if (quantidade <= 0) return atuais.filter((i) => chaveDoItem(i) !== chave);
-        const teto = Math.max(0, alvo.estoque - somaDaPeca(atuais, alvo.sku, chave));
+        const sobra = Math.max(0, alvo.estoque - somaDaPeca(atuais, alvo.sku, chave));
+        const teto = Math.floor(sobra / aliancasDaLinha(1, alvo.aros));
         return atuais.map((i) =>
           chaveDoItem(i) === chave ? { ...i, quantidade: Math.min(quantidade, teto) } : i
         );
@@ -254,10 +266,10 @@ export function ProvedorCarrinho({ children }: { children: React.ReactNode }) {
         const novos = atuais.map((i) => {
           const ficha = fichas[i.sku];
           const estoque = ficha?.estoque ?? 0;
-          const aros = ficha?.aros ?? i.aros;
+          const aros = i.avulsa ? 1 : ficha?.aros ?? i.aros;
           const cabe = restante.has(i.sku) ? restante.get(i.sku)! : estoque;
-          const quantidade = Math.min(i.quantidade, cabe);
-          restante.set(i.sku, cabe - quantidade);
+          const quantidade = Math.min(i.quantidade, Math.floor(cabe / aliancasDaLinha(1, aros)));
+          restante.set(i.sku, cabe - aliancasDaLinha(quantidade, aros));
 
           // Peça que deixou de ser par (ou de ter aro) perde a medida que não tem.
           const tamanho = aros >= 1 ? i.tamanho : null;

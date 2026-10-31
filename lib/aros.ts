@@ -2,7 +2,8 @@
  * MEDIDA DO ARO — o vocabulário que a vitrine, o carrinho, a conta e o painel
  * compartilham.
  *
- * `aros` vem da ficha da peça (0 sem aro, 1 um tamanho, 2 par). A medida é
+ * `aros` vem da ficha da peça (0 sem aro, 1 um tamanho, 2 par, que também se
+ * vende por unidade; na linha de uma unidade, `aros` é 1). A medida é
  * OBRIGATÓRIA para fechar o pedido: no carrinho, tamanho `null` numa peça com
  * aro quer dizer "ainda não escolhido", e `criar_pedido()` recusa.
  *
@@ -24,6 +25,24 @@ export const TAMANHOS_DE_ARO: number[] = Array.from({ length: 27 }, (_, i) => i 
 export function medidasDoAro(aro: number): { circunferencia: number; diametro: string } {
   const circunferencia = aro + 40;
   return { circunferencia, diametro: (circunferencia / Math.PI).toFixed(1).replace(".", ",") };
+}
+
+/**
+ * Preço de UMA aliança de uma peça vendida em par: metade do preço do par.
+ * Centavo ímpar arredonda para cima, para duas unidades nunca saírem mais baratas
+ * que o par. É cortesia para a tela: quem cobra é `criar_pedido()`, com a mesma conta.
+ */
+export function precoDaUnidade(precoDoPar: number): number {
+  return Math.ceil(precoDoPar / 2);
+}
+
+/**
+ * Quanto uma linha tira do estoque. Peça em par conta alianças: a linha do par
+ * tem `aros` 2 e baixa 2; a da unidade tem `aros` 1 e baixa 1. Mesma conta de
+ * `aliancas_da_linha()` no banco, que é quem decide.
+ */
+export function aliancasDaLinha(quantidade: number, aros: number): number {
+  return quantidade * (aros === 2 ? 2 : 1);
 }
 
 /** Falta escolher alguma medida desta linha do carrinho? */

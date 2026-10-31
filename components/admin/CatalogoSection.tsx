@@ -11,7 +11,7 @@ import type { ProdutoAdmin } from "@/lib/admin/listas";
 const AROS = [
   { valor: 0, rotulo: "Sem aro" },
   { valor: 1, rotulo: "1 aro" },
-  { valor: 2, rotulo: "Par (2 aros)" },
+  { valor: 2, rotulo: "Par ou unidade" },
 ];
 
 const paraTexto = (centavos: number) => (centavos / 100).toFixed(2).replace(".", ",");
@@ -284,7 +284,8 @@ export function CatalogoSection({
       >
         <p className="adm-mapa__dica-linha mb-4">
           Estoque é o que está disponível — peças reservadas em pedidos aguardando pagamento já
-          saíram dele. Preço novo vale para os próximos pedidos. A vitrine atualiza em até um minuto.
+          saíram dele. Em peça par ou unidade, o preço é o do par, a unidade sai pela metade e o
+          estoque conta alianças: o par baixa 2 e a unidade baixa 1. Preço novo vale para os próximos pedidos. A vitrine atualiza em até um minuto.
         </p>
         {erro && <p className="adm-erro" role="alert" style={{ marginTop: 0, marginBottom: 12 }}>{erro}</p>}
 

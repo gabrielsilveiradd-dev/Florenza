@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { aliancasDaLinha } from "@/lib/aros";
 import { useCarrinho, type ItemCarrinho } from "@/lib/carrinho";
 
 const Sacola = () => (
@@ -44,7 +45,7 @@ export function BotaoComprar({
   const esgotado = produto.estoque <= 0;
   // Já pegou tudo que existe: continuar clicando não faria nada e o botão
   // dizendo "Comprar" seria promessa falsa.
-  const noLimite = !esgotado && noCarrinho >= produto.estoque;
+  const noLimite = !esgotado && noCarrinho + aliancasDaLinha(1, produto.aros) > produto.estoque;
 
   if (esgotado) {
     // Continua sendo um <a> para o card não mudar de forma, mas sem href não

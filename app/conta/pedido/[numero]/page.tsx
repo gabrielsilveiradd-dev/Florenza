@@ -99,8 +99,8 @@ export default async function PaginaDoPedido({
             {aguardando && pedido.expiraEm && (
               <p className="ped-reserva">
                 {reservaVencida
-                  ? "A reserva venceu. Se o pagamento já foi feito, ele ainda será reconhecido; se não, fale com a Florenza."
-                  : `As peças estão reservadas para você até ${dataHora.format(new Date(pedido.expiraEm))}.`}
+                  ? "O prazo de pagamento venceu. Se o pagamento já foi feito, ele ainda será reconhecido; se não, fale com a Florenza."
+                  : `Pague até ${dataHora.format(new Date(pedido.expiraEm))}. Depois disso, o pedido é cancelado automaticamente.`}
               </p>
             )}
 

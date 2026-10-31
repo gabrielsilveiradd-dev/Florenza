@@ -265,3 +265,6 @@ main:not(.categoryPage--formatura) .ringCard__img--produto {
   width: 88%;
   height: 86%;
 }
+
+/* Aliança: o preço do card é o do par. */
+.ringCard__par { font-size: .72em; font-weight: 400; opacity: .75; white-space: nowrap; }

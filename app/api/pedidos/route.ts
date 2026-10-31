@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       quantidade: typeof i.quantidade === "number" ? i.quantidade : 1,
       tamanho: tamanho(i.tamanho),
       tamanho_par: tamanho(i.tamanhoPar),
+      avulsa: i.avulsa === true,
     };
   });
 

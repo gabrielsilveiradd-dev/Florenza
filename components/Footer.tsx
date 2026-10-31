@@ -94,13 +94,14 @@ export function Footer() {
             {whatsapp && (
               <li><a href={whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
             )}
+            {LOJA.telefone && (
+              <li><a href={`tel:+55${LOJA.telefone.replace(/\D/g, "")}`}>{LOJA.telefone}</a></li>
+            )}
             {LOJA.email && <li><a href={`mailto:${LOJA.email}`}>{LOJA.email}</a></li>}
           </ul>
-          <p className="footer__nota">
-            {pagamentoOnlineAtivo()
-              ? "Pagamento com Pix ou cartão pelo PagBank."
-              : "O pagamento é combinado por WhatsApp depois que o pedido chega."}
-          </p>
+          {pagamentoOnlineAtivo() && (
+            <p className="footer__nota">Pagamento com Pix ou cartão pelo PagBank.</p>
+          )}
         </div>
       </div>
 

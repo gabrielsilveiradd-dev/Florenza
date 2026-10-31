@@ -9,9 +9,9 @@
  *                       a compra com conta e `criar_pedido()`;
  *   3. pagamento     → depende do que estiver ligado, e por isso vem por prop:
  *                       com o PagBank configurado, Pix ou cartão logo
- *                       depois de fechar; sem ele, o acerto por WhatsApp. Dizer
- *                       "não há cobrança automática" com o checkout ligado
- *                       seria mentir na home;
+ *                       depois de fechar; sem ele, a Florenza conclui o
+ *                       pagamento com a pessoa. O site não promete reserva
+ *                       de peça antes do pagamento;
  *   4. acompanhar    → `StatusDoPedido`, as cinco etapas carimbadas pela
  *                       trigger `pedidos_carimba_etapas`, e a página do pedido
  *                       em /conta.
@@ -39,12 +39,12 @@ function etapas(pagamentoOnline: boolean) {
       ? {
           numero: "03",
           titulo: "Pague com segurança",
-          texto: "Pix ou cartão pelo PagBank. A peça fica reservada para você enquanto isso.",
+          texto: "Pix ou cartão pelo PagBank, logo depois de fechar o pedido.",
         }
       : {
           numero: "03",
-          titulo: "Combine o pagamento",
-          texto: "A Florenza fala com você por WhatsApp. Não há cobrança automática neste site.",
+          titulo: "Conclua o pagamento",
+          texto: "A Florenza fala com você para concluir o pagamento do pedido.",
         },
     {
       numero: "04",

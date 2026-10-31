@@ -8,7 +8,8 @@ import { GaleriaDaPeca } from "@/components/GaleriaDaPeca";
 import {
   buscarCategoria, buscarProduto, formatarPreco, linhaDoMaterial, listarTodosOsProdutos,
 } from "@/lib/catalogo";
-import { RESERVA_HORAS, linkWhatsApp } from "@/lib/loja";
+import { linkWhatsApp } from "@/lib/loja";
+import { precoDaUnidade } from "@/lib/aros";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 
 import "../produto.css";
@@ -82,7 +83,7 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
     ...(produto.larguraMm != null
       ? ([["Largura", `${produto.larguraMm} mm`]] as Array<[string, string]>)
       : []),
-    ...(produto.aros === 2 ? ([["Venda", "Par — duas alianças"]] as Array<[string, string]>) : []),
+    ...(produto.aros === 2 ? ([["Venda", "Par ou unidade"]] as Array<[string, string]>) : []),
   ];
 
   return (
@@ -124,7 +125,15 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
             <p className="pdp__eyebrow">{categoria?.nome ?? "Florenza"}</p>
             <h1 className="pdp__nome">{produto.nome}</h1>
             <p className="pdp__material">{linhaDoMaterial(produto)}</p>
-            <p className="pdp__preco">{formatarPreco(produto.precoCentavos)}</p>
+            <p className="pdp__preco">
+              {formatarPreco(produto.precoCentavos)}
+              {produto.aros === 2 && <span className="pdp__preco-par"> o par</span>}
+            </p>
+            {produto.aros === 2 && (
+              <p className="pdp__preco-unidade">
+                ou {formatarPreco(precoDaUnidade(produto.precoCentavos))} cada aliança
+              </p>
+            )}
             <p className="pdp__desc">{produto.descricao}</p>
 
             <ul className="pdp__ficha">
@@ -163,9 +172,13 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                 </p>
               ) : produto.estoque <= 2 ? (
                 <p className="pdp__estoque">
-                  {produto.estoque === 1
-                    ? "Última peça disponível."
-                    : "Restam 2 peças disponíveis."}
+                  {produto.aros === 2
+                    ? produto.estoque === 1
+                      ? "Última aliança disponível: só dá para comprar a unidade."
+                      : "Restam 2 alianças disponíveis."
+                    : produto.estoque === 1
+                      ? "Última peça disponível."
+                      : "Restam 2 peças disponíveis."}
                 </p>
               ) : null}
             </div>
@@ -176,10 +189,8 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                 a vitrine mostra quantas restam. Prometer encomenda e depois
                 recusar por falta de estoque seria as duas coisas ao mesmo tempo. */}
             <p className="pdp__nota">
-              {pagamentoOnline
-                ? "Pagamento com Pix ou cartão pelo PagBank, logo depois de fechar o pedido."
-                : "O pagamento é combinado por WhatsApp depois que o pedido chega — não há cobrança automática neste site."}{" "}
-              A peça fica reservada para você por {RESERVA_HORAS} horas. Veja os{" "}
+              {pagamentoOnline && "Pagamento com Pix ou cartão pelo PagBank, logo depois de fechar o pedido. "}
+              Veja os{" "}
               <Link href="/termos-de-compra">termos de compra</Link> e a{" "}
               <Link href="/trocas-e-devolucoes">política de trocas</Link>.
             </p>

@@ -8,7 +8,7 @@ import "../institucional.css";
 
 export const metadata: Metadata = {
   title: "Termos de compra — Florenza",
-  description: "Como funcionam a compra, a reserva, o pagamento e a entrega das peças Florenza.",
+  description: "Como funcionam a compra, o pagamento, o cancelamento e a entrega das peças Florenza.",
 };
 
 /* Texto-base: revisar com advogado ou contador antes de abrir a loja (ver
@@ -47,20 +47,23 @@ export default function TermosDeCompra() {
           peça ou no carrinho — e a peça é preparada nessa medida. Em caso de dúvida, fale com a
           Florenza antes de comprar.
         </li>
+        <li>
+          As alianças são anunciadas pelo valor do par e também podem ser compradas por unidade, pela
+          metade desse valor.
+        </li>
         <li>Há um limite de 10 unidades por peça em cada pedido.</li>
       </ul>
 
-      <h2>Reserva e pagamento</h2>
+      <h2>Pagamento</h2>
       <p>
-        Ao fechar o pedido, as peças ficam <strong>reservadas para você por {RESERVA_HORAS} horas</strong>.
         {online
-          ? " O pagamento é feito com Pix ou cartão na página do PagBank, logo depois do fechamento."
-          : " A Florenza entra em contato pelo WhatsApp para combinar a forma de pagamento."}
+          ? "O pagamento é feito com Pix ou cartão na página do PagBank, logo depois do fechamento."
+          : "Depois do fechamento, a Florenza entra em contato para concluir o pagamento."}
       </p>
       <ul>
         <li>
-          Sem pagamento confirmado dentro da reserva, o pedido é cancelado automaticamente e as peças
-          voltam para a vitrine. Pagamento com cartão em análise mantém a reserva até a resposta.
+          Sem pagamento confirmado em {RESERVA_HORAS} horas, o pedido é cancelado automaticamente.
+          Pagamento com cartão em análise mantém o pedido aberto até a resposta.
           {online && " Antes de cancelar, a situação é conferida com o PagBank."}
         </li>
         <li>Cada conta pode ter até 3 pedidos aguardando pagamento ao mesmo tempo.</li>
@@ -111,8 +114,16 @@ export default function TermosDeCompra() {
       <h2>Cancelamento pela loja</h2>
       <p>
         A Florenza pode cancelar um pedido quando o pagamento não for confirmado, quando houver erro
-        evidente nos dados ou indício de fraude. Nesses casos, qualquer valor pago é devolvido
-        integralmente, pelo mesmo meio de pagamento.
+        evidente nos dados ou indício de fraude.
+      </p>
+      <p>
+        O site confere o estoque e recusa a venda de peça indisponível. Ainda assim, pode haver falhas
+        no processo, como divergência de estoque ou problema no preparo. Se, por isso, faltar a peça
+        para cumprir o prazo de entrega, a compra poderá ser cancelada, mesmo depois de paga, e a
+        Florenza avisará você e estornará o valor.
+      </p>
+      <p>
+        Nesses casos, qualquer valor pago é devolvido integralmente, pelo mesmo meio de pagamento.
       </p>
 
       <h2>Arrependimento, troca e garantia</h2>

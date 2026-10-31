@@ -108,7 +108,7 @@ export function IconeConta({ className, size = 16 }: Props) {
    desktop está sempre ao lado e no celular abre por extenso no menu.
    --------------------------------------------------------------------------- */
 
-/** Anéis de Ouro: aro liso e largo, visto de frente. */
+/** Alianças de Ouro: aro liso e largo, visto de frente. */
 export function IconeAnelOuro({ className, size = 16 }: Props) {
   return (
     <svg {...base(size, className)}>
@@ -118,7 +118,7 @@ export function IconeAnelOuro({ className, size = 16 }: Props) {
   );
 }
 
-/** Anéis de Prata: o mesmo aro, com o friso que corre no meio da peça. */
+/** Alianças de Prata: o mesmo aro, com o friso que corre no meio da peça. */
 export function IconeAnelPrata({ className, size = 16 }: Props) {
   return (
     <svg {...base(size, className)}>

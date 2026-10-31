@@ -213,7 +213,7 @@ ${whats ? `<p style="margin:0 0 10px"><a href="${whats}" style="display:inline-b
       `Recebemos seu pedido #${pedido.numero}`,
       `<p style="margin:0 0 6px">Olá, ${esc(pedido.nome.split(" ")[0])}. Seu pedido chegou para a Florenza.</p>
 ${itens.html}
-${pedido.expiraEm ? `<p style="margin:0 0 16px;color:${COR.apagada}">As peças ficam reservadas para você até ${dataHora.format(new Date(pedido.expiraEm))}. Depois disso, sem pagamento, voltam para a vitrine.</p>` : ""}
+${pedido.expiraEm ? `<p style="margin:0 0 16px;color:${COR.apagada}">Sem pagamento confirmado até ${dataHora.format(new Date(pedido.expiraEm))}, o pedido é cancelado automaticamente.</p>` : ""}
 <p style="margin:0"><a href="${urlBase}/conta/pedido/${pedido.numero}" style="color:${COR.ouro}">Acompanhar o pedido</a></p>`
     );
     const texto = `Recebemos seu pedido #${pedido.numero}.\n\n${itens.texto}\n\nAcompanhe: ${urlBase}/conta/pedido/${pedido.numero}`;

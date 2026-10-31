@@ -118,12 +118,15 @@ export function RingCard({
         <div className="ringCard__foot">
           <span className="ringCard__price">
             {formatarPreco(produto.precoCentavos)}
+            {produto.aros === 2 && <span className="ringCard__par"> o par</span>}
             {/* Avisa antes de a pessoa se apegar à peça. Só nas últimas
                 unidades: em estoque cheio isso viraria pressão de venda, que
                 não é o tom da casa. */}
             {produto.estoque > 0 && produto.estoque <= 2 && (
               <span className="ringCard__restam">
-                {produto.estoque === 1 ? "última peça" : "restam 2"}
+                {produto.aros === 2
+                  ? produto.estoque === 1 ? "última aliança" : "restam 2 alianças"
+                  : produto.estoque === 1 ? "última peça" : "restam 2"}
               </span>
             )}
           </span>

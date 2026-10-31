@@ -95,7 +95,7 @@ export function Rings3D() {
     .join(" ");
 
   return (
-    <section className={classeSecao} id="ringsSection" aria-label="Materiais: prata 925 e ouro 18K">
+    <section className={classeSecao} id="ringsSection" aria-label="Materiais: prata 950 e ouro 18K">
       {/* PRATA */}
       <div
         className="rings3d-panel silver"
@@ -104,7 +104,7 @@ export function Rings3D() {
         tabIndex={0}
         role="button"
         aria-expanded="false"
-        aria-label="Ver detalhes da Prata 925"
+        aria-label="Ver detalhes da Prata 950"
       >
         <span className="rings3d-glow" aria-hidden="true" />
         <canvas className="rings3d-canvas" id="canvasSilver" ref={canvasPrata} />
@@ -120,10 +120,10 @@ export function Rings3D() {
         </div>
 
         <div className="rings3d-card silver-card">
-          <h3>Prata 925</h3>
+          <h3>Prata 950</h3>
           <p className="sub">Pureza, brilho e permanência.</p>
           <p className="desc">
-            A prata 925 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.
+            A prata 950 oferece beleza e qualidade em cada detalhe, com um brilho que atravessa o tempo.
           </p>
           <ul>
             <li><Check />Acabamento sofisticado</li>
@@ -131,7 +131,7 @@ export function Rings3D() {
             <li><Check />Design atemporal</li>
           </ul>
           <Link className="rings3d-cta" href="/aliancas-prata" target="_blank" rel="noopener">
-            Conhecer Prata 925
+            Conhecer Prata 950
             <SetaCta />
           </Link>
         </div>
@@ -148,7 +148,7 @@ export function Rings3D() {
           type="button"
           data-metal="silver"
           aria-pressed={metal === "silver"}
-          aria-label="Destacar Prata 925"
+          aria-label="Destacar Prata 950"
           onClick={() => escolher("silver")}
         >
           Prata

@@ -9,7 +9,7 @@
  * Ficam no código, e não em variável de ambiente, porque são públicos por
  * definição e mudam quase nunca. Quando mudarem, a mudança passa pelo git.
  *
- * VAZIOS DE PROPÓSITO: nenhum destes valores pode ser inventado. Enquanto
+ * OS VAZIOS SÃO DE PROPÓSITO: nenhum destes valores pode ser inventado. Enquanto
  * estiverem vazios, o site abre em todo lugar, com "a preencher" nas páginas
  * legais — e o build de produção deixa um aviso no log (fim do arquivo).
  */
@@ -19,10 +19,12 @@ export const LOJA = {
   /** Como aparece no cartão CNPJ: 00.000.000/0001-00. */
   cnpj: "",
   /** Endereço completo em uma linha, com cidade, UF e CEP. */
-  endereco: "",
-  email: "",
+  endereco: "R. Prof. Alfredo Gonçalves Figueira, 100 - Lj 231 - Centro, Nilópolis - RJ, 26525-060",
+  email: "florenzajoias@outlook.com",
+  /** Telefone fixo, como é exibido. */
+  telefone: "(21) 2691-7140",
   /** Só dígitos, com DDI e DDD: 5521999998888. */
-  whatsapp: "",
+  whatsapp: "5521965432738",
   /**
    * Como a entrega funciona hoje, em uma ou duas frases: quem paga o frete,
    * por qual transportadora, e em quanto tempo a peça sai. Vai para os termos
@@ -31,13 +33,20 @@ export const LOJA = {
   entrega: "",
 };
 
-/** Mesmo prazo de `criar_pedido()` no banco. Mudou lá, muda aqui. */
+/** Prazo para pagar, o mesmo de `criar_pedido()` no banco. Mudou lá, muda aqui. */
 export const RESERVA_HORAS = 48;
 
 const OBRIGATORIOS = ["razaoSocial", "cnpj", "endereco", "email", "whatsapp", "entrega"] as const;
 
 export function camposDaLojaPendentes(): string[] {
   return OBRIGATORIOS.filter((campo) => LOJA[campo].trim() === "");
+}
+
+/** O WhatsApp como se lê: (21) 96543-2738. O campo guarda só dígitos, para o link. */
+export function whatsappParaExibir(): string {
+  const local = LOJA.whatsapp.replace(/\D/g, "").replace(/^55/, "");
+  const m = local.match(/^(\d{2})(\d{4,5})(\d{4})$/);
+  return m ? `(${m[1]}) ${m[2]}-${m[3]}` : LOJA.whatsapp;
 }
 
 /** Link para falar com a Florenza. `null` enquanto o número não estiver cadastrado. */

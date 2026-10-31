@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
-import { LOJA, linkWhatsApp } from "@/lib/loja";
+import { LOJA, linkWhatsApp, whatsappParaExibir } from "@/lib/loja";
 
 /**
  * Moldura das páginas de termos, trocas e privacidade.
@@ -71,10 +71,11 @@ export function DadosDaLoja() {
         <dt>E-mail</dt>
         {LOJA.email ? <dd><a href={`mailto:${LOJA.email}`}>{LOJA.email}</a></dd> : <Valor>{""}</Valor>}
       </div>
+      <div><dt>Telefone</dt><Valor>{LOJA.telefone}</Valor></div>
       <div>
         <dt>WhatsApp</dt>
         {whatsapp ? (
-          <dd><a href={whatsapp} target="_blank" rel="noopener noreferrer">{LOJA.whatsapp}</a></dd>
+          <dd><a href={whatsapp} target="_blank" rel="noopener noreferrer">{whatsappParaExibir()}</a></dd>
         ) : (
           <Valor>{""}</Valor>
         )}
@@ -85,8 +86,9 @@ export function DadosDaLoja() {
 
 /** Frase de contato reaproveitada nas três páginas. */
 export function ComoFalar() {
-  const canais = [LOJA.email && `pelo e-mail ${LOJA.email}`, LOJA.whatsapp && `pelo WhatsApp ${LOJA.whatsapp}`]
+  const canais = [LOJA.email && `pelo e-mail ${LOJA.email}`, LOJA.whatsapp && `pelo WhatsApp ${whatsappParaExibir()}`, LOJA.telefone && `pelo telefone ${LOJA.telefone}`]
     .filter(Boolean)
-    .join(" ou ");
+    .join(", ")
+    .replace(/, ([^,]*)$/, " ou $1");
   return <>{canais || "pelos canais de atendimento informados acima"}</>;
 }

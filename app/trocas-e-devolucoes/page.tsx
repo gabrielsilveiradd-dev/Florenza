@@ -70,7 +70,7 @@ export default function TrocasEDevolucoes() {
       <h2>Pedido ainda não enviado</h2>
       <p>
         Antes da postagem, o cancelamento é imediato: fale com a Florenza e o valor pago é devolvido
-        por inteiro. Pedido que ainda não foi pago é cancelado sozinho quando a reserva vence — veja
+        por inteiro. Pedido que ainda não foi pago é cancelado sozinho quando o prazo de pagamento vence — veja
         os <Link href="/termos-de-compra">termos de compra</Link>.
       </p>
 

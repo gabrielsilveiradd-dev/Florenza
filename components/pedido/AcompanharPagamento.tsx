@@ -94,7 +94,7 @@ const FRASE: Partial<Record<EstadoDePagamento, string>> = {
   pending: "conferindo com o PagBank.",
   paid: "o PagBank confirmou o seu pagamento.",
   declined: "o pagamento não foi aprovado. Você pode tentar de novo com outro cartão ou pelo Pix.",
-  expired: "a reserva venceu sem pagamento, e as peças voltaram para a vitrine.",
+  expired: "o prazo de pagamento venceu, e o pedido foi cancelado.",
   refunded: "o valor foi devolvido pelo mesmo meio do pagamento.",
   partially_refunded: "parte do valor foi devolvida pelo mesmo meio do pagamento.",
   in_dispute: "a operadora do cartão abriu uma contestação. A Florenza acompanha o caso.",

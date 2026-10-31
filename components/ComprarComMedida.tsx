@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { BotaoComprar } from "@/components/BotaoComprar";
 import { SeletorDeAro } from "@/components/SeletorDeAro";
+import { formatarPreco } from "@/lib/admin/format";
+import { precoDaUnidade } from "@/lib/aros";
 import type { ItemCarrinho } from "@/lib/carrinho";
 
 /**
@@ -15,7 +17,9 @@ import type { ItemCarrinho } from "@/lib/carrinho";
  * WhatsApp depois do pedido. Saiu por decisão da loja: a peça precisa sair com a
  * medida certa, e a conversa depois da compra atrasava o envio.
  *
- * Aliança em par tem dois seletores, um para cada pessoa.
+ * Aliança tem a escolha entre o par, com dois seletores, um para cada pessoa, e
+ * uma aliança só, com um seletor e metade do preço. O preço aqui é só para a
+ * tela: quem cobra é `criar_pedido()`.
  */
 export function ComprarComMedida({
   produto,
@@ -27,12 +31,34 @@ export function ComprarComMedida({
   const [aro, setAro] = useState<number | null>(null);
   const [aroPar, setAroPar] = useState<number | null>(null);
   const [avisar, setAvisar] = useState(false);
+  // O estoque conta alianças: com uma só, não há par para vender.
+  const semPar = produto.estoque < 2;
+  const [unidade, setUnidade] = useState(semPar);
 
-  const par = produto.aros === 2;
+  const vendidaEmPar = produto.aros === 2;
+  const par = vendidaEmPar && !unidade;
   const falta = produto.aros >= 1 && (aro === null || (par && aroPar === null));
 
   return (
     <>
+      {vendidaEmPar && produto.estoque > 0 && (
+        <fieldset className="pdp__medida pdp__venda">
+          <legend className="pdp__medida-titulo">Como comprar</legend>
+          <div className="pdp__venda-opcoes">
+            <label className="pdp__venda-opcao">
+              <input type="radio" name="venda" checked={!unidade} disabled={semPar} onChange={() => setUnidade(false)} />
+              <span>O par</span>
+              <strong>{formatarPreco(produto.precoCentavos)}</strong>
+            </label>
+            <label className="pdp__venda-opcao">
+              <input type="radio" name="venda" checked={unidade} onChange={() => setUnidade(true)} />
+              <span>Uma aliança</span>
+              <strong>{formatarPreco(precoDaUnidade(produto.precoCentavos))}</strong>
+            </label>
+          </div>
+        </fieldset>
+      )}
+
       {produto.aros > 0 && produto.estoque > 0 && (
         <fieldset className="pdp__medida" id="medida">
           <legend className="pdp__medida-titulo">{par ? "Tamanho dos aros" : "Tamanho do aro"}</legend>
@@ -67,7 +93,19 @@ export function ComprarComMedida({
         modo="pagina"
         bloqueado={falta}
         aoBloquear={() => setAvisar(true)}
-        produto={{ ...produto, tamanho: aro, tamanhoPar: par ? aroPar : null }}
+        produto={
+          vendidaEmPar && unidade
+            ? {
+                ...produto,
+                nome: `${produto.nome} (unidade)`,
+                precoCentavos: precoDaUnidade(produto.precoCentavos),
+                aros: 1,
+                avulsa: true,
+                tamanho: aro,
+                tamanhoPar: null,
+              }
+            : { ...produto, tamanho: aro, tamanhoPar: par ? aroPar : null }
+        }
       />
     </>
   );

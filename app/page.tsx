@@ -57,17 +57,11 @@ export default function Home() {
           />
           <div className="aliancasFeature__scrim" aria-hidden="true" />
           <div className="aliancasFeature__content js-reveal">
-            {/* O título era "Alianças", com "De Prata e Ouro" embaixo — e
-                "Alianças" é justamente o nome que não pode conviver com
-                "Anéis de Ouro"/"Anéis de Prata" nos outros seis lugares onde
-                o site nomeia as categorias. Duas palavras para a mesma coisa
-                é como um catálogo se torna confuso. O vídeo, a composição e o
-                CSS da seção seguem exatamente como estavam. */}
             <p className="section-eyebrow">A casa</p>
             <h2 className="aliancasFeature__title">Ouro e Prata</h2>
             <p className="aliancasFeature__subtitle">Dois metais, a mesma promessa</p>
             <p className="aliancasFeature__desc">
-              Peças atemporais, lapidadas à mão para selar promessas que atravessam gerações.
+              Peças atemporais, feitas em maquinário para selar promessas que atravessam gerações.
             </p>
             <a className="btn-outline" href="#categoryShowcase">
               Ver as categorias{" "}
