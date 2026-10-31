@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
-import { criarCheckout } from "@/lib/pagamento/pagbank";
+import { abrirCobranca } from "@/lib/pagamento/cobranca";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { urlDoSite } from "@/lib/url-do-site";
@@ -46,7 +46,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ nu
   }
 
   try {
-    const url = await criarCheckout({
+    const url = await abrirCobranca({
       pedidoId: pedido.id,
       numero: pedido.numero,
       totalCentavos: pedido.totalCentavos,

@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-import { pagBankEmTeste } from "@/lib/pagamento/config";
+import { pagBankApiUrl } from "@/lib/pagamento/config";
 
 /**
  * CONVERSA COM O PAGBANK — só servidor.
@@ -12,14 +12,33 @@ import { pagBankEmTeste } from "@/lib/pagamento/config";
  * `criar_pedido()` calculou — nunca um número vindo do navegador.
  *
  * A API fala em centavos inteiros, como o resto do projeto: nada de conversão.
+ *
+ * Cada campo cita a página que o sustenta, em developer.pagbank.com.br. O que a
+ * documentação não garante está marcado com "SUPOSIÇÃO – validar no sandbox".
  */
-
-const API = () => (pagBankEmTeste() ? "https://sandbox.api.pagseguro.com" : "https://api.pagseguro.com");
 
 function token(): string {
   const valor = process.env.PAGBANK_TOKEN;
   if (!valor) throw new Error("PAGBANK_TOKEN não está configurado.");
   return valor;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RespostaDaApi = { status: number; dados: any };
+
+/** Toda chamada ao PagBank passa por aqui. */
+async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<RespostaDaApi> {
+  const resposta = await fetch(`${pagBankApiUrl()}${caminho}`, {
+    method: metodo,
+    headers: {
+      Authorization: `Bearer ${token()}`,
+      ...(corpo === undefined ? {} : { "Content-Type": "application/json" }),
+    },
+    body: corpo === undefined ? undefined : JSON.stringify(corpo),
+    signal: AbortSignal.timeout(10_000),
+    cache: "no-store",
+  });
+  return { status: resposta.status, dados: await resposta.json().catch(() => null) };
 }
 
 /**
@@ -45,17 +64,17 @@ export type EntradaDoCheckout = {
   expiraEm: string | null;
   itens: Array<{ nome: string; quantidade: number }>;
   comprador: { nome: string; email: string | null; cpf: string | null; telefone: string | null };
-  urlBase: string;
+  urlRetorno: string;
+  /** `null` no localhost: o PagBank só avisa endereço público. */
+  urlNotificacao: string | null;
 };
 
-/** Devolve o link de pagamento para onde a pessoa é mandada. */
-export async function criarCheckout(e: EntradaDoCheckout): Promise<string> {
-  const destino = `${e.urlBase}/conta/pedido/${e.numero}`;
+/** reference/criar-checkout: POST /checkouts. Guarde o `checkoutId`: é ele que vincula o pedido. */
+export async function criarCheckout(e: EntradaDoCheckout): Promise<{ checkoutId: string; payUrl: string }> {
   const nome = e.comprador.nome.trim();
 
   const corpo: Record<string, unknown> = {
-    // É por aqui que o pagamento volta ao pedido. O webhook lê este campo do
-    // pedido buscado na API, nunca do corpo do aviso.
+    // Redundância: o vínculo principal é o id devolvido na resposta.
     reference_id: e.pedidoId,
     // A pessoa ainda pode corrigir os dados na página do PagBank: com `false`, um
     // telefone fora do formato deles impediria o pagamento inteiro.
@@ -69,7 +88,7 @@ export async function criarCheckout(e: EntradaDoCheckout): Promise<string> {
     },
     // Um item só, com o total do pedido: frete e desconto já estão dentro dele,
     // e o valor cobrado não tem como sair diferente do pedido. O id do pedido vai
-    // aqui também, como segunda forma de achar o pedido — ver `pedidoDaOrder`.
+    // aqui também, como segunda redundância — ver `pedidoDaOrder`.
     items: [
       {
         reference_id: e.pedidoId,
@@ -84,37 +103,34 @@ export async function criarCheckout(e: EntradaDoCheckout): Promise<string> {
     // mais gera estorno.
     payment_methods: [{ type: "PIX" }, { type: "CREDIT_CARD" }],
     soft_descriptor: "FLORENZA",
-    redirect_url: destino,
-    return_url: destino,
+    redirect_url: e.urlRetorno,
+    return_url: e.urlRetorno,
   };
 
-  // Aviso por webhook só em endereço HTTPS público. No localhost não há aviso, e
-  // o pedido fica aguardando pagamento.
-  if (e.urlBase.startsWith("https://")) {
-    corpo.payment_notification_urls = [`${e.urlBase}/api/pagbank/webhook`];
-  }
+  if (e.urlNotificacao) corpo.payment_notification_urls = [e.urlNotificacao];
 
   // A cobrança vence junto com a reserva: não dá para pagar peça que já voltou
   // para a vitrine. Sem esta data, o PagBank vence o checkout em 2 horas.
   if (e.expiraEm) corpo.expiration_date = dataParaPagBank(e.expiraEm);
 
-  const resposta = await fetch(`${API()}/checkouts`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
-    body: JSON.stringify(corpo),
-    signal: AbortSignal.timeout(10_000),
-    cache: "no-store",
-  });
-  const dados = await resposta.json().catch(() => null);
-
-  if (!resposta.ok || !dados) {
-    throw new Error(`PagBank recusou o checkout (${resposta.status}): ${JSON.stringify(dados)?.slice(0, 300)}`);
+  const { status, dados } = await chamar("POST", "/checkouts", corpo);
+  if (status < 200 || status >= 300 || !dados) {
+    throw new Error(`PagBank recusou o checkout (${status}): ${JSON.stringify(dados)?.slice(0, 300)}`);
   }
 
   const links: Array<{ rel?: string; href?: string }> = Array.isArray(dados.links) ? dados.links : [];
-  const url = links.find((l) => l.rel === "PAY")?.href;
-  if (!url) throw new Error("PagBank não devolveu o link de pagamento.");
-  return url;
+  const payUrl = links.find((l) => l.rel === "PAY")?.href;
+  if (!payUrl || typeof dados.id !== "string") {
+    throw new Error("PagBank não devolveu o id do checkout ou o link de pagamento.");
+  }
+  return { checkoutId: dados.id, payUrl };
+}
+
+/** reference/inativar-checkout: POST /checkouts/{id}/inactivate, sem corpo. */
+export async function inativarCheckout(checkoutId: string): Promise<void> {
+  if (!/^CHEC_[0-9A-Za-z_-]{1,64}$/.test(checkoutId)) throw new Error(`Id de checkout inválido: ${checkoutId}`);
+  const { status } = await chamar("POST", `/checkouts/${checkoutId}/inactivate`);
+  if (status < 200 || status >= 300) throw new Error(`PagBank não inativou ${checkoutId} (${status}).`);
 }
 
 export type CobrancaDoPagBank = {
@@ -162,14 +178,9 @@ export async function buscarOrder(id: string): Promise<OrderDoPagBank> {
   // caminho da requisição.
   if (!/^ORDE_[0-9A-Za-z_-]{1,64}$/.test(id)) throw new Error(`Id de pedido do PagBank inválido: ${id}`);
 
-  const resposta = await fetch(`${API()}/orders/${id}`, {
-    headers: { Authorization: `Bearer ${token()}` },
-    signal: AbortSignal.timeout(10_000),
-    cache: "no-store",
-  });
-  if (!resposta.ok) throw new Error(`PagBank não achou o pedido ${id} (${resposta.status}).`);
+  const { status, dados: o } = await chamar("GET", `/orders/${id}`);
+  if (status !== 200 || !o) throw new Error(`PagBank não achou o pedido ${id} (${status}).`);
 
-  const o = await resposta.json();
   type Cobranca = {
     id: unknown;
     status?: unknown;

@@ -1,27 +1,59 @@
 /**
- * O pagamento online está ligado?
+ * O PAGBANK ESTÁ LIGADO, E EM QUE AMBIENTE?
  *
- * Duas chaves, e as duas precisam existir: o token do PagBank (para criar a
- * cobrança e conferir o pagamento na API deles) e o segredo que o banco exige
- * em `registrar_pagamento()`. Com uma só, o site cobraria e não conseguiria
- * marcar o pedido como pago — pior do que não cobrar.
+ * Tudo vem de variável de ambiente, nenhuma URL ou token no código:
+ *
+ *   PAGBANK_ENV          `production` cobra de verdade; qualquer outro valor é sandbox.
+ *   PAGBANK_TOKEN        token da conta, de um ambiente só.
+ *   PAGBANK_API_URL      base da API do ambiente (ver docs/ambientes-disponiveis).
+ *   PAGBANK_WEBHOOK_URL  o endereço público de /api/pagbank/webhook.
+ *   PAGBANK_URL_SECRET   assina o pedido nas URLs que nós controlamos.
+ *
+ * E o PAGAMENTO_SEGREDO_BANCO, que o banco exige nas funções de pagamento. Sem
+ * ele o site cobraria e não conseguiria marcar o pedido como pago — pior do que
+ * não cobrar.
  *
  * Enquanto não estiver ligado, o site inteiro fala a língua do acerto por
- * WhatsApp: vitrine, checkout, confirmação e conta. Nada precisa ser mudado à
- * mão no dia de ligar; basta pôr as variáveis na Vercel.
+ * WhatsApp: vitrine, checkout, confirmação e conta.
  *
  * Só para código de servidor. Num componente de cliente `process.env` não tem
  * estas variáveis e a resposta seria sempre "não" — passe o valor por prop.
  */
-export function pagamentoOnlineAtivo(): boolean {
-  return Boolean(process.env.PAGBANK_TOKEN && process.env.PAGAMENTO_SEGREDO_BANCO);
+
+export type AmbientePagBank = "sandbox" | "production";
+
+export function ambientePagBank(): AmbientePagBank {
+  return process.env.PAGBANK_ENV === "production" ? "production" : "sandbox";
 }
 
-/**
- * O token do PagBank não diz de qual ambiente é, então o ambiente é declarado.
- * Só `producao` cobra de verdade: esquecer a variável aponta para o sandbox, e
- * um token de produção lá é recusado, em vez de virar cobrança real sem querer.
- */
 export function pagBankEmTeste(): boolean {
-  return process.env.PAGBANK_AMBIENTE !== "producao";
+  return ambientePagBank() === "sandbox";
+}
+
+/** A URL precisa bater com o ambiente: token de um lado e URL de outro só dá erro confuso. */
+export function urlDaApiCoerente(url: string, ambiente: AmbientePagBank): boolean {
+  return ambiente === "sandbox" ? url.includes("sandbox") : !url.includes("sandbox");
+}
+
+export function pagBankApiUrl(): string {
+  const url = process.env.PAGBANK_API_URL;
+  if (!url) throw new Error("PAGBANK_API_URL não está configurada.");
+  return url.replace(/\/$/, "");
+}
+
+/** Dá para conversar com o PagBank e gravar o que ele disser? */
+export function pagBankConfigurado(): boolean {
+  const url = process.env.PAGBANK_API_URL;
+  return Boolean(
+    url &&
+      urlDaApiCoerente(url, ambientePagBank()) &&
+      process.env.PAGBANK_TOKEN &&
+      process.env.PAGBANK_URL_SECRET &&
+      process.env.PAGAMENTO_SEGREDO_BANCO
+  );
+}
+
+/** O site abre cobrança nova? */
+export function pagamentoOnlineAtivo(): boolean {
+  return pagBankConfigurado();
 }
