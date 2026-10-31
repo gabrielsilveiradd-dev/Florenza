@@ -1,5 +1,7 @@
 import { createHash, timingSafeEqual, verify } from "node:crypto";
-import { pagBankApiUrl } from "@/lib/pagamento/config";
+import { rpcComSegredo } from "@/lib/pagamento/banco";
+import { ambientePagBank, pagBankApiUrl } from "@/lib/pagamento/config";
+import { sanitizarParaLog } from "@/lib/pagamento/sanitizar";
 
 /**
  * CONVERSA COM O PAGBANK — só servidor.
@@ -26,20 +28,61 @@ function token(): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RespostaDaApi = { status: number; dados: any };
 
-/** Toda chamada ao PagBank passa por aqui. */
-async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<RespostaDaApi> {
-  const resposta = await fetch(`${pagBankApiUrl()}${caminho}`, {
-    method: metodo,
-    headers: {
-      Authorization: `Bearer ${token()}`,
-      ...(corpo === undefined ? {} : { "Content-Type": "application/json" }),
-    },
-    body: corpo === undefined ? undefined : JSON.stringify(corpo),
-    signal: AbortSignal.timeout(10_000),
-    cache: "no-store",
-  });
-  return { status: resposta.status, dados: await resposta.json().catch(() => null) };
+/** Erro de resposta da API, com o código: quem chama precisa distinguir 401 e 403. */
+export class ErroDoPagBank extends Error {
+  constructor(mensagem: string, readonly http: number) {
+    super(mensagem);
+  }
 }
+
+/** Log nunca derruba a operação: a homologação precisa dele, o pagamento não. */
+async function gravarLog(e: {
+  metodo: string;
+  caminho: string;
+  http: number | null;
+  inicio: number;
+  requisicao: unknown;
+  resposta: unknown;
+  erro: string | null;
+}): Promise<void> {
+  await rpcComSegredo("pagbank_registrar_log", {
+    p_ambiente: ambientePagBank(),
+    p_metodo: e.metodo,
+    p_caminho: e.caminho,
+    p_http_status: e.http,
+    p_duracao_ms: Date.now() - e.inicio,
+    p_requisicao: sanitizarParaLog(e.requisicao),
+    p_resposta: sanitizarParaLog(e.resposta),
+    p_erro: e.erro,
+  }).catch((falha) => console.error("[pagbank] log não gravado:", falha));
+}
+
+/** Toda chamada ao PagBank passa por aqui, e toda chamada fica no log. */
+async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<RespostaDaApi> {
+  const inicio = Date.now();
+  try {
+    const resposta = await fetch(`${pagBankApiUrl()}${caminho}`, {
+      method: metodo,
+      headers: {
+        Authorization: `Bearer ${token()}`,
+        ...(corpo === undefined ? {} : { "Content-Type": "application/json" }),
+      },
+      body: corpo === undefined ? undefined : JSON.stringify(corpo),
+      signal: AbortSignal.timeout(10_000),
+      cache: "no-store",
+    });
+    const dados = await resposta.json().catch(() => null);
+    await gravarLog({ metodo, caminho, http: resposta.status, inicio, requisicao: corpo, resposta: dados, erro: null });
+    return { status: resposta.status, dados };
+  } catch (erro) {
+    const mensagem = erro instanceof Error ? erro.message : String(erro);
+    await gravarLog({ metodo, caminho, http: null, inicio, requisicao: corpo, resposta: null, erro: mensagem });
+    throw erro;
+  }
+}
+
+/** Para os testes da página de integração, que precisam do código cru. */
+export const chamadaCrua = chamar;
 
 /**
  * A API pede data com fuso explícito. O Brasil não tem mais horário de verão
@@ -115,7 +158,7 @@ export async function criarCheckout(e: EntradaDoCheckout): Promise<{ checkoutId:
 
   const { status, dados } = await chamar("POST", "/checkouts", corpo);
   if (status < 200 || status >= 300 || !dados) {
-    throw new Error(`PagBank recusou o checkout (${status}): ${JSON.stringify(dados)?.slice(0, 300)}`);
+    throw new ErroDoPagBank(`PagBank recusou o checkout (${status}): ${JSON.stringify(dados)?.slice(0, 300)}`, status);
   }
 
   const links: Array<{ rel?: string; href?: string }> = Array.isArray(dados.links) ? dados.links : [];
@@ -335,6 +378,7 @@ export async function consultarNotificacaoLegada(codigo: string): Promise<Notifi
   const email = process.env.PAGBANK_EMAIL;
   if (!base || !email || !/^[A-Za-z0-9-]{1,36}$/.test(codigo)) return null;
 
+  const inicio = Date.now();
   const busca = new URLSearchParams({ email, token: token() });
   const resposta = await fetch(`${base.replace(/\/$/, "")}/v3/transactions/notifications/${codigo}?${busca}`, {
     headers: { "Content-Type": "application/xml" },
@@ -345,12 +389,56 @@ export async function consultarNotificacaoLegada(codigo: string): Promise<Notifi
 
   const xml = await resposta.text();
   const campo = (nome: string) => xml.match(new RegExp(`<${nome}>([^<]*)</${nome}>`))?.[1]?.trim() ?? null;
-  return {
+  const notificacao = {
     status: campo("status"),
     referencia: campo("reference"),
     codigo: campo("code"),
     valorCentavos: Math.round(Number(campo("grossAmount") ?? 0) * 100),
   };
+  // Só o caminho, porque a URL leva o token. E só os campos lidos, porque o XML traz
+  // nome, e-mail, telefone e endereço do comprador sem as chaves que a máscara conhece.
+  await gravarLog({
+    metodo: "GET",
+    caminho: `/v3/transactions/notifications/${codigo}`,
+    http: resposta.status,
+    inicio,
+    requisicao: null,
+    resposta: notificacao,
+    erro: null,
+  });
+  return notificacao;
+}
+
+/* ---- Preferências de notificação (contestação e cancelamento) ---- */
+
+/** reference/validacao-de-autenticidade: GET /public-keys?type=webhook. */
+export async function temChavePublicaDoWebhook(): Promise<boolean> {
+  const { status, dados } = await chamar("GET", "/public-keys?type=webhook");
+  return status === 200 && typeof dados?.public_key === "string";
+}
+
+/** reference/criar-chave-publica: POST /public-keys, com `type`. Sucesso: 201. */
+export async function criarChavePublicaDoWebhook(): Promise<void> {
+  const { status } = await chamar("POST", "/public-keys", { type: "webhook" });
+  if (status < 200 || status >= 300) throw new ErroDoPagBank(`PagBank não criou a chave pública (${status}).`, status);
+}
+
+/** reference/listar-todas-as-preferencias: GET /notifications/preferences, campo `preferences`. */
+export async function listarPreferencias(): Promise<Array<{ target: string; events: string[] }>> {
+  const { status, dados } = await chamar("GET", "/notifications/preferences");
+  if (status !== 200) throw new ErroDoPagBank(`PagBank não listou as preferências (${status}).`, status);
+  const lista: unknown = dados?.preferences;
+  if (!Array.isArray(lista)) return [];
+  return lista.map((p: { target?: unknown; events?: unknown }) => ({
+    target: String(p.target ?? ""),
+    events: Array.isArray(p.events) ? p.events.map(String) : [],
+  }));
+}
+
+/** reference/criar-preferencia: POST /notifications/preferences, com `events` e `target`. */
+export async function criarPreferencia(target: string, eventos: string[]): Promise<void> {
+  const { status } = await chamar("POST", "/notifications/preferences", { events: eventos, target });
+  if (status < 200 || status >= 300) throw new ErroDoPagBank(`PagBank não criou a preferência (${status}).`, status);
 }
 
 /* ---- Autenticidade dos avisos ---- */

@@ -64,7 +64,7 @@ function LigacoesDaLoja() {
         ? pagBankEmTeste()
           ? "PagBank no ambiente de TESTE — nenhum pagamento é real."
           : "PagBank recebendo Pix e cartão."
-        : "Pedidos ficam aguardando pagamento e o acerto é por WhatsApp.",
+        : "Pedidos ficam aguardando pagamento e o acerto é por WhatsApp. Detalhes na aba Pagamentos.",
     },
     {
       rotulo: "Aviso de pedido novo (e-mail)",

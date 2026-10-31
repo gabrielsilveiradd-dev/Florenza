@@ -1,8 +1,9 @@
 import { urlDeNotificacao, urlDeRetorno } from "@/lib/pagamento/assinatura-url";
 import { rpcComSegredo, vincularCheckout } from "@/lib/pagamento/banco";
 import { STATUS_EM_ANDAMENTO } from "@/lib/pagamento/estados";
-import { criarCheckout, inativarCheckout, type EntradaDoCheckout } from "@/lib/pagamento/pagbank";
-import { reconcileOrder, type ContextoDoPedido } from "@/lib/pagamento/reconciliar";
+import { urlPublicaDoSite } from "@/lib/pagamento/config";
+import { ErroDoPagBank, criarCheckout, inativarCheckout, type EntradaDoCheckout } from "@/lib/pagamento/pagbank";
+import { reconcileOrder, registrarAlerta, type ContextoDoPedido } from "@/lib/pagamento/reconciliar";
 
 type EntradaDaCobranca = Omit<EntradaDoCheckout, "urlRetorno" | "urlNotificacao"> & { urlBase: string };
 
@@ -21,6 +22,18 @@ export async function abrirCobranca({ urlBase, ...e }: EntradaDaCobranca): Promi
     urlRetorno: urlDeRetorno(urlBase, e.numero, e.pedidoId),
     // O PagBank só avisa endereço HTTPS público; no localhost, sem aviso.
     urlNotificacao: webhook.startsWith("https://") ? urlDeNotificacao(webhook, e.numero) : null,
+  }).catch(async (erro) => {
+    // Token recusado ou conta sem liberação derrubam toda venda: a equipe precisa
+    // saber na primeira. Uma vez por dia, para não virar ruído.
+    if (erro instanceof ErroDoPagBank && (erro.http === 401 || erro.http === 403)) {
+      await registrarAlerta(
+        null,
+        `alerta:checkout-${erro.http}:${new Date().toISOString().slice(0, 10)}`,
+        `O PagBank recusou a abertura de cobrança (${erro.http}). Os clientes não conseguem pagar online: veja o Status da integração, ou desligue PAGBANK_ENABLED.`,
+        urlPublicaDoSite()
+      ).catch((falha) => console.error("[pagamento] alerta não gravado:", falha));
+    }
+    throw erro;
   });
 
   try {

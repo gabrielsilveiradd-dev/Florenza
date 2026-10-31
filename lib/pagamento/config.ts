@@ -3,6 +3,7 @@
  *
  * Tudo vem de variável de ambiente, nenhuma URL ou token no código:
  *
+ *   PAGBANK_ENABLED      `true` abre cobranças. Desligada, o checkout usa o WhatsApp.
  *   PAGBANK_ENV          `production` cobra de verdade; qualquer outro valor é sandbox.
  *   PAGBANK_TOKEN        token da conta, de um ambiente só.
  *   PAGBANK_API_URL      base da API do ambiente (ver docs/ambientes-disponiveis).
@@ -61,7 +62,10 @@ export function pagBankConfigurado(): boolean {
   );
 }
 
-/** O site abre cobrança nova? */
+/**
+ * O site abre cobrança nova? A flag só decide isto: desligada, os pedidos já abertos
+ * continuam sendo conferidos, e a página pode testar o token antes de ligar.
+ */
 export function pagamentoOnlineAtivo(): boolean {
-  return pagBankConfigurado();
+  return process.env.PAGBANK_ENABLED === "true" && pagBankConfigurado();
 }
