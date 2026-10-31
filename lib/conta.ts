@@ -1,3 +1,5 @@
+import type { EstadoDePagamento } from "@/lib/pagamento/estados";
+
 /**
  * Vocabulário da área da conta — tipos e rótulos, sem nenhuma consulta.
  *
@@ -44,6 +46,8 @@ export type PedidoDaConta = {
   /** Até quando a peça fica reservada sem pagamento. Nulo = não expira. */
   expiraEm: string | null;
   motivoCancelamento: string | null;
+  /** A máquina de estados do pagamento. Nulo = sem pagamento online. */
+  pagamentoEstado: EstadoDePagamento | null;
   codigoRastreio: string | null;
   transportadora: string | null;
   cidade: string | null;

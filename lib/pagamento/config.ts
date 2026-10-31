@@ -41,6 +41,14 @@ export function pagBankApiUrl(): string {
   return url.replace(/\/$/, "");
 }
 
+/** O endereço do site para link em aviso, onde não há requisição de onde deduzir (job, webhook). */
+export function urlPublicaDoSite(): string {
+  const fixa = process.env.NEXT_PUBLIC_SITE_URL;
+  if (fixa) return fixa.replace(/\/$/, "");
+  const webhook = process.env.PAGBANK_WEBHOOK_URL;
+  return webhook ? new URL(webhook).origin : "";
+}
+
 /** Dá para conversar com o PagBank e gravar o que ele disser? */
 export function pagBankConfigurado(): boolean {
   const url = process.env.PAGBANK_API_URL;

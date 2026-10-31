@@ -1,3 +1,4 @@
+import type { EstadoDePagamento } from "@/lib/pagamento/estados";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemDoPedido, PedidoDaConta, PedidoDetalhado, PerfilDaConta } from "@/lib/conta";
 
@@ -83,6 +84,7 @@ type LinhaResumo = {
   entregue_em: string | null;
   expira_em: string | null;
   motivo_cancelamento: string | null;
+  pagamento_estado: EstadoDePagamento | null;
   codigo_rastreio: string | null;
   transportadora: string | null;
   cidade: string | null;
@@ -115,7 +117,7 @@ type LinhaDetalhe = LinhaResumo & {
 const COLUNAS_RESUMO =
   "id, numero, status, subtotal_centavos, desconto_centavos, total_centavos, " +
   "frete_centavos, frete_nome, frete_prazo_min_dias, frete_prazo_max_dias, " +
-  "cupom_codigo, created_at, pago_em, enviado_em, entregue_em, expira_em, motivo_cancelamento, " +
+  "cupom_codigo, created_at, pago_em, enviado_em, entregue_em, expira_em, motivo_cancelamento, pagamento_estado, " +
   "codigo_rastreio, transportadora, cidade, uf, " +
   "pedido_itens (sku, nome, preco_centavos, quantidade, aros, tamanho, tamanho_par)";
 
@@ -154,6 +156,7 @@ function paraResumo(p: LinhaResumo): PedidoDaConta {
     entregueEm: p.entregue_em,
     expiraEm: p.expira_em,
     motivoCancelamento: p.motivo_cancelamento,
+    pagamentoEstado: p.pagamento_estado,
     codigoRastreio: p.codigo_rastreio,
     transportadora: p.transportadora,
     cidade: p.cidade,

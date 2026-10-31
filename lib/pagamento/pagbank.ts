@@ -138,6 +138,10 @@ export type CobrancaDoPagBank = {
   status: string;
   statusDetalhe: string | null;
   valorCentavos: number;
+  /** reference/objeto-order: `amount.summary.paid`. */
+  pagoCentavos: number;
+  /** reference/objeto-order: `amount.summary.refunded`. */
+  estornadoCentavos: number;
   metodo: string | null;
   parcelas: number | null;
   pagoEm: string | null;
@@ -163,13 +167,48 @@ function pedidoDaOrder(o: { reference_id?: unknown; items?: Array<{ reference_id
 }
 
 /**
- * O PagBank não tem status de "estornado": a cobrança paga continua com o status
- * dela, e o estorno aparece em `amount.summary.refunded`. `registrar_pagamento()`
- * precisa saber do estorno, então aqui ele vira um status — o único que não vem
- * cru da API.
+ * O PagBank não tem status de "estornado": no estorno total a cobrança vira
+ * CANCELED, no parcial continua PAID, e só `amount.summary.refunded` conta a
+ * história (page/passo-a-passo-devolvendo-uma-cobrança-paga). Aqui isso vira um
+ * status, os únicos dois que não vêm crus da API.
  */
-function statusDaCobranca(c: { status?: unknown; amount?: { summary?: { refunded?: unknown } } }): string {
-  return Number(c.amount?.summary?.refunded ?? 0) > 0 ? "REFUNDED" : String(c.status);
+function statusDaCobranca(status: unknown, pago: number, estornado: number): string {
+  if (estornado <= 0) return String(status);
+  return pago > 0 && estornado < pago ? "PARTIALLY_REFUNDED" : "REFUNDED";
+}
+
+export type ChecagemDoCheckout = {
+  /** reference/objeto-checkout: ACTIVE, INACTIVE ou EXPIRED. */
+  status: string | null;
+  orderIds: string[];
+  /** A resposta trouxe o campo `orders`? Sem ele, não dá para afirmar que não há pagamento. */
+  conheceOrders: boolean;
+};
+
+/**
+ * reference/consultar-checkout: GET /checkouts/{id}. A página diz que a resposta
+ * inclui os pagamentos do checkout, mas o exemplo não mostra o campo.
+ *
+ * SUPOSIÇÃO – validar no sandbox: `orders` é uma lista de objetos com `id` (ORDE_...).
+ * Se o campo não vier, `conheceOrders` fica `false`, e o pedido não expira por aqui.
+ */
+export async function consultarCheckout(checkoutId: string): Promise<ChecagemDoCheckout> {
+  if (!/^CHEC_[0-9A-Za-z_-]{1,64}$/.test(checkoutId)) throw new Error(`Id de checkout inválido: ${checkoutId}`);
+
+  const { status, dados } = await chamar("GET", `/checkouts/${checkoutId}`);
+  if (status !== 200 || !dados) throw new Error(`PagBank não achou o checkout ${checkoutId} (${status}).`);
+
+  const orders: unknown = dados.orders;
+  const conheceOrders = Array.isArray(orders);
+  return {
+    status: typeof dados.status === "string" ? dados.status : null,
+    conheceOrders,
+    orderIds: conheceOrders
+      ? (orders as Array<{ id?: unknown }>)
+          .map((o) => o?.id)
+          .filter((id): id is string => typeof id === "string" && id.startsWith("ORDE_"))
+      : [],
+  };
 }
 
 /** A verdade sobre um pagamento é o que a API diz, com o token da loja. */
@@ -194,17 +233,22 @@ export async function buscarOrder(id: string): Promise<OrderDoPagBank> {
   return {
     id: String(o.id),
     pedidoId: pedidoDaOrder(o),
-    cobrancas: cobrancas.map((c) => ({
-      id: String(c.id),
-      status: statusDaCobranca(c),
-      statusDetalhe: c.payment_response?.message ?? null,
-      // `paid` é o que entrou de fato; antes de pagar, ele é zero e vale o valor
-      // cobrado. É esse número que o banco compara com o total do pedido.
-      valorCentavos: Number(c.amount?.summary?.paid || c.amount?.value || 0),
-      metodo: c.payment_method?.type ?? null,
-      parcelas: c.payment_method?.installments ? Number(c.payment_method.installments) : null,
-      pagoEm: c.paid_at ?? null,
-    })),
+    cobrancas: cobrancas.map((c) => {
+      const pago = Number(c.amount?.summary?.paid ?? 0);
+      const estornado = Number(c.amount?.summary?.refunded ?? 0);
+      return {
+        id: String(c.id),
+        status: statusDaCobranca(c.status, pago, estornado),
+        statusDetalhe: c.payment_response?.message ?? null,
+        // É esse número que o banco compara com o total do pedido.
+        valorCentavos: pago || Number(c.amount?.value ?? 0),
+        pagoCentavos: pago,
+        estornadoCentavos: estornado,
+        metodo: c.payment_method?.type ?? null,
+        parcelas: c.payment_method?.installments ? Number(c.payment_method.installments) : null,
+        pagoEm: c.paid_at ?? null,
+      };
+    }),
   };
 }
 

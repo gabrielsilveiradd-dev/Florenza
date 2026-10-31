@@ -6,9 +6,9 @@ import { CreditCard, Loader2 } from "lucide-react";
 /**
  * "Pagar agora" de um pedido que já existe.
  *
- * Pede ao servidor uma cobrança nova no PagBank e manda a pessoa para lá.
- * Não guarda link de pagamento antigo: a cobrança vence com a reserva, e um
- * link de ontem pode já não abrir.
+ * Pede ao servidor o link de pagamento e manda a pessoa para lá. Quem decide é o
+ * servidor: reabre a cobrança que estiver ativa, em vez de abrir outra, e recusa
+ * se houver pagamento em análise.
  */
 export function BotaoPagar({
   numero,

@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
-import { abrirCobranca } from "@/lib/pagamento/cobranca";
+import { pagarDeNovo } from "@/lib/pagamento/cobranca";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { urlDoSite } from "@/lib/url-do-site";
 
 /**
  * "Pagar agora" de um pedido que já existe — o cartão recusado, o Pix que a
- * pessoa fechou sem pagar, a cobrança que não abriu no fechamento.
+ * pessoa fechou sem pagar, a cobrança que não abriu no fechamento. As regras que
+ * impedem pagar duas vezes estão em `pagarDeNovo`.
  *
  * O pedido é lido com a sessão de quem pede, então a RLS garante que só o dono
  * consegue gerar cobrança dele. O valor é o do banco, como sempre.
@@ -46,7 +47,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ nu
   }
 
   try {
-    const url = await abrirCobranca({
+    const resultado = await pagarDeNovo({
       pedidoId: pedido.id,
       numero: pedido.numero,
       totalCentavos: pedido.totalCentavos,
@@ -55,7 +56,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ nu
       comprador: { nome: pedido.nome, email: pedido.email, cpf: pedido.cpf, telefone: pedido.telefone },
       urlBase: await urlDoSite(),
     });
-    return NextResponse.json({ url });
+    if ("bloqueado" in resultado) return NextResponse.json({ erro: resultado.bloqueado }, { status: 409 });
+    return NextResponse.json({ url: resultado.url });
   } catch (e) {
     console.error(`[pagamento] checkout do pedido #${pedido.numero} falhou:`, e);
     return NextResponse.json(

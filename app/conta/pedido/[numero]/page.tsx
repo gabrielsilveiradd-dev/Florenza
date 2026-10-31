@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { Footer } from "@/components/Footer";
+import { AcompanharPagamento } from "@/components/pedido/AcompanharPagamento";
 import { BotaoPagar } from "@/components/pedido/BotaoPagar";
 import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
 import { descreverMedida } from "@/lib/aros";
@@ -12,7 +13,9 @@ import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { formatarCpf } from "@/lib/documentos";
 import { descreverPrazo, valorDoFrete } from "@/lib/frete";
 import { linkWhatsApp } from "@/lib/loja";
-import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
+import { pagBankConfigurado, pagamentoOnlineAtivo } from "@/lib/pagamento/config";
+import { STATUS_EM_ANDAMENTO } from "@/lib/pagamento/estados";
+import { reconciliarSeLivre } from "@/lib/pagamento/reconciliar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,10 +35,11 @@ const dataHora = new Intl.DateTimeFormat("pt-BR", {
  * A página de um pedido — o link do e-mail, o destino da volta do PagBank e o
  * "ver pedido" da conta.
  *
- * VOLTA DO PAGAMENTO: o PagBank não documenta nenhum identificador na URL de
- * volta, então a página não tem o que consultar e só lê o banco. Quem traz o
- * pagamento é o webhook — e por isso a tela não diz que o pagamento falhou só
- * porque ele ainda não chegou.
+ * VOLTA DO PAGAMENTO: o pedido em aberto é conferido com o PagBank ao abrir, pelo
+ * id salvo, sem depender de identificador na URL nem do webhook. Depois disso o
+ * `AcompanharPagamento` segue perguntando, e a pessoa vê o estado real sem
+ * precisar fazer nada. A reconciliação falhar não impede a página de abrir: o job
+ * também confere.
  */
 export default async function PaginaDoPedido({
   params,
@@ -50,16 +54,23 @@ export default async function PaginaDoPedido({
 
   const online = pagamentoOnlineAtivo();
 
-  const pedido = await buscarMeuPedido({ numero });
+  let pedido = await buscarMeuPedido({ numero });
   if (!pedido) notFound();
+
+  if (pagBankConfigurado() && pedido.status === "aguardando_pagamento" && pedido.pagamentoEstado) {
+    try {
+      await reconciliarSeLivre(pedido.id, "pagina", 15);
+      // Lido de novo, para a tela já nascer com o estado novo.
+      pedido = (await buscarMeuPedido({ numero })) ?? pedido;
+    } catch (e) {
+      console.error(`[pedido #${numero}] reconciliação ao abrir falhou:`, e);
+    }
+  }
 
   const aguardando = pedido.status === "aguardando_pagamento";
   const reservaVencida = Boolean(pedido.expiraEm && new Date(pedido.expiraEm) <= new Date());
-  // Toda tentativa falhou. Com uma ainda em aberto, não é hora de dizer isso.
-  const recusado =
-    aguardando &&
-    pedido.pagamentos.length > 0 &&
-    pedido.pagamentos.every((g) => g.status === "DECLINED" || g.status === "CANCELED");
+  // Com cobrança em análise não se abre outra: o resultado ainda vai chegar.
+  const emAnalise = pedido.pagamentos.some((g) => (STATUS_EM_ANDAMENTO as readonly string[]).includes(g.status));
   const endereco = enderecoEmUmaLinha(pedido);
   const prazo = descreverPrazo(pedido.fretePrazoMinDias, pedido.fretePrazoMaxDias);
   const whatsapp = linkWhatsApp(`Olá! Quero falar sobre o meu pedido #${pedido.numero}.`);
@@ -81,11 +92,7 @@ export default async function PaginaDoPedido({
               </span>
             </div>
 
-            {recusado && (
-              <p className="chk-erro" role="alert">
-                O pagamento não foi aprovado. Você pode tentar de novo com outro cartão ou pelo Pix.
-              </p>
-            )}
+            <AcompanharPagamento numero={pedido.numero} estadoInicial={pedido.pagamentoEstado} />
 
             <StatusDoPedido pagamentoOnline={online} pedido={pedido} />
 
@@ -94,14 +101,12 @@ export default async function PaginaDoPedido({
                 {reservaVencida
                   ? "A reserva venceu. Se o pagamento já foi feito, ele ainda será reconhecido; se não, fale com a Florenza."
                   : `As peças estão reservadas para você até ${dataHora.format(new Date(pedido.expiraEm))}.`}
-                {online && !reservaVencida &&
-                  " Se você acabou de pagar, a confirmação do PagBank chega em instantes: recarregue a página antes de pagar de novo."}
               </p>
             )}
 
-            {(aguardando && online && !reservaVencida) || whatsapp ? (
+            {(aguardando && online && !reservaVencida && !emAnalise) || whatsapp ? (
               <div className="ped-acoes">
-                {aguardando && online && !reservaVencida && <BotaoPagar numero={pedido.numero} />}
+                {aguardando && online && !reservaVencida && !emAnalise && <BotaoPagar numero={pedido.numero} />}
                 {whatsapp && (
                   <a className="ped-acao" href={whatsapp} target="_blank" rel="noopener noreferrer">
                     <MessageCircle aria-hidden size={14} />

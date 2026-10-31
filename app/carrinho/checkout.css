@@ -656,3 +656,21 @@ button.ped-acao:disabled { opacity: .55; cursor: not-allowed; }
 /* Resumo: frete que ainda não tem valor, e o aviso de medida que falta. */
 .chk-contas__pendente { font-size: 12px; font-style: italic; }
 .chk-nota--alerta { color: #8c2a26; }
+
+/* ---------- Estado do pagamento na página do pedido ---------- */
+.ped-pagamento {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--gold-line);
+  border-radius: 10px;
+  background: rgba(229, 211, 166, .18);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.ped-pagamento svg { flex: none; margin-top: 3px; color: var(--gold-ink); }
+.ped-pagamento strong { font-weight: 600; }
+.ped-pagamento--alerta { border-color: rgba(163, 49, 44, .35); background: rgba(163, 49, 44, .07); color: #8c2a26; }
+.ped-pagamento--alerta svg { color: #8c2a26; }

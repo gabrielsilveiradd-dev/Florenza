@@ -270,3 +270,27 @@ export async function avisarPagamentoConfirmado(pedido: PagamentoParaAviso, urlB
 
   await registrarFalhas(`pagamento do pedido #${pedido.numero}`, tarefas);
 }
+
+/**
+ * Algo no pagamento precisa de gente olhando: contestação, evento desconhecido,
+ * pedido que não pôde ser conferido. Vai só para a loja, e o painel mostra também:
+ * sem domínio próprio o e-mail pode não sair, e o alerta não pode depender dele.
+ */
+export async function avisarAlertaDePagamento(alerta: string, urlBase: string): Promise<void> {
+  const config = avisosConfigurados();
+  const tarefas: Array<Promise<unknown>> = [];
+  const link = `${urlBase}/admin?aba=pagamentos`;
+
+  if (config.emailParaLoja) {
+    const html = moldura(
+      "Pagamento pede atenção",
+      `<p style="margin:0 0 12px">${esc(alerta)}</p>
+<p style="margin:0"><a href="${link}" style="color:${COR.ouro}">Abrir no painel</a></p>`
+    );
+    tarefas.push(enviarEmail(process.env.AVISO_PEDIDO_EMAIL!, "Pagamento pede atenção", html, `${alerta} ${link}`));
+  }
+
+  if (config.webhook) tarefas.push(chamarWebhook("alerta_de_pagamento", { alerta, linkPainel: link }));
+
+  await registrarFalhas("alerta de pagamento", tarefas);
+}

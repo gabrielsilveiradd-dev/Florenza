@@ -1,6 +1,8 @@
 import { urlDeNotificacao, urlDeRetorno } from "@/lib/pagamento/assinatura-url";
-import { vincularCheckout } from "@/lib/pagamento/banco";
+import { rpcComSegredo, vincularCheckout } from "@/lib/pagamento/banco";
+import { STATUS_EM_ANDAMENTO } from "@/lib/pagamento/estados";
 import { criarCheckout, inativarCheckout, type EntradaDoCheckout } from "@/lib/pagamento/pagbank";
+import { reconcileOrder, type ContextoDoPedido } from "@/lib/pagamento/reconciliar";
 
 type EntradaDaCobranca = Omit<EntradaDoCheckout, "urlRetorno" | "urlNotificacao"> & { urlBase: string };
 
@@ -31,4 +33,50 @@ export async function abrirCobranca({ urlBase, ...e }: EntradaDaCobranca): Promi
   }
 
   return payUrl;
+}
+
+export type RespostaDoPagarDeNovo = { url: string } | { bloqueado: string };
+
+/**
+ * "Pagar agora" de um pedido que já existe, sem nunca permitir pagar duas vezes:
+ *
+ *   - antes de tudo, confere com o PagBank: pode já estar pago;
+ *   - cartão em análise: bloqueado, a resposta ainda vai chegar;
+ *   - checkout ativo: reabre o mesmo link, sem cobrança nova;
+ *   - recusado com checkout ativo: inativa o anterior e abre outro.
+ *
+ * Duas abas ao mesmo tempo esbarram no índice de um checkout ativo por pedido, e a
+ * segunda recebe o link da primeira.
+ */
+export async function pagarDeNovo(e: EntradaDaCobranca): Promise<RespostaDoPagarDeNovo> {
+  await reconcileOrder(e.pedidoId, "pagina");
+
+  const ler = () => rpcComSegredo<ContextoDoPedido | null>("pagbank_contexto_pedido", { p_pedido_id: e.pedidoId });
+  const pedido = await ler();
+  if (!pedido) return { bloqueado: "Pedido não encontrado." };
+
+  if (pedido.status !== "aguardando_pagamento") {
+    return { bloqueado: "Este pedido não está mais aguardando pagamento." };
+  }
+  if (pedido.cobrancas.some((c) => (STATUS_EM_ANDAMENTO as readonly string[]).includes(c.status))) {
+    return { bloqueado: "O pagamento está em análise. Assim que o PagBank responder, esta página mostra o resultado." };
+  }
+
+  const ativo = pedido.checkouts.find((c) => c.status === "ACTIVE");
+  if (ativo && pedido.estado !== "declined") return { url: ativo.payUrl };
+
+  if (ativo) {
+    await inativarCheckout(ativo.checkoutId);
+    await rpcComSegredo("pagbank_atualizar_checkout", { p_checkout_id: ativo.checkoutId, p_status: "INACTIVE" });
+  }
+
+  try {
+    return { url: await abrirCobranca(e) };
+  } catch (erro) {
+    if ((erro as { codigo?: string }).codigo !== "23505") throw erro;
+    const atual = await ler();
+    const venceu = atual?.checkouts.find((c) => c.status === "ACTIVE");
+    if (venceu) return { url: venceu.payUrl };
+    throw erro;
+  }
 }
