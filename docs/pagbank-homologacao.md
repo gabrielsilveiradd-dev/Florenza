@@ -38,6 +38,7 @@ qualquer coisa fora do export.
 
 ## Roteiro de teste no sandbox
 
+O passo a passo dos casos principais está em [pagbank-teste-sandbox.md](pagbank-teste-sandbox.md).
 Faça com uma conta de cliente em `/carrinho`. Depois de cada caso, confira a página do
 pedido, a aba Pagamentos e o log.
 
