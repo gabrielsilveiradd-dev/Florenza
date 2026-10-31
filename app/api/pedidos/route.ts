@@ -2,7 +2,7 @@ import { after, NextResponse } from "next/server";
 import { avisarPedidoNovo, pedidoParaAviso } from "@/lib/avisos";
 import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
-import { criarPreferencia } from "@/lib/pagamento/mercado-pago";
+import { criarCheckout } from "@/lib/pagamento/pagbank";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { urlDoSite } from "@/lib/url-do-site";
@@ -16,7 +16,7 @@ import { urlDoSite } from "@/lib/url-do-site";
  * que o navegador não pode fazer:
  *
  *   - avisar a Florenza (a chave do serviço de e-mail não vai para o navegador);
- *   - abrir a cobrança no Mercado Pago (o token da loja, menos ainda).
+ *   - abrir a cobrança no PagBank (o token da loja, menos ainda).
  *
  * O que NÃO é mandado continua não sendo: preço, frete, total, desconto e
  * status. Do frete chega só a modalidade escolhida.
@@ -117,19 +117,19 @@ export async function POST(request: Request) {
 
   if (pagamentoOnlineAtivo() && pedido && pedido.totalCentavos > 0) {
     try {
-      pagamentoUrl = await criarPreferencia({
+      pagamentoUrl = await criarCheckout({
         pedidoId: pedido.id,
         numero: pedido.numero,
         totalCentavos: pedido.totalCentavos,
         expiraEm: pedido.expiraEm,
         itens: pedido.itens,
-        comprador: { nome: pedido.nome, email: pedido.email, cpf: pedido.cpf },
+        comprador: { nome: pedido.nome, email: pedido.email, cpf: pedido.cpf, telefone: pedido.telefone },
         urlBase,
       });
     } catch (e) {
       // O pedido existe e a peça está reservada: falhar aqui não pode desfazer
       // a compra. A página do pedido tem o botão para tentar de novo.
-      console.error(`[pedidos] preferência do pedido #${pedido.numero} falhou:`, e);
+      console.error(`[pedidos] checkout do pedido #${pedido.numero} falhou:`, e);
       erroPagamento =
         "O pedido foi registrado e as peças estão reservadas, mas o pagamento não abriu agora. " +
         "Tente pagar pela página do pedido.";

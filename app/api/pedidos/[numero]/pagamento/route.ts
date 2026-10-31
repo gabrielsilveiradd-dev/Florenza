@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
-import { criarPreferencia } from "@/lib/pagamento/mercado-pago";
+import { criarCheckout } from "@/lib/pagamento/pagbank";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { urlDoSite } from "@/lib/url-do-site";
@@ -46,20 +46,20 @@ export async function POST(_request: Request, { params }: { params: Promise<{ nu
   }
 
   try {
-    const url = await criarPreferencia({
+    const url = await criarCheckout({
       pedidoId: pedido.id,
       numero: pedido.numero,
       totalCentavos: pedido.totalCentavos,
       expiraEm: pedido.expiraEm,
       itens: pedido.itens,
-      comprador: { nome: pedido.nome, email: pedido.email, cpf: pedido.cpf },
+      comprador: { nome: pedido.nome, email: pedido.email, cpf: pedido.cpf, telefone: pedido.telefone },
       urlBase: await urlDoSite(),
     });
     return NextResponse.json({ url });
   } catch (e) {
-    console.error(`[pagamento] preferência do pedido #${pedido.numero} falhou:`, e);
+    console.error(`[pagamento] checkout do pedido #${pedido.numero} falhou:`, e);
     return NextResponse.json(
-      { erro: "O Mercado Pago não respondeu agora. Tente de novo em instantes." },
+      { erro: "O PagBank não respondeu agora. Tente de novo em instantes." },
       { status: 502 }
     );
   }

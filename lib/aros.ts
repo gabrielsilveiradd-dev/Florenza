@@ -4,8 +4,7 @@
  *
  * `aros` vem da ficha da peça (0 sem aro, 1 um tamanho, 2 par). A medida é
  * OBRIGATÓRIA para fechar o pedido: no carrinho, tamanho `null` numa peça com
- * aro quer dizer "ainda não escolhido", e `criar_pedido()` recusa. Quem não sabe
- * medir tem o guia de medidas.
+ * aro quer dizer "ainda não escolhido", e `criar_pedido()` recusa.
  *
  * Até 14/09/2026 havia a opção "Não sei ainda", gravada como tamanho nulo. Os
  * pedidos daquela época continuam no banco, e `descreverMedida` ainda sabe
@@ -20,8 +19,7 @@ export const TAMANHOS_DE_ARO: number[] = Array.from({ length: 27 }, (_, i) => i 
 
 /**
  * Regra brasileira: o número do aro é a circunferência interna em milímetros
- * menos 40 (aro 10 = 50 mm, aro 18 = 58 mm). O diâmetro sai da circunferência —
- * é ele que se mede com a régua num anel que já serve.
+ * menos 40 (aro 10 = 50 mm, aro 18 = 58 mm). O diâmetro sai da circunferência.
  */
 export function medidasDoAro(aro: number): { circunferencia: number; diametro: string } {
   const circunferencia = aro + 40;

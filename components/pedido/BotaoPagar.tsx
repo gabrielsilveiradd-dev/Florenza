@@ -6,7 +6,7 @@ import { CreditCard, Loader2 } from "lucide-react";
 /**
  * "Pagar agora" de um pedido que já existe.
  *
- * Pede ao servidor uma cobrança nova no Mercado Pago e manda a pessoa para lá.
+ * Pede ao servidor uma cobrança nova no PagBank e manda a pessoa para lá.
  * Não guarda link de pagamento antigo: a cobrança vence com a reserva, e um
  * link de ontem pode já não abrir.
  */

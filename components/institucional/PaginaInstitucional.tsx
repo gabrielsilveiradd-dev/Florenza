@@ -7,7 +7,7 @@ import { LOJA, linkWhatsApp } from "@/lib/loja";
  *
  * ESTES TEXTOS SÃO UMA BASE, NÃO PARECER JURÍDICO. Foram escritos a partir do
  * que o sistema faz de fato (reserva de 48 horas, compra com conta, cupom de
- * primeira compra, Mercado Pago) e das regras que valem para qualquer loja
+ * primeira compra, PagBank) e das regras que valem para qualquer loja
  * online — Decreto 7.962/2013, CDC arts. 18, 26 e 49, LGPD. Antes de abrir a
  * loja, revise com o advogado ou o contador da empresa.
  */

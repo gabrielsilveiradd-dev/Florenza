@@ -23,15 +23,13 @@ import { TAMANHOS_DE_ARO, medidasDoAro } from "@/lib/aros";
  * É uma `<div>` e não um `<button>` de propósito: o botão dispara clique no
  * Enter e no espaço, e a mesma tecla abriria e escolheria ao mesmo tempo.
  *
- * Não há "Não sei ainda": a medida é obrigatória. O rodapé da lista abre o guia
- * de medidas, e a tabela do guia escolhe por este seletor.
+ * Não há "Não sei ainda": a medida é obrigatória.
  */
 export function SeletorDeAro({
   rotulo,
   descricao,
   valor,
   aoMudar,
-  aoPedirGuia,
   invalido = false,
   variante,
 }: {
@@ -41,8 +39,6 @@ export function SeletorDeAro({
   descricao?: string;
   valor: number | null;
   aoMudar: (aro: number) => void;
-  /** Abre o guia de medidas já apontado para este seletor. */
-  aoPedirGuia?: () => void;
   invalido?: boolean;
   /** `pagina`: caixa reta, rótulo em cima. `carrinho`: compacta, rótulo ao lado. */
   variante: "pagina" | "carrinho";
@@ -220,20 +216,6 @@ export function SeletorDeAro({
                 </div>
               ))}
             </div>
-
-            {aoPedirGuia && (
-              <button
-                type="button"
-                className="aro__guia"
-                onPointerDown={(evento) => evento.preventDefault()}
-                onClick={() => {
-                  setAberto(false);
-                  aoPedirGuia();
-                }}
-              >
-                Não sabe a medida? Veja como medir
-              </button>
-            )}
           </div>
         )}
       </div>

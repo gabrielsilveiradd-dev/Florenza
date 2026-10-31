@@ -7,16 +7,14 @@ import { BotaoPagar } from "@/components/pedido/BotaoPagar";
 import { StatusDoPedido } from "@/components/pedido/StatusDoPedido";
 import { descreverMedida } from "@/lib/aros";
 import { formatarPreco } from "@/lib/catalogo";
-import { STATUS_DO_PAGAMENTO, STATUS_DO_PEDIDO, enderecoEmUmaLinha } from "@/lib/conta";
+import { METODO_DE_PAGAMENTO, STATUS_DO_PAGAMENTO, STATUS_DO_PEDIDO, enderecoEmUmaLinha } from "@/lib/conta";
 import { buscarMeuPedido } from "@/lib/conta-servidor";
 import { formatarCpf } from "@/lib/documentos";
 import { descreverPrazo, valorDoFrete } from "@/lib/frete";
 import { linkWhatsApp } from "@/lib/loja";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
-import { sincronizarPagamento } from "@/lib/pagamento/sincronizar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-import { urlDoSite } from "@/lib/url-do-site";
 
 import "../../../carrinho/checkout.css";
 import "../../conta.css";
@@ -31,20 +29,18 @@ const dataHora = new Intl.DateTimeFormat("pt-BR", {
 });
 
 /**
- * A página de um pedido — o link do e-mail, o destino da volta do Mercado Pago
- * e o "ver pedido" da conta.
+ * A página de um pedido — o link do e-mail, o destino da volta do PagBank e o
+ * "ver pedido" da conta.
  *
- * VOLTA DO PAGAMENTO: o Mercado Pago devolve a pessoa com `payment_id` na URL.
- * O webhook costuma chegar antes, mas não há garantia — e no localhost ele nem
- * chega. Por isso a página também sincroniza: busca o pagamento na API e
- * registra. É idempotente; se o webhook já tiver feito, nada muda.
+ * VOLTA DO PAGAMENTO: o PagBank não documenta nenhum identificador na URL de
+ * volta, então a página não tem o que consultar e só lê o banco. Quem traz o
+ * pagamento é o webhook — e por isso a tela não diz que o pagamento falhou só
+ * porque ele ainda não chegou.
  */
 export default async function PaginaDoPedido({
   params,
-  searchParams,
 }: {
   params: Promise<{ numero: string }>;
-  searchParams: Promise<{ payment_id?: string; collection_id?: string; status?: string }>;
 }) {
   const numero = Number((await params).numero);
   if (!supabaseConfigurado() || !Number.isInteger(numero)) notFound();
@@ -53,25 +49,17 @@ export default async function PaginaDoPedido({
   if (!usuario) redirect(`/entrar?redirect=${encodeURIComponent(`/conta/pedido/${numero}`)}`);
 
   const online = pagamentoOnlineAtivo();
-  const busca = await searchParams;
-  const pagamentoId = busca.payment_id ?? busca.collection_id;
 
-  if (online && pagamentoId && /^\d+$/.test(pagamentoId)) {
-    try {
-      await sincronizarPagamento(pagamentoId, await urlDoSite());
-    } catch (e) {
-      // A página abre mesmo assim: o webhook ainda vai trazer o pagamento.
-      console.error(`[pedido #${numero}] sincronização na volta do pagamento falhou:`, e);
-    }
-  }
-
-  // Lido DEPOIS de sincronizar, para a tela já mostrar o status novo.
   const pedido = await buscarMeuPedido({ numero });
   if (!pedido) notFound();
 
   const aguardando = pedido.status === "aguardando_pagamento";
   const reservaVencida = Boolean(pedido.expiraEm && new Date(pedido.expiraEm) <= new Date());
-  const recusado = aguardando && (busca.status === "rejected" || busca.status === "failure");
+  // Toda tentativa falhou. Com uma ainda em aberto, não é hora de dizer isso.
+  const recusado =
+    aguardando &&
+    pedido.pagamentos.length > 0 &&
+    pedido.pagamentos.every((g) => g.status === "DECLINED" || g.status === "CANCELED");
   const endereco = enderecoEmUmaLinha(pedido);
   const prazo = descreverPrazo(pedido.fretePrazoMinDias, pedido.fretePrazoMaxDias);
   const whatsapp = linkWhatsApp(`Olá! Quero falar sobre o meu pedido #${pedido.numero}.`);
@@ -106,6 +94,8 @@ export default async function PaginaDoPedido({
                 {reservaVencida
                   ? "A reserva venceu. Se o pagamento já foi feito, ele ainda será reconhecido; se não, fale com a Florenza."
                   : `As peças estão reservadas para você até ${dataHora.format(new Date(pedido.expiraEm))}.`}
+                {online && !reservaVencida &&
+                  " Se você acabou de pagar, a confirmação do PagBank chega em instantes: recarregue a página antes de pagar de novo."}
               </p>
             )}
 
@@ -186,7 +176,7 @@ export default async function PaginaDoPedido({
                     <li key={g.id}>
                       <span>
                         {STATUS_DO_PAGAMENTO[g.status] ?? g.status}
-                        {g.metodo && <span className="ped-itens__medida">{g.metodo === "pix" ? "Pix" : g.metodo}</span>}
+                        {g.metodo && <span className="ped-itens__medida">{METODO_DE_PAGAMENTO[g.metodo] ?? g.metodo}</span>}
                       </span>
                       <span>{formatarPreco(g.valorCentavos)}</span>
                     </li>

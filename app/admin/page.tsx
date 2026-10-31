@@ -18,7 +18,7 @@ import {
 import { formatarPreco } from "@/lib/admin/format";
 import { avisosConfigurados } from "@/lib/avisos";
 import { camposDaLojaPendentes } from "@/lib/loja";
-import { mercadoPagoEmTeste, pagamentoOnlineAtivo } from "@/lib/pagamento/config";
+import { pagBankEmTeste, pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -45,7 +45,7 @@ type AbaId = (typeof ABAS)[number]["id"];
  *
  * Só booleanos saem daqui — nenhum valor de variável de ambiente chega à tela.
  * Serve para a equipe não descobrir pelo cliente que o aviso de pedido não
- * chegava, ou que o Mercado Pago ainda estava com a credencial de teste.
+ * chegava, ou que o PagBank ainda estava no ambiente de teste.
  */
 function LigacoesDaLoja() {
   const avisos = avisosConfigurados();
@@ -55,12 +55,12 @@ function LigacoesDaLoja() {
   const itens = [
     {
       rotulo: "Pagamento online",
-      ok: online && !mercadoPagoEmTeste(),
-      selo: online ? (mercadoPagoEmTeste() ? "Teste" : "Ligado") : "Desligado",
+      ok: online && !pagBankEmTeste(),
+      selo: online ? (pagBankEmTeste() ? "Teste" : "Ligado") : "Desligado",
       detalhe: online
-        ? mercadoPagoEmTeste()
-          ? "Mercado Pago com credencial de TESTE — nenhum pagamento é real."
-          : "Mercado Pago recebendo Pix e cartão."
+        ? pagBankEmTeste()
+          ? "PagBank no ambiente de TESTE — nenhum pagamento é real."
+          : "PagBank recebendo Pix e cartão."
         : "Pedidos ficam aguardando pagamento e o acerto é por WhatsApp.",
     },
     {

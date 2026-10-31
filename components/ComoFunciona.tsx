@@ -8,7 +8,7 @@
  *   2. pedir         → a medida do aro na página da peça (ComprarComMedida),
  *                       a compra com conta e `criar_pedido()`;
  *   3. pagamento     → depende do que estiver ligado, e por isso vem por prop:
- *                       com o Mercado Pago configurado, Pix ou cartão logo
+ *                       com o PagBank configurado, Pix ou cartão logo
  *                       depois de fechar; sem ele, o acerto por WhatsApp. Dizer
  *                       "não há cobrança automática" com o checkout ligado
  *                       seria mentir na home;
@@ -39,7 +39,7 @@ function etapas(pagamentoOnline: boolean) {
       ? {
           numero: "03",
           titulo: "Pague com segurança",
-          texto: "Pix ou cartão pelo Mercado Pago. A peça fica reservada para você enquanto isso.",
+          texto: "Pix ou cartão pelo PagBank. A peça fica reservada para você enquanto isso.",
         }
       : {
           numero: "03",

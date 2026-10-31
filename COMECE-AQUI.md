@@ -96,8 +96,8 @@ SQL Editor → cola → Run. Termina numa conferência de 16 linhas, todas `ok`.
 
 ## O que ficou de fora
 
-- **Mercado Pago.** Combinado ficar para depois. O pedido já nasce em
-  `aguardando_pagamento` — é plugar o webhook e promover o status.
+- **PagBank.** Código pronto, falta a conta — DEPLOY.md, "Ligar o PagBank". O
+  pedido nasce em `aguardando_pagamento` e o webhook promove o status.
 - **Upload de foto pelo painel.** O formulário de cadastro está lá, o bucket do
   Storage existe e as permissões estão escritas, mas o envio do arquivo ainda
   não está ligado. Por enquanto a foto entra pelo script Python.

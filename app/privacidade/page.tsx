@@ -30,7 +30,7 @@ export default function Privacidade() {
       <ul>
         <li><strong>Conta:</strong> nome, e-mail, WhatsApp e senha — a senha é guardada cifrada pelo serviço de autenticação e ninguém da loja tem acesso a ela.</li>
         <li><strong>Pedido:</strong> CPF, endereço de entrega, peças compradas, medida do aro, observações e a mensagem de presente, se houver.</li>
-        <li><strong>Pagamento:</strong> a situação do pagamento, a forma usada e o valor. Os dados do cartão são digitados no Mercado Pago e não chegam à Florenza.</li>
+        <li><strong>Pagamento:</strong> a situação do pagamento, a forma usada e o valor. Os dados do cartão são digitados no PagBank e não chegam à Florenza.</li>
         <li><strong>Navegação:</strong> os cookies necessários para manter você conectado. O carrinho fica guardado no seu próprio navegador.</li>
       </ul>
 
@@ -46,7 +46,7 @@ export default function Privacidade() {
       <ul>
         <li><strong>Supabase</strong> — guarda o banco de dados e cuida do login.</li>
         <li><strong>Vercel</strong> — hospeda o site.</li>
-        <li><strong>Mercado Pago</strong> — processa o pagamento; recebe nome, e-mail, CPF e o valor do pedido.</li>
+        <li><strong>PagBank</strong> — processa o pagamento; recebe nome, e-mail, CPF, telefone e o valor do pedido.</li>
         <li><strong>Transportadora</strong> — recebe nome e endereço para a entrega.</li>
         <li><strong>Serviço de e-mail</strong> — envia a confirmação e as atualizações do pedido.</li>
         <li><strong>ViaCEP</strong> — ao digitar o CEP, só o CEP é consultado para preencher o endereço.</li>

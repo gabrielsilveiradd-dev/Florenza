@@ -572,18 +572,6 @@
    card seguinte, que vem depois no HTML, pintaria por cima da lista. */
 .chk-item:has(.aro.is-aberto) { position: relative; z-index: 3; }
 .chk-selo--alerta { background: rgba(163, 49, 44, .08); color: #8c2a26; }
-.chk-item__medida-guia {
-  align-self: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 11.5px;
-  color: var(--gold-ink);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
 
 /* ---------- Compra com conta ---------- */
 .chk-entrar {

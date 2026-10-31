@@ -30,7 +30,7 @@ export type PedidoConfirmado = {
   cupomCodigo: string | null;
   criadoEm: string;
   expiraEm: string | null;
-  /** O pedido nasceu, mas a cobrança no Mercado Pago não abriu. */
+  /** O pedido nasceu, mas a cobrança no PagBank não abriu. */
   erroPagamento: string | null;
 };
 
@@ -43,9 +43,9 @@ const dataHora = new Intl.DateTimeFormat("pt-BR", {
 /**
  * A tela logo depois de fechar o pedido — quando ela aparece.
  *
- * Com o Mercado Pago ligado e a cobrança aberta, a pessoa vai direto para a
- * página de pagamento e volta em /conta/pedido/[numero]; esta tela só aparece
- * se a cobrança não abriu. Sem o Mercado Pago, é aqui que ela termina.
+ * Com o PagBank ligado e a cobrança aberta, a pessoa vai direto para a página
+ * de pagamento e volta em /conta/pedido/[numero]; esta tela só aparece se a
+ * cobrança não abriu. Sem o PagBank, é aqui que ela termina.
  *
  * Mantém o vocabulário visual do carrinho de propósito — cartão de canto
  * arredondado, mesma paleta, mesma tipografia. A pessoa acabou de sair de lá, e

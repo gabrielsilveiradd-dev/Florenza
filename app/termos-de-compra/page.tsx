@@ -44,8 +44,8 @@ export default function TermosDeCompra() {
         </li>
         <li>
           Para anéis e alianças, a medida do aro é escolhida antes de fechar o pedido — na página da
-          peça ou no carrinho — e a peça é preparada nessa medida. O guia de medidas explica como
-          medir em casa; em caso de dúvida, fale com a Florenza antes de comprar.
+          peça ou no carrinho — e a peça é preparada nessa medida. Em caso de dúvida, fale com a
+          Florenza antes de comprar.
         </li>
         <li>Há um limite de 10 unidades por peça em cada pedido.</li>
       </ul>
@@ -54,7 +54,7 @@ export default function TermosDeCompra() {
       <p>
         Ao fechar o pedido, as peças ficam <strong>reservadas para você por {RESERVA_HORAS} horas</strong>.
         {online
-          ? " O pagamento é feito com Pix ou cartão na página do Mercado Pago, logo depois do fechamento."
+          ? " O pagamento é feito com Pix ou cartão na página do PagBank, logo depois do fechamento."
           : " A Florenza entra em contato pelo WhatsApp para combinar a forma de pagamento."}
       </p>
       <ul>
@@ -65,7 +65,7 @@ export default function TermosDeCompra() {
         <li>Cada conta pode ter até 3 pedidos aguardando pagamento ao mesmo tempo.</li>
         {online && (
           <li>
-            Os dados do cartão são digitados no ambiente do Mercado Pago. A Florenza não recebe nem
+            Os dados do cartão são digitados no ambiente do PagBank. A Florenza não recebe nem
             guarda número de cartão.
           </li>
         )}

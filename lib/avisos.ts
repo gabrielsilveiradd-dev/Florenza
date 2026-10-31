@@ -227,7 +227,7 @@ ${pedido.expiraEm ? `<p style="margin:0 0 16px;color:${COR.apagada}">As peças f
   await registrarFalhas(`pedido #${pedido.numero}`, tarefas);
 }
 
-/** O Mercado Pago confirmou o pagamento e o banco promoveu o pedido a pago. */
+/** O PagBank confirmou o pagamento e o banco promoveu o pedido a pago. */
 export async function avisarPagamentoConfirmado(pedido: PagamentoParaAviso, urlBase: string): Promise<void> {
   const config = avisosConfigurados();
   const tarefas: Array<Promise<unknown>> = [];
@@ -235,7 +235,7 @@ export async function avisarPagamentoConfirmado(pedido: PagamentoParaAviso, urlB
   if (config.emailParaLoja) {
     const html = moldura(
       `Pagamento confirmado · #${pedido.numero}`,
-      `<p style="margin:0 0 12px"><strong>${esc(pedido.nome)}</strong> pagou ${reais(pedido.totalCentavos)} pelo Mercado Pago.</p>
+      `<p style="margin:0 0 12px"><strong>${esc(pedido.nome)}</strong> pagou ${reais(pedido.totalCentavos)} pelo PagBank.</p>
 <p style="margin:0"><a href="${urlBase}/admin?aba=pedidos" style="color:${COR.ouro}">Abrir no painel</a></p>`
     );
     tarefas.push(

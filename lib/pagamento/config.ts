@@ -1,8 +1,8 @@
 /**
  * O pagamento online está ligado?
  *
- * Duas chaves, e as duas precisam existir: o token do Mercado Pago (para criar
- * a cobrança e conferir o pagamento na API deles) e o segredo que o banco exige
+ * Duas chaves, e as duas precisam existir: o token do PagBank (para criar a
+ * cobrança e conferir o pagamento na API deles) e o segredo que o banco exige
  * em `registrar_pagamento()`. Com uma só, o site cobraria e não conseguiria
  * marcar o pedido como pago — pior do que não cobrar.
  *
@@ -14,10 +14,14 @@
  * estas variáveis e a resposta seria sempre "não" — passe o valor por prop.
  */
 export function pagamentoOnlineAtivo(): boolean {
-  return Boolean(process.env.MP_ACCESS_TOKEN && process.env.PAGAMENTO_SEGREDO_BANCO);
+  return Boolean(process.env.PAGBANK_TOKEN && process.env.PAGAMENTO_SEGREDO_BANCO);
 }
 
-/** Credencial de teste do Mercado Pago começa com TEST-. */
-export function mercadoPagoEmTeste(): boolean {
-  return (process.env.MP_ACCESS_TOKEN ?? "").startsWith("TEST-");
+/**
+ * O token do PagBank não diz de qual ambiente é, então o ambiente é declarado.
+ * Só `producao` cobra de verdade: esquecer a variável aponta para o sandbox, e
+ * um token de produção lá é recusado, em vez de virar cobrança real sem querer.
+ */
+export function pagBankEmTeste(): boolean {
+  return process.env.PAGBANK_AMBIENTE !== "producao";
 }

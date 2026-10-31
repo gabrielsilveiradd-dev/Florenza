@@ -23,7 +23,7 @@ export const ETAPAS = [
   { chave: "entregue", rotulo: "Entregue", icone: Home },
 ] as const;
 
-/* A dica da primeira etapa depende de como se paga. Com o Mercado Pago ligado,
+/* A dica da primeira etapa depende de como se paga. Com o PagBank ligado,
  * "estamos combinando o pagamento com você" seria mentira: a pessoa paga
  * sozinha, e o que ela espera é a confirmação. */
 function dicaDaEtapa(chave: string, pagamentoOnline: boolean): string {

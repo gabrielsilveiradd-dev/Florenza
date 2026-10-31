@@ -31,7 +31,7 @@ const formatar = (centavos: number) => moeda.format(centavos / 100);
  * MEDIDA: peça com aro não fecha sem a medida escolhida. A tela avisa antes; o
  * banco recusa de qualquer jeito.
  *
- * O pagamento depende do que estiver ligado. Com o Mercado Pago configurado, o
+ * O pagamento depende do que estiver ligado. Com o PagBank configurado, o
  * fechamento leva direto para a página de pagamento; sem ele, o pedido nasce
  * em 'aguardando_pagamento' e o acerto é por WhatsApp. Em qualquer caso as
  * peças ficam reservadas por 48 horas.
@@ -647,7 +647,7 @@ export function Checkout({
           </p>
         ) : pagamentoOnline ? (
           <p className="chk-nota">
-            Depois de fechar, você paga com Pix ou cartão na página do Mercado Pago. As peças ficam
+            Depois de fechar, você paga com Pix ou cartão na página segura do PagBank. As peças ficam
             reservadas para você por {RESERVA_HORAS} horas.
           </p>
         ) : (

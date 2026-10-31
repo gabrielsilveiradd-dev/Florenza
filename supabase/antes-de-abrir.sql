@@ -29,7 +29,7 @@ from cron.job
 where jobname = 'florenza-expirar-reservas';
 
 
--- 3) O segredo dos pagamentos existe? (só quando for ligar o Mercado Pago) -----
+-- 3) O segredo dos pagamentos existe? (só quando for ligar o PagBank) ----------
 --    Uma linha com tamanho_ok = true. O valor em si não aparece aqui.
 select name, length(decrypted_secret) >= 32 as tamanho_ok
 from vault.decrypted_secrets

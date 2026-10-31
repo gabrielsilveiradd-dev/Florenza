@@ -98,7 +98,7 @@ export function Footer() {
           </ul>
           <p className="footer__nota">
             {pagamentoOnlineAtivo()
-              ? "Pagamento com Pix ou cartão pelo Mercado Pago."
+              ? "Pagamento com Pix ou cartão pelo PagBank."
               : "O pagamento é combinado por WhatsApp depois que o pedido chega."}
           </p>
         </div>

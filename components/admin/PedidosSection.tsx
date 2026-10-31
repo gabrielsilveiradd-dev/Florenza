@@ -10,7 +10,7 @@ import {
 } from "@/lib/admin/format";
 import { descreverMedida } from "@/lib/aros";
 import { descreverPrazo, valorDoFrete } from "@/lib/frete";
-import { STATUS_DO_PAGAMENTO, enderecoEmUmaLinha } from "@/lib/conta";
+import { METODO_DE_PAGAMENTO, STATUS_DO_PAGAMENTO, enderecoEmUmaLinha } from "@/lib/conta";
 import { formatarCpf, somenteDigitos } from "@/lib/documentos";
 import { UFS } from "@/lib/geo/ufs";
 import { RESERVA_HORAS, linkWhatsAppDoCliente } from "@/lib/loja";
@@ -462,8 +462,8 @@ function FichaDoPedido({
                   <span>
                     {STATUS_DO_PAGAMENTO[g.status] ?? g.status}
                     <span className="adm-lista__meta">
-                      {g.metodo ?? "—"}
-                      {g.parcelas && g.parcelas > 1 ? ` em ${g.parcelas}x` : ""} · Mercado Pago {g.provedor_pagamento_id}
+                      {g.metodo ? (METODO_DE_PAGAMENTO[g.metodo] ?? g.metodo) : "—"}
+                      {g.parcelas && g.parcelas > 1 ? ` em ${g.parcelas}x` : ""} · PagBank {g.provedor_pagamento_id}
                     </span>
                     {g.pendencia && <span className="adm-ficha__alerta">{g.pendencia}</span>}
                   </span>

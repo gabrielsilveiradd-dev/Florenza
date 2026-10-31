@@ -177,7 +177,7 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                 recusar por falta de estoque seria as duas coisas ao mesmo tempo. */}
             <p className="pdp__nota">
               {pagamentoOnline
-                ? "Pagamento com Pix ou cartão pelo Mercado Pago, logo depois de fechar o pedido."
+                ? "Pagamento com Pix ou cartão pelo PagBank, logo depois de fechar o pedido."
                 : "O pagamento é combinado por WhatsApp depois que o pedido chega — não há cobrança automática neste site."}{" "}
               A peça fica reservada para você por {RESERVA_HORAS} horas. Veja os{" "}
               <Link href="/termos-de-compra">termos de compra</Link> e a{" "}

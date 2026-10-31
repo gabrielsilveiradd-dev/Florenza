@@ -4,8 +4,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { GuiaDeMedidas } from "@/components/GuiaDeMedidas";
 import { SeletorDeAro } from "@/components/SeletorDeAro";
 import { faltaMedida } from "@/lib/aros";
 import { chaveDoItem, type ItemCarrinho } from "@/lib/carrinho";
@@ -62,16 +60,7 @@ export function ListaDoCarrinho({
         transition: { opacity: { duration: 0.2 }, layout: { duration: 0.2 } },
       };
 
-  // A linha e o seletor que abriram o guia de medidas. `par` = o segundo aro.
-  const [guia, setGuia] = useState<{
-    chave: string;
-    par: boolean;
-    destino?: string;
-    peca: string;
-  } | null>(null);
-
   return (
-    <>
     <ul className="chk-lista">
       <AnimatePresence initial={false} mode="popLayout">
         {itens.map((item) => {
@@ -80,14 +69,6 @@ export function ListaDoCarrinho({
           // O teto é da peça, somando todas as medidas dela no carrinho.
           const noLimite = quantidadeDaPeca(item.sku) >= item.estoque;
           const semMedida = faltaMedida(item);
-
-          const abrirGuia = (par: boolean) =>
-            setGuia({
-              chave,
-              par,
-              destino: item.aros === 2 ? (par ? "Aro 2" : "Aro 1") : undefined,
-              peca: item.nome,
-            });
 
           /* A medida pode ser trocada aqui mesmo. É o conserto para quem
              escolheu errado na página da peça, e é por onde carrinhos antigos —
@@ -101,7 +82,6 @@ export function ListaDoCarrinho({
               valor={valor}
               invalido={valor === null}
               aoMudar={(n) => mudarMedida(chave, par ? item.tamanho : n, par ? n : item.tamanhoPar)}
-              aoPedirGuia={() => abrirGuia(par)}
             />
           );
 
@@ -150,15 +130,6 @@ export function ListaDoCarrinho({
                   <div className="chk-item__medida">
                     {seletor(item.aros === 2 ? "Aro 1" : "Aro", item.tamanho, false)}
                     {item.aros === 2 && seletor("Aro 2", item.tamanhoPar, true)}
-                    {semMedida && (
-                      <button
-                        type="button"
-                        className="chk-item__medida-guia"
-                        onClick={() => abrirGuia(item.aros === 2 && item.tamanho !== null)}
-                      >
-                        Como medir
-                      </button>
-                    )}
                   </div>
                 )}
 
@@ -192,23 +163,6 @@ export function ListaDoCarrinho({
         })}
       </AnimatePresence>
     </ul>
-
-    <GuiaDeMedidas
-      aberto={guia !== null}
-      aoFechar={() => setGuia(null)}
-      destino={guia?.destino}
-      peca={guia?.peca}
-      aoEscolher={
-        guia
-          ? (n) => {
-              const linha = itens.find((i) => chaveDoItem(i) === guia.chave);
-              if (!linha) return;
-              mudarMedida(guia.chave, guia.par ? linha.tamanho : n, guia.par ? n : linha.tamanhoPar);
-            }
-          : undefined
-      }
-    />
-    </>
   );
 }
 

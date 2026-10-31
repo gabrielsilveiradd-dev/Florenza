@@ -1,24 +1,23 @@
 import { avisarPagamentoConfirmado } from "@/lib/avisos";
-import { buscarPagamento } from "@/lib/pagamento/mercado-pago";
+import { buscarOrder } from "@/lib/pagamento/pagbank";
 import { createClientePublico } from "@/lib/supabase/publico";
 
 /**
- * Traz o que o Mercado Pago sabe sobre um pagamento para dentro do banco.
+ * Traz o que o PagBank sabe sobre um pedido dele para dentro do banco.
  *
- * Dois caminhos chamam isto: o webhook, quando o Mercado Pago avisa, e a página
- * do pedido, quando a pessoa volta do pagamento. Os dois podem chegar juntos, e
+ * Quem chama é o webhook, quando o PagBank avisa. O aviso pode se repetir, e
  * tudo bem — `registrar_pagamento()` é idempotente.
  *
- * A ordem é a proteção: primeiro BUSCAR o pagamento na API com o token da loja
- * (a verdade), depois registrar. O id que chegou no aviso só diz onde procurar.
+ * A ordem é a proteção: primeiro BUSCAR na API com o token da loja (a verdade),
+ * depois registrar. O id que chegou no aviso só diz onde procurar.
+ *
+ * Uma order pode ter várias cobranças (cartão recusado, depois Pix), e cada uma
+ * vira uma linha em `pagamentos`.
  *
  * O cliente é o público, sem sessão, de propósito. O webhook não tem sessão de
- * ninguém, e a página de retorno não deve registrar pagamento "como o cliente":
- * quem autoriza a escrita é o segredo que só o servidor tem, conferido dentro
- * da função.
+ * ninguém: quem autoriza a escrita é o segredo que só o servidor tem, conferido
+ * dentro da função.
  */
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type LinhaRegistrada = {
   pedido_numero: number;
@@ -33,57 +32,65 @@ type LinhaRegistrada = {
 
 export type Sincronizacao =
   | { ignorado: string }
-  | { pedidoNumero: number; pedidoStatus: string; promovido: boolean; pendencia: string | null };
+  | { pedidoNumero: number; pedidoStatus: string; promovido: boolean };
 
-export async function sincronizarPagamento(pagamentoId: string, urlBase: string): Promise<Sincronizacao> {
-  const pagamento = await buscarPagamento(pagamentoId);
+export async function sincronizarPagamento(orderId: string, urlBase: string): Promise<Sincronizacao> {
+  const order = await buscarOrder(orderId);
 
-  // Pagamento de outra origem na mesma conta do Mercado Pago (link avulso,
-  // maquininha) não tem pedido deste site para atualizar.
-  if (!pagamento.pedidoId || !UUID.test(pagamento.pedidoId)) {
-    return { ignorado: `pagamento ${pagamento.id} não pertence a um pedido do site` };
+  if (!order.pedidoId) {
+    return { ignorado: `order ${order.id} não pertence a um pedido do site` };
+  }
+  if (order.cobrancas.length === 0) {
+    return { ignorado: `order ${order.id} ainda não tem cobrança` };
   }
 
-  const { data, error } = await createClientePublico().rpc("registrar_pagamento", {
-    p_segredo: process.env.PAGAMENTO_SEGREDO_BANCO,
-    p_pedido_id: pagamento.pedidoId,
-    p_provedor_pagamento_id: pagamento.id,
-    p_status: pagamento.status,
-    p_valor_centavos: pagamento.valorCentavos,
-    p_status_detalhe: pagamento.statusDetalhe,
-    p_metodo: pagamento.metodo,
-    p_parcelas: pagamento.parcelas,
-    p_aprovado_em: pagamento.aprovadoEm,
-  });
+  let ultima: LinhaRegistrada | null = null;
+  let promovido = false;
 
-  if (error) {
-    throw new Error(`registrar_pagamento recusou o pagamento ${pagamento.id}: ${error.message}`);
-  }
+  for (const cobranca of order.cobrancas) {
+    const { data, error } = await createClientePublico().rpc("registrar_pagamento", {
+      p_segredo: process.env.PAGAMENTO_SEGREDO_BANCO,
+      p_pedido_id: order.pedidoId,
+      p_provedor_pagamento_id: cobranca.id,
+      p_status: cobranca.status,
+      p_valor_centavos: cobranca.valorCentavos,
+      p_status_detalhe: cobranca.statusDetalhe,
+      p_metodo: cobranca.metodo,
+      p_parcelas: cobranca.parcelas,
+      p_aprovado_em: cobranca.pagoEm,
+    });
 
-  const linha = (Array.isArray(data) ? data[0] : data) as LinhaRegistrada | null;
-  if (!linha) throw new Error(`registrar_pagamento não devolveu nada para o pagamento ${pagamento.id}.`);
+    if (error) {
+      throw new Error(`registrar_pagamento recusou a cobrança ${cobranca.id}: ${error.message}`);
+    }
 
-  if (linha.pendencia) {
-    console.warn(`[pagamentos] pedido #${linha.pedido_numero}: ${linha.pendencia}`);
-  }
+    const linha = (Array.isArray(data) ? data[0] : data) as LinhaRegistrada | null;
+    if (!linha) throw new Error(`registrar_pagamento não devolveu nada para a cobrança ${cobranca.id}.`);
 
-  if (linha.promovido) {
-    await avisarPagamentoConfirmado(
-      {
-        numero: linha.pedido_numero,
-        nome: linha.pedido_nome,
-        email: linha.pedido_email,
-        telefone: linha.pedido_telefone,
-        totalCentavos: linha.pedido_total_centavos,
-      },
-      urlBase
-    );
+    if (linha.pendencia) {
+      console.warn(`[pagamentos] pedido #${linha.pedido_numero}: ${linha.pendencia}`);
+    }
+
+    if (linha.promovido) {
+      promovido = true;
+      await avisarPagamentoConfirmado(
+        {
+          numero: linha.pedido_numero,
+          nome: linha.pedido_nome,
+          email: linha.pedido_email,
+          telefone: linha.pedido_telefone,
+          totalCentavos: linha.pedido_total_centavos,
+        },
+        urlBase
+      );
+    }
+
+    ultima = linha;
   }
 
   return {
-    pedidoNumero: linha.pedido_numero,
-    pedidoStatus: linha.pedido_status,
-    promovido: linha.promovido,
-    pendencia: linha.pendencia,
+    pedidoNumero: ultima!.pedido_numero,
+    pedidoStatus: ultima!.pedido_status,
+    promovido,
   };
 }

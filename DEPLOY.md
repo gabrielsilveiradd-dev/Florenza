@@ -26,7 +26,7 @@ as fotos originais de 33 MB, que alimentam o script Python e não o site.
 O site já está publicado. Esta atualização traz compra com conta, endereço
 completo e CPF, medida do aro, reserva de 48 horas, a ficha completa do pedido
 no painel, edição de preço e estoque, envio de foto, cupons, avisos de pedido,
-páginas legais e o Mercado Pago pronto para ligar. **A ordem abaixo importa.**
+páginas legais e o PagBank pronto para ligar. **A ordem abaixo importa.**
 
 ### 1. Preencher os dados da loja
 
@@ -87,36 +87,50 @@ pedido com o cupom `BEMVINDO10` e uma forma de envio. Confira que o desconto sai
 só das peças e o frete soma no total. Em `/admin?aba=pedidos`, abra a **Ficha** e
 confira medidas, frete, CPF e endereço. Cancele pelo painel e veja o estoque voltar.
 
-### 5. Ligar o Mercado Pago
+### 5. Ligar o PagBank
 
-1. Em [mercadopago.com.br/developers](https://www.mercadopago.com.br/developers)
-   → **Suas integrações → Criar aplicação**, para pagamentos online (Checkout
-   Pro).
-2. Invente um segredo aleatório com 32 caracteres ou mais e grave no Supabase,
+1. Aplique a migration `20261031120000_pagamentos_pagbank.sql`
+   (`npx supabase db push --linked`). Sem ela, o banco não reconhece os status do
+   PagBank e o pedido não vira **Pago**.
+2. Crie a conta de testes em
+   [developer.pagbank.com.br](https://developer.pagbank.com.br) e pegue o token de
+   **sandbox**.
+3. Invente um segredo aleatório com 32 caracteres ou mais e grave no Supabase,
    pelo SQL Editor:
    ```sql
    select vault.create_secret('COLE-AQUI-O-SEGREDO', 'florenza_pagamentos');
    ```
-3. No Mercado Pago → **Webhooks → Configurar notificações**: URL
-   `https://florenza-virid.vercel.app/api/mercadopago/webhook`, evento **Pagamentos**. Guarde a
-   **assinatura secreta** que ele mostra.
 4. Na Vercel → **Settings → Environment Variables**, em Production:
 
    | Variável | Valor |
    |---|---|
-   | `MP_ACCESS_TOKEN` | Access Token da aplicação — comece pelo de **teste** (`TEST-…`) |
-   | `PAGAMENTO_SEGREDO_BANCO` | o mesmo segredo do item 2 |
-   | `MP_WEBHOOK_SECRET` | a assinatura secreta do item 3 |
+   | `PAGBANK_TOKEN` | o token do **sandbox**, por enquanto |
+   | `PAGBANK_AMBIENTE` | deixe vazio, por enquanto |
+   | `PAGAMENTO_SEGREDO_BANCO` | o mesmo segredo do item 3 |
    | `NEXT_PUBLIC_SITE_URL` | `https://florenza-virid.vercel.app`, sem barra no fim |
 
    Nenhuma delas leva `NEXT_PUBLIC_` além da última — com o prefixo, o valor
-   iria parar no navegador.
+   iria parar no navegador. O webhook não se configura em painel: o site informa
+   `/api/pagbank/webhook` ao PagBank a cada checkout.
 5. **Redeploy** — variável nova só vale em build novo.
-6. Compre com um cartão de teste do Mercado Pago. O pedido tem que virar
-   **Pago** sozinho, e a ficha no painel mostra o pagamento. O quadro "Ligações
-   da loja", na aba Pedidos, diz **Teste** enquanto a credencial for de teste.
-7. Deu certo: troque `MP_ACCESS_TOKEN` pela credencial de **produção** e faça
-   redeploy.
+6. Compre com um cartão de teste do PagBank e **confira de verdade**, porque esta
+   integração ainda não rodou contra a API real:
+   - a página de pagamento abre com o valor do pedido, e o Pix e o cartão aparecem;
+   - o pedido vira **Pago** sozinho, e a ficha no painel mostra o pagamento;
+   - nos logs da Vercel, o aviso em `/api/pagbank/webhook` não diz "não pertence a
+     um pedido do site" nem "assinatura inválida".
+
+   O quadro "Ligações da loja", na aba Pedidos, diz **Teste** enquanto o ambiente
+   não for o de produção.
+7. Deu certo: peça a homologação ao PagBank, se a conta exigir (há relato de
+   `403` na criação do checkout com token de produção antes dela). Troque
+   `PAGBANK_TOKEN` pelo token de **produção**, ponha `PAGBANK_AMBIENTE=producao` e
+   faça redeploy.
+
+**Limites conhecidos:** o site só sabe do pagamento pelo webhook; a volta do
+PagBank não traz identificador para consultar. Devolução e contestação chegam em
+outro formato, ainda não tratado: ficam no log, e a contestação precisa ser
+acompanhada no painel do PagBank.
 
 Enquanto este passo não for feito, nada quebra: o pedido nasce aguardando
 pagamento e o acerto é por WhatsApp, como hoje.
@@ -327,7 +341,7 @@ para alguém:
   retorno `https://jydcgsxzinrguounnmpi.supabase.co/auth/v1/callback`. Enquanto
   não estiver ligado, o botão avisa e manda usar e-mail e senha — ninguém fica
   travado.
-- **Pagamento online, enquanto a conta do Mercado Pago não for ligada.** O
+- **Pagamento online, enquanto a conta do PagBank não for ligada.** O
   código está pronto; sem as credenciais, o pedido nasce em "aguardando
   pagamento" e o combinado é por WhatsApp. Passo 5 lá em cima.
 - **Cadastro de cliente parado até o Gmail novo.** O SMTP ainda aponta para o

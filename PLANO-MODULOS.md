@@ -71,7 +71,7 @@ o HTML antigo, mesma largura de janela, **sem diferença visível**.
 |---|---|
 | Arquitetura | Migrar para Next.js — site público e `/admin` no mesmo projeto |
 | Estética | Preservada; CSS atual reaproveitado sem reescrita. Só telas novas são desenhadas |
-| Dados de venda | Checkout real no site **+** lançamento manual no painel. **Sem gateway no Módulo 1** — Mercado Pago fica para o Módulo 2 |
+| Dados de venda | Checkout real no site **+** lançamento manual no painel. **Sem gateway no Módulo 1** — PagBank fica para o Módulo 2 |
 | Clientes | Conta real com Supabase Auth (e-mail + senha), somada ao cadastro manual |
 | Catálogo | Todo o catálogo no banco (formatura **e** alianças) + upload de foto pelo painel |
 
@@ -420,7 +420,7 @@ da próxima conversa.
 
 ### A. Fechar o ciclo de venda
 
-1. **Mercado Pago** (já definido como gateway). Checkout Pro + Webhook em Route Handler que
+1. **PagBank** (já definido como gateway). Checkout PagBank + Webhook em Route Handler que
    promove o pedido de `aguardando_pagamento` para `pago`. O schema do Módulo 1 já nasce com o
    status certo — é plugar, não remodelar. Pix cai na conta no mesmo minuto.
 2. **Frete por CEP** (Melhor Envio ou Correios). Joia é leve: quase sempre PAC/Sedex barato, e

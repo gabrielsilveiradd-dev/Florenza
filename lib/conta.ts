@@ -100,16 +100,23 @@ export const STATUS_DO_PEDIDO: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
-/** O status cru do Mercado Pago, dito em português. */
+/** O status cru do PagBank, dito em português. */
 export const STATUS_DO_PAGAMENTO: Record<string, string> = {
-  approved: "Aprovado",
-  pending: "Aguardando pagamento",
-  in_process: "Em análise",
-  authorized: "Autorizado",
-  rejected: "Recusado",
-  cancelled: "Cancelado",
-  refunded: "Estornado",
-  charged_back: "Contestado",
+  PAID: "Aprovado",
+  WAITING: "Aguardando pagamento",
+  IN_ANALYSIS: "Em análise",
+  AUTHORIZED: "Autorizado",
+  DECLINED: "Recusado",
+  CANCELED: "Cancelado",
+  REFUNDED: "Estornado",
+};
+
+/** A forma de pagamento crua do PagBank, dita em português. */
+export const METODO_DE_PAGAMENTO: Record<string, string> = {
+  PIX: "Pix",
+  CREDIT_CARD: "Cartão de crédito",
+  DEBIT_CARD: "Cartão de débito",
+  BOLETO: "Boleto",
 };
 
 /** "Avenida Paulista, 1000, apto 12 — Bela Vista, São Paulo/SP · 01310-100" */
@@ -134,7 +141,7 @@ export function enderecoEmUmaLinha(e: {
  *
  * Número de cartão não entra neste banco: guardar cartão exige cofre de PSP e
  * certificação PCI, e uma joalheria não tem por que carregar esse risco. Com o
- * Mercado Pago ligado, o cartão é digitado na página deles e fica lá.
+ * PagBank ligado, o cartão é digitado na página deles e fica lá.
  */
 export const FORMAS_DE_PAGAMENTO = [
   { valor: "pix", rotulo: "Pix" },
