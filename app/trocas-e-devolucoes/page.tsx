@@ -18,7 +18,7 @@ export const metadata: Metadata = {
  * não uma linha escrita por conta própria nesta página. */
 export default function TrocasEDevolucoes() {
   return (
-    <PaginaInstitucional caminho="/trocas-e-devolucoes" titulo="Trocas e devoluções" atualizadoEm="14 de setembro de 2026">
+    <PaginaInstitucional caminho="/trocas-e-devolucoes" titulo="Trocas e devoluções" atualizadoEm="31 de outubro de 2026">
       <div className="inst__destaque">
         <p>
           <strong>Você tem 7 dias corridos, contados do recebimento da peça, para desistir da compra</strong> —
@@ -38,7 +38,7 @@ export default function TrocasEDevolucoes() {
         <li>
           Assim que a peça chega e é conferida, o reembolso é feito pelo mesmo meio do pagamento: Pix
           devolvido na conta de origem; no cartão, estorno na fatura — o prazo para aparecer depende
-          da operadora do cartão.
+          da operadora do cartão. A devolução e o valor aparecem na página do pedido, em sua conta.
         </li>
       </ul>
 

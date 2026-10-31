@@ -18,7 +18,7 @@ export default function TermosDeCompra() {
   const online = pagamentoOnlineAtivo();
 
   return (
-    <PaginaInstitucional caminho="/termos-de-compra" titulo="Termos de compra" atualizadoEm="14 de setembro de 2026">
+    <PaginaInstitucional caminho="/termos-de-compra" titulo="Termos de compra" atualizadoEm="31 de outubro de 2026">
       <p>
         Estes termos valem para as compras feitas neste site. Ao fechar um pedido, você declara
         que leu e concorda com eles, com a <Link href="/trocas-e-devolucoes">política de trocas e
@@ -61,6 +61,7 @@ export default function TermosDeCompra() {
         <li>
           Sem pagamento confirmado dentro da reserva, o pedido é cancelado automaticamente e as peças
           voltam para a vitrine. Pagamento com cartão em análise mantém a reserva até a resposta.
+          {online && " Antes de cancelar, a situação é conferida com o PagBank."}
         </li>
         <li>Cada conta pode ter até 3 pedidos aguardando pagamento ao mesmo tempo.</li>
         {online && (
@@ -70,6 +71,12 @@ export default function TermosDeCompra() {
           </li>
         )}
         <li>O pedido só entra em preparo depois que o pagamento é confirmado.</li>
+        {online && (
+          <li>
+            Se a operadora do cartão abrir uma contestação da compra, isso aparece na página do
+            pedido, e a Florenza acompanha o caso com o PagBank.
+          </li>
+        )}
       </ul>
 
       <h2>Cupons de desconto</h2>

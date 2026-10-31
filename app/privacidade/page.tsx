@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  * entra aqui ANTES de ir ao ar. */
 export default function Privacidade() {
   return (
-    <PaginaInstitucional caminho="/privacidade" titulo="Política de privacidade" atualizadoEm="14 de setembro de 2026">
+    <PaginaInstitucional caminho="/privacidade" titulo="Política de privacidade" atualizadoEm="31 de outubro de 2026">
       <p>
         Esta política explica quais dados pessoais a Florenza trata quando você usa o site, para quê,
         com quem eles são compartilhados e como você exerce os seus direitos, conforme a Lei Geral de
@@ -30,7 +30,7 @@ export default function Privacidade() {
       <ul>
         <li><strong>Conta:</strong> nome, e-mail, WhatsApp e senha — a senha é guardada cifrada pelo serviço de autenticação e ninguém da loja tem acesso a ela.</li>
         <li><strong>Pedido:</strong> CPF, endereço de entrega, peças compradas, medida do aro, observações e a mensagem de presente, se houver.</li>
-        <li><strong>Pagamento:</strong> a situação do pagamento, a forma usada e o valor. Os dados do cartão são digitados no PagBank e não chegam à Florenza.</li>
+        <li><strong>Pagamento:</strong> a situação do pagamento, a forma usada e o valor. Os dados do cartão são digitados no PagBank e não chegam à Florenza. Guardamos também os avisos que o PagBank envia sobre o pagamento, devoluções e contestações, e um registro técnico das nossas chamadas a ele, com os dados pessoais mascarados.</li>
         <li><strong>Navegação:</strong> os cookies necessários para manter você conectado. O carrinho fica guardado no seu próprio navegador.</li>
       </ul>
 
@@ -59,7 +59,8 @@ export default function Privacidade() {
       <h2>Por quanto tempo</h2>
       <p>
         Os dados da conta ficam guardados enquanto ela existir. Os registros de pedidos são mantidos
-        pelo prazo exigido pela legislação fiscal, mesmo depois de a conta ser excluída.
+        pelo prazo exigido pela legislação fiscal, mesmo depois de a conta ser excluída. O registro
+        técnico das chamadas ao PagBank é apagado depois de 180 dias.
       </p>
 
       <h2>Seus direitos</h2>

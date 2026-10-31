@@ -9,12 +9,13 @@ Next.js 16 (App Router) + Supabase + Vercel. Código, comentários e interface e
 npm run dev      # localhost:3000
 npm run build    # A VERIFICAÇÃO REAL antes de commitar — é ela que roda o TypeScript
 npm run lint
+npm test         # vitest: pagamento, com o banco simulado em PGlite
 npm run seed     # gera supabase/seed-catalogo.sql das fichas locais
 npm run mapa     # regera lib/geo/brasil-uf.ts da malha do IBGE
 python tools/importar-aneis-formatura.py   # fotos originais -> WebP em public/produtos/
 ```
 
-Não há testes nem formatter configurados.
+Não há formatter configurado.
 
 ## Estética: mudança é aditiva
 
@@ -37,7 +38,8 @@ Não há testes nem formatter configurados.
 - **Compra só com conta.** `criar_pedido()` exige `auth.uid()`, e cliente **não tem INSERT** em `pedidos`/`pedido_itens` — as policies antigas deixavam criar pedido "pago" por qualquer valor direto na API. Pedido de cliente nasce só pela função; venda manual, pelo painel (policy de admin).
 - Reserva de **48 h** (`expira_em`, espelhada em `RESERVA_HORAS` de `lib/loja.ts`). `expirar_pedidos_vencidos()` roda a cada 10 min no pg_cron: cancela, devolve estoque e uso do cupom. Cartão `IN_ANALYSIS`/`AUTHORIZED` segura a reserva. Limites: 10 por peça, 20 linhas, 3 pedidos aguardando por conta.
 - Cupom passa por `avaliar_cupom()` (EXECUTE de ninguém): validade no fuso de São Paulo; `so_primeira_compra` e `um_por_cliente` conferidos por **conta OU CPF**. Cancelar devolve o uso.
-- **Pago, só o banco marca.** `registrar_pagamento()` exige o segredo do Vault (`florenza_pagamentos`), que o servidor tem em `PAGAMENTO_SEGREDO_BANCO`. A prova é `GET /orders/{id}` do PagBank — nem o corpo do webhook nem a URL de retorno valem. Valor a menor e estorno viram `pagamentos.pendencia` para a equipe, não mudança de status. Contestação ainda não chega ao site: o PagBank a manda em outro formato (`notificationCode`), que só vai para o log.
+- **Pago, só o banco marca.** `registrar_pagamento()` exige o segredo do Vault (`florenza_pagamentos`), que o servidor tem em `PAGAMENTO_SEGREDO_BANCO`. A prova é `GET /orders/{id}` do PagBank — nem o corpo do webhook nem a URL de retorno valem. Valor a menor vira `pagamentos.pendencia` para a equipe, não mudança de status.
+- **Só expira com prova.** Pedido com checkout não vence pelo `expirar_pedidos_vencidos()`: o job consulta o PagBank antes. Sem conseguir provar que ninguém pagou, gera alerta e não expira. Nunca expire pedido pago por falta de resposta.
 - Categoria e produto usam `export const revalidate = 60`: sem isso o HTML congela no build e o site oferece "Comprar" em peça esgotada.
 
 ## Banco (`FLORENZA`, jydcgsxzinrguounnmpi, Postgres 17)
@@ -75,12 +77,18 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 - Medida do aro: `produtos.aros` (0, 1 ou 2) decide quantos seletores a página da peça mostra. **A medida é obrigatória** (desde 14/09/2026): `criar_pedido()` recusa peça com aro sem `tamanho`, e par sem `tamanho_par`. Nulo em `pedido_itens` só existe em pedido antigo e aparece como "a combinar". No carrinho, a linha é `sku|tamanho|tamanhoPar` e aceita medida vazia — o fechamento, não. O seletor é `components/SeletorDeAro.tsx` (combobox no padrão APG, sem `<select>` nativo; CSS `.aro` em `app/produto/produto.css`; regra brasileira, aro = circunferência − 40 mm). O guia "como medir" saiu em 31/10/2026, por decisão da loja.
 - Frete: tabela `fretes` (modalidade × região), `uf_do_cep()` e `cotar_frete()` (anon pode cotar). **O navegador manda só a modalidade**, como no cupom; `criar_pedido()` confere se o CEP é do estado escolhido, busca preço e prazo pela região da UF e grava `frete_*` no pedido. Total = máx(0, subtotal − desconto) + frete — **cupom não desconta frete**. Cotação na página da peça (`CalculadoraDeFrete`) e no checkout, ambos por `lib/frete.ts`. Os valores atuais são **fictícios** (`supabase/antes-de-abrir.sql`, bloco 10).
 - A confirmação **não promete o que não acontece**: nada de "pagamento aprovado" antes da confirmação real, e toda copy sobre pagamento depende de `pagamentoOnlineAtivo()`.
-- `/conta/pedido/[numero]` só lê o banco: a volta do PagBank não traz identificador documentado, então **o webhook é o único caminho do pagamento** (e não chega no localhost). A tela pede para recarregar antes de pagar de novo.
+- A confirmação tem três camadas, e as três caem em `reconcileOrder()`: webhook, página do pedido (ao abrir e a cada 5 s por 2 min) e job (`pg_cron` + `pg_net` chamando `/api/pagbank/reconciliar`, a cada 5 min). O servidor limita a conferência por pedido a uma a cada 15 s. "Pagar agora" fica bloqueado com cobrança em andamento.
 - Datas de etapa vêm da trigger `pedidos_carimba_etapas`, nunca digitadas.
 
 ## Pagamento, avisos e dados da loja
 
-- `lib/pagamento/`: `config.ts` (liga com `PAGBANK_TOKEN` + `PAGAMENTO_SEGREDO_BANCO`; só `PAGBANK_AMBIENTE=producao` cobra de verdade), `pagbank.ts` (checkout, consulta, assinatura do webhook), `sincronizar.ts`. Rotas: `POST /api/pedidos`, `POST /api/pedidos/[numero]/pagamento`, `POST /api/pagbank/webhook`.
+- `lib/pagamento/`: `config.ts` (`PAGBANK_ENABLED` só decide abrir cobrança nova; só `PAGBANK_ENV=production` cobra de verdade), `pagbank.ts` (toda chamada passa por `chamar()`, que grava o log), `cobranca.ts`, `reconciliar.ts`, `webhook.ts`, `eventos.ts` (parsers), `estados.ts`, `estorno.ts`, `integracao.ts`, `sanitizar.ts`. Rotas: `/api/pedidos`, `/api/pagbank/webhook`, `/api/pagbank/reconciliar`, `/api/admin/pagamentos/...`, `/api/admin/pagbank/...`.
+- **Máquina de estados de pagamento:** `pedidos.pagamento_estado` (`pending`, `paid`, `declined`, `expired`, `refunded`, `partially_refunded`, `in_dispute`). A trigger recusa transição inválida, com a mesma regra de `lib/pagamento/estados.ts`: mudou um, muda o outro.
+- **Vínculo:** o id que o PagBank devolve (`CHEC_`, `ORDE_`, em `pagbank_checkouts`/`pagbank_orders`) é a chave; `reference_id` é reserva. URLs de retorno e aviso levam o pedido assinado (HMAC).
+- **Idempotência:** `payment_events.chave` é única; aviso repetido não processa de novo.
+- **API do PagBank:** todo campo usado cita a seção da documentação em comentário. O que não está documentado leva `SUPOSIÇÃO – validar no sandbox`. Não invente campo.
+- `payment_logs` não guarda token nem cartão, e mascara dados pessoais (`sanitizar.ts`). Resposta que não é JSON não passa pela máscara: logue só os campos lidos.
+- Trocar `PAGBANK_ENABLED` exige redeploy, porque páginas estáticas leem a flag no build.
 - Segredo é **só servidor** — nenhum `NEXT_PUBLIC_` além da URL do site. Lista em `.env.local.example`.
 - `lib/avisos.ts` (Resend + webhook) **nunca derruba o pedido**: roda em `after()`, erro vai para o log.
 - `lib/loja.ts`: razão social, CNPJ, endereço, contatos, entrega. Rodapé e páginas legais leem de lá. Vazio, o build de produção **avisa no log** — era erro até 14/09/2026, quando se decidiu publicar antes de ter os dados; a lei (Decreto 7.962/2013) continua exigindo.
@@ -105,7 +113,8 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 
 - **Ninguém é admin ainda**: o painel só abre após `update public.profiles set role = 'admin'`.
 - "Entrar com Google" exige habilitar o provedor em Authentication → Providers.
-- PagBank: código pronto mas **nunca testado contra a API real**, falta a conta — migration `20261031120000`, token, segredo no Vault e teste no sandbox (DEPLOY.md, passo 5).
+- PagBank: código pronto mas **nunca testado contra a API real**, falta a conta — migrations `20261031120000` a `20261031130300`, token, segredos no Vault e roteiro de `docs/pagbank-homologacao.md` (DEPLOY.md, passo 5). A conferência sem webhook depende do campo `orders` de `GET /checkouts/{id}`, ainda suposição.
+- O faturamento do painel (`vw_pedidos_confirmados`) conta pedido estornado, a menos que seja cancelado.
 - **Frete fictício no ar** (desde 16/09/2026) até escolher transportadora: o cliente paga os valores do bloco 10 de `antes-de-abrir.sql`.
 - Domínio: fica `florenza-virid.vercel.app` (Vercel ligada ao GitHub). Sem domínio próprio o Resend não envia (não se verifica `vercel.app`). Os e-mails de conta saem pelo SMTP de um Gmail da loja — DEPLOY.md, passo 7. **Nas páginas da conta Google só o dono mexe, à mão**: o primeiro Gmail foi suspenso por "suspeita de bots" no dia em que foi criado, depois de configurado por automação. Enquanto o SMTP apontar para uma conta sem senha de app válida, todo cadastro no site dá erro 500 ("Error sending confirmation email").
 - `lib/loja.ts` vazio: o site está no ar com "a preencher" nas páginas legais. Textos legais precisam de revisão de advogado.

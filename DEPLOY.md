@@ -89,51 +89,58 @@ confira medidas, frete, CPF e endereço. Cancele pelo painel e veja o estoque vo
 
 ### 5. Ligar o PagBank
 
-1. Aplique a migration `20261031120000_pagamentos_pagbank.sql`
-   (`npx supabase db push --linked`). Sem ela, o banco não reconhece os status do
-   PagBank e o pedido não vira **Pago**.
-2. Crie a conta de testes em
+**Migrations antes do código:** `/conta` e o painel leem colunas novas, e código novo
+sobre banco velho quebra a página de pedidos.
+
+1. Aplique as migrations, em ordem, com `npx supabase db push --linked`:
+   `20261031120000_pagamentos_pagbank`, `20261031130000_pagbank_vinculo`,
+   `20261031130100_pagamento_estados_e_eventos`,
+   `20261031130200_estornos_e_contestacoes` e `20261031130300_pagbank_logs`.
+2. Em **Database → Extensions**, confira que `pg_cron` e `pg_net` estão ligados. Sem eles,
+   o agendamento não roda, e a última camada da confirmação fica desligada.
+3. Crie a conta de testes em
    [developer.pagbank.com.br](https://developer.pagbank.com.br) e pegue o token de
    **sandbox**.
-3. Invente um segredo aleatório com 32 caracteres ou mais e grave no Supabase,
+4. Invente dois segredos aleatórios com 32 caracteres ou mais e grave no Supabase, com o
+   endereço do agendamento,
    pelo SQL Editor:
    ```sql
-   select vault.create_secret('COLE-AQUI-O-SEGREDO', 'florenza_pagamentos');
+   select vault.create_secret('SEGREDO-DOS-PAGAMENTOS', 'florenza_pagamentos');
+   select vault.create_secret('SEGREDO-DO-AGENDAMENTO', 'florenza_job_pagbank');
+   select vault.create_secret('https://florenza-virid.vercel.app/api/pagbank/reconciliar', 'florenza_job_url');
    ```
-4. Na Vercel → **Settings → Environment Variables**, em Production:
+5. Na Vercel → **Settings → Environment Variables**, em Production:
 
    | Variável | Valor |
    |---|---|
+   | `PAGBANK_ENABLED` | `false`, até o painel confirmar que está tudo certo |
+   | `PAGBANK_ENV` | `sandbox` |
    | `PAGBANK_TOKEN` | o token do **sandbox**, por enquanto |
-   | `PAGBANK_AMBIENTE` | deixe vazio, por enquanto |
-   | `PAGAMENTO_SEGREDO_BANCO` | o mesmo segredo do item 3 |
+   | `PAGBANK_API_URL` | `https://sandbox.api.pagseguro.com` |
+   | `PAGBANK_URL_SECRET` | um terceiro segredo aleatório, de 32 caracteres ou mais |
+   | `PAGBANK_JOB_SECRET` | o `florenza_job_pagbank` do item 4 |
+   | `PAGAMENTO_SEGREDO_BANCO` | o `florenza_pagamentos` do item 4 |
    | `NEXT_PUBLIC_SITE_URL` | `https://florenza-virid.vercel.app`, sem barra no fim |
 
-   Nenhuma delas leva `NEXT_PUBLIC_` além da última — com o prefixo, o valor
-   iria parar no navegador. O webhook não se configura em painel: o site informa
-   `/api/pagbank/webhook` ao PagBank a cada checkout.
-5. **Redeploy** — variável nova só vale em build novo.
-6. Compre com um cartão de teste do PagBank e **confira de verdade**, porque esta
-   integração ainda não rodou contra a API real:
-   - a página de pagamento abre com o valor do pedido, e o Pix e o cartão aparecem;
-   - o pedido vira **Pago** sozinho, e a ficha no painel mostra o pagamento;
-   - nos logs da Vercel, o aviso em `/api/pagbank/webhook` não diz "não pertence a
-     um pedido do site" nem "assinatura inválida".
+   Nenhuma delas leva `NEXT_PUBLIC_` além da última: com o prefixo, o valor iria parar no
+   navegador. O webhook de pagamento não se configura em painel, porque o site informa o
+   endereço a cada checkout. Opcionais em `.env.local.example`.
+6. **Redeploy**: variável nova só vale em build novo. Vale também para ligar ou desligar
+   a flag, porque a home, o rodapé e os termos são gerados no build.
+7. Painel → **Pagamentos → Status da integração**: "Testar token", "Testar criação de
+   checkout" e "Ligar avisos de contestação" precisam dar OK.
+8. Ponha `PAGBANK_ENABLED=true`, faça redeploy e siga o roteiro de
+   [docs/pagbank-homologacao.md](docs/pagbank-homologacao.md). **Comece pelo caso 0**:
+   ele decide se a conferência sem webhook funciona.
+9. Peça a homologação, com os logs exportados pelo painel. Com a liberação: troque
+   `PAGBANK_TOKEN` e `PAGBANK_API_URL` pelos de produção, ponha `PAGBANK_ENV=production`
+   e faça redeploy.
 
-   O quadro "Ligações da loja", na aba Pedidos, diz **Teste** enquanto o ambiente
-   não for o de produção.
-7. Deu certo: peça a homologação ao PagBank, se a conta exigir (há relato de
-   `403` na criação do checkout com token de produção antes dela). Troque
-   `PAGBANK_TOKEN` pelo token de **produção**, ponha `PAGBANK_AMBIENTE=producao` e
-   faça redeploy.
+**Se o PagBank falhar em produção:** `PAGBANK_ENABLED=false` e redeploy. O checkout volta
+para o WhatsApp, e os pedidos abertos continuam sendo conferidos.
 
-**Limites conhecidos:** o site só sabe do pagamento pelo webhook; a volta do
-PagBank não traz identificador para consultar. Devolução e contestação chegam em
-outro formato, ainda não tratado: ficam no log, e a contestação precisa ser
-acompanhada no painel do PagBank.
-
-Enquanto este passo não for feito, nada quebra: o pedido nasce aguardando
-pagamento e o acerto é por WhatsApp, como hoje.
+Enquanto este passo não for feito, nada quebra: o pedido nasce aguardando pagamento e o
+acerto é por WhatsApp.
 
 ### 6. Avisos de pedido
 
@@ -341,9 +348,9 @@ para alguém:
   retorno `https://jydcgsxzinrguounnmpi.supabase.co/auth/v1/callback`. Enquanto
   não estiver ligado, o botão avisa e manda usar e-mail e senha — ninguém fica
   travado.
-- **Pagamento online, enquanto a conta do PagBank não for ligada.** O
-  código está pronto; sem as credenciais, o pedido nasce em "aguardando
-  pagamento" e o combinado é por WhatsApp. Passo 5 lá em cima.
+- **Pagamento online, enquanto o PagBank não for ligado.** O código está
+  pronto; sem as credenciais ou sem `PAGBANK_ENABLED=true`, o pedido nasce em
+  "aguardando pagamento" e o combinado é por WhatsApp. Passo 5 lá em cima.
 - **Cadastro de cliente parado até o Gmail novo.** O SMTP ainda aponta para o
   Gmail suspenso, e todo cadastro dá erro 500. O passo 7 resolve.
 - **Frete de verdade.** A cotação por CEP funciona, mas os valores são
