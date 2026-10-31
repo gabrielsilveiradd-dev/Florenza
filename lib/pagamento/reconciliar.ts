@@ -1,9 +1,12 @@
 import { avisarAlertaDePagamento, avisarPagamentoConfirmado, type PagamentoParaAviso } from "@/lib/avisos";
 import { rpcComSegredo } from "@/lib/pagamento/banco";
 import { urlPublicaDoSite } from "@/lib/pagamento/config";
-import { STATUS_EM_ANDAMENTO, decidirEstado, type EstadoDePagamento } from "@/lib/pagamento/estados";
 import {
-  buscarOrder, consultarCheckout, inativarCheckout, type ChecagemDoCheckout, type OrderDoPagBank,
+  STATUS_EM_ANDAMENTO, decidirEstado, situacaoDasDisputas, type EstadoDePagamento,
+} from "@/lib/pagamento/estados";
+import {
+  buscarOrder, consultarChargeback, consultarCheckout, inativarCheckout,
+  type ChecagemDoCheckout, type ContestacaoDoPagBank, type OrderDoPagBank,
 } from "@/lib/pagamento/pagbank";
 
 /**
@@ -32,6 +35,7 @@ export type ContextoDoPedido = {
   checkouts: Array<{ checkoutId: string; status: string; payUrl: string; expiraEm: string | null }>;
   orders: string[];
   cobrancas: Array<{ id: string; status: string }>;
+  disputas: Array<{ id: string; status: string; valorCentavos: number }>;
 };
 
 export type DependenciasDaReconciliacao = {
@@ -53,6 +57,10 @@ export type DependenciasDaReconciliacao = {
     origem: OrigemDaReconciliacao
   ) => Promise<{ mudou: boolean; rejeitada: boolean; anterior: string | null }>;
   expirar: (pedidoId: string) => Promise<boolean>;
+  consultarChargeback: (id: string) => Promise<ContestacaoDoPagBank>;
+  registrarDisputa: (pedidoId: string | null, c: ContestacaoDoPagBank) => Promise<void>;
+  resolverEstornosIncertos: (pedidoId: string) => Promise<void>;
+  estoqueAposEstorno: (pedidoId: string) => Promise<string>;
   alertar: (pedidoId: string | null, chave: string, alerta: string) => Promise<void>;
   avisarPago: (aviso: PagamentoParaAviso) => Promise<void>;
   agora: () => Date;
@@ -137,8 +145,31 @@ export async function reconcileOrder(
     }
   }
 
+  // Estorno que ficou sem resposta: agora dá para saber se aconteceu.
+  await dep.resolverEstornosIncertos(pedidoId);
+
+  // Contestação: a resposta nova vale mais que a gravada. `LEGADO_` veio da API
+  // antiga, sem recurso para consultar, e fica como está até alguém resolver.
+  const statusDasDisputas: string[] = [];
+  for (const disputa of pedido.disputas) {
+    if (disputa.id.startsWith("LEGADO_")) {
+      statusDasDisputas.push(disputa.status);
+      continue;
+    }
+    try {
+      const atualizada = await dep.consultarChargeback(disputa.id);
+      await dep.registrarDisputa(pedidoId, atualizada);
+      statusDasDisputas.push(atualizada.status);
+    } catch (erro) {
+      console.error(`[reconciliar] contestação ${disputa.id}:`, erro);
+      verificado = false;
+      statusDasDisputas.push(disputa.status);
+    }
+  }
+
   // 3) O estado a que isso leva.
   const decisao = decidirEstado({
+    disputa: situacaoDasDisputas(statusDasDisputas),
     atual: pedido.estado,
     cobrancas: cobrancas.map((c) => ({
       status: c.status,
@@ -165,6 +196,19 @@ export async function reconcileOrder(
     } else {
       estado = decisao.estado;
       mudou = aplicado.mudou;
+    }
+  }
+
+  // Estorno total: resolve o estoque pela escolha de quem estornou, ou pela regra.
+  // Rodar de novo não mexe em nada: a decisão fica gravada no pedido.
+  if (estado === "refunded") {
+    const estoque = await dep.estoqueAposEstorno(pedidoId);
+    if (estoque === "perguntar") {
+      await dep.alertar(
+        pedidoId,
+        `alerta:estoque:${pedidoId}`,
+        `Pedido #${pedido.numero} estornado por inteiro: decida na aba Pagamentos se a peça volta ao estoque.`
+      );
     }
   }
 
@@ -286,10 +330,27 @@ export function dependenciasReais(urlBase = urlPublicaDoSite()): DependenciasDaR
       return primeira(dados) ?? { mudou: false, rejeitada: false, anterior: null };
     },
     expirar: (pedidoId) => rpcComSegredo<boolean>("pagbank_expirar_pedido", { p_pedido_id: pedidoId }),
+    consultarChargeback,
+    registrarDisputa,
+    resolverEstornosIncertos: (pedidoId) =>
+      rpcComSegredo("pagbank_resolver_estornos_incertos", { p_pedido_id: pedidoId }),
+    estoqueAposEstorno: (pedidoId) => rpcComSegredo<string>("pagbank_estoque_apos_estorno", { p_pedido_id: pedidoId }),
     alertar: (pedidoId, chave, alerta) => registrarAlerta(pedidoId, chave, alerta, urlBase),
     avisarPago: (aviso) => avisarPagamentoConfirmado(aviso, urlBase),
     agora: () => new Date(),
   };
+}
+
+export function registrarDisputa(pedidoId: string | null, c: ContestacaoDoPagBank): Promise<void> {
+  return rpcComSegredo("pagbank_registrar_disputa", {
+    p_id: c.id,
+    p_pedido_id: pedidoId,
+    p_status: c.status,
+    p_valor: c.valorCentavos,
+    p_prazo: c.prazo,
+    p_classificacao: c.classificacao,
+    p_codigo_motivo: c.codigoMotivo,
+  });
 }
 
 /** Grava o alerta e avisa a equipe uma vez só: a mesma chave não avisa de novo. */

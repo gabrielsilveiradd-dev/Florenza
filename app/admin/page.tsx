@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  BadgeDollarSign, Gem, LayoutDashboard, MapPin, Package, PlugZap, ReceiptText,
+  BadgeDollarSign, CreditCard, Gem, LayoutDashboard, MapPin, Package, PlugZap, ReceiptText,
   ShieldAlert, Ticket, TriangleAlert, Users, Wallet,
 } from "lucide-react";
 import { SectionCard, StatCard } from "@/components/admin/Primitivos";
@@ -11,11 +11,13 @@ import { PedidosSection } from "@/components/admin/PedidosSection";
 import { ClientesSection } from "@/components/admin/ClientesSection";
 import { CatalogoSection } from "@/components/admin/CatalogoSection";
 import { CuponsSection } from "@/components/admin/CuponsSection";
+import { PagamentosSection } from "@/components/admin/PagamentosSection";
 import { carregarDashboard } from "@/lib/admin/dashboard-data";
 import {
   listarCategoriasAdmin, listarClientesAdmin, listarCuponsAdmin, listarPedidosAdmin, listarProdutosAdmin,
 } from "@/lib/admin/listas";
 import { formatarPreco } from "@/lib/admin/format";
+import { carregarPagamentosAdmin } from "@/lib/admin/pagamentos";
 import { avisosConfigurados } from "@/lib/avisos";
 import { camposDaLojaPendentes } from "@/lib/loja";
 import { pagBankEmTeste, pagamentoOnlineAtivo } from "@/lib/pagamento/config";
@@ -33,6 +35,7 @@ export const metadata: Metadata = {
 const ABAS = [
   { id: "vendas", rotulo: "Vendas", icone: LayoutDashboard },
   { id: "pedidos", rotulo: "Pedidos", icone: ReceiptText },
+  { id: "pagamentos", rotulo: "Pagamentos", icone: CreditCard },
   { id: "catalogo", rotulo: "Catálogo", icone: Gem },
   { id: "cupons", rotulo: "Cupons", icone: Ticket },
   { id: "clientes", rotulo: "Clientes", icone: Users },
@@ -145,13 +148,14 @@ export default async function PaginaAdmin({
   const pedida = (await searchParams).aba;
   const aba: AbaId = ABAS.some((a) => a.id === pedida) ? (pedida as AbaId) : "vendas";
 
-  const [dados, pedidos, clientes, produtos, categorias, cupons] = await Promise.all([
+  const [dados, pedidos, clientes, produtos, categorias, cupons, pagamentos] = await Promise.all([
     carregarDashboard(),
     listarPedidosAdmin(),
     listarClientesAdmin(),
     listarProdutosAdmin(),
     listarCategoriasAdmin(),
     listarCuponsAdmin(),
+    carregarPagamentosAdmin(),
   ]);
 
   const aguardando = pedidos.filter((p) => p.status === "aguardando_pagamento").length;
@@ -180,7 +184,7 @@ export default async function PaginaAdmin({
         {ABAS.map((item) => {
           const Icone = item.icone;
           const ativa = aba === item.id;
-          const conta = item.id === "pedidos" ? aguardando : 0;
+          const conta = item.id === "pedidos" ? aguardando : item.id === "pagamentos" ? pagamentos.alertas.length : 0;
           return (
             <Link
               key={item.id}
@@ -191,7 +195,10 @@ export default async function PaginaAdmin({
               <Icone aria-hidden size={14} strokeWidth={1.75} />
               {item.rotulo}
               {conta > 0 && (
-                <span className="adm__aba-conta" aria-label={`${conta} aguardando pagamento`}>
+                <span
+                  className="adm__aba-conta"
+                  aria-label={item.id === "pagamentos" ? `${conta} alertas` : `${conta} aguardando pagamento`}
+                >
                   {conta}
                 </span>
               )}
@@ -238,6 +245,7 @@ export default async function PaginaAdmin({
           <PedidosSection pedidos={pedidos} demo={demo} />
         </div>
       )}
+      {aba === "pagamentos" && <PagamentosSection dados={pagamentos} demo={demo} />}
       {aba === "catalogo" && <CatalogoSection produtos={produtos} categorias={categorias} demo={demo} />}
       {aba === "cupons" && <CuponsSection cupons={cupons} demo={demo} />}
       {aba === "clientes" && <ClientesSection clientes={clientes} demo={demo} />}

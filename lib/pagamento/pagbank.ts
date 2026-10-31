@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual, verify } from "node:crypto";
 import { pagBankApiUrl } from "@/lib/pagamento/config";
 
 /**
@@ -252,22 +252,164 @@ export async function buscarOrder(id: string): Promise<OrderDoPagBank> {
   };
 }
 
+export type ResultadoDoEstorno =
+  | { resultado: "ok"; http: number }
+  | { resultado: "recusado"; http: number; mensagem: string }
+  /** Sem resposta conclusiva: pode ter sido feito. A reconciliação decide; nada de reenviar. */
+  | { resultado: "incerto"; http: number | null; mensagem: string };
+
 /**
- * Confere o `x-authenticity-token`: SHA-256 de `{token}-{corpo cru}`.
- *
- * É defesa a mais, não a principal: mesmo um aviso forjado só faz o servidor ir
- * à API buscar um pedido, e um pagamento aprovado não se forja. A assinatura
- * existe para ninguém usar o webhook como gatilho de consultas.
- *
- * Sem o cabeçalho a resposta é "ausente", e o aviso segue — a conferência na API
- * continua valendo, e recusar perderia um pagamento real se o PagBank trocar o
- * jeito de assinar (a documentação já descreve um segundo, `x-payload-signature`).
+ * reference/cancelar-pagamento e page/passo-a-passo-devolvendo-uma-cobrança-paga:
+ * POST /charges/{id}/cancel com `amount.value` em centavos, total ou parcial.
+ * Sucesso documentado: 201.
  */
-export function assinaturaDoWebhook(cabecalhos: Headers, corpoCru: string): "valida" | "invalida" | "ausente" {
+export async function cancelarCobranca(cobrancaId: string, valorCentavos: number): Promise<ResultadoDoEstorno> {
+  if (!/^CHAR_[0-9A-Za-z_-]{1,64}$/.test(cobrancaId)) throw new Error(`Id de cobrança inválido: ${cobrancaId}`);
+
+  try {
+    const { status, dados } = await chamar("POST", `/charges/${cobrancaId}/cancel`, {
+      amount: { value: Math.round(valorCentavos) },
+    });
+    if (status >= 200 && status < 300) return { resultado: "ok", http: status };
+    const mensagem = JSON.stringify(dados)?.slice(0, 300) ?? "";
+    return status >= 500 ? { resultado: "incerto", http: status, mensagem } : { resultado: "recusado", http: status, mensagem };
+  } catch (erro) {
+    return { resultado: "incerto", http: null, mensagem: erro instanceof Error ? erro.message : String(erro) };
+  }
+}
+
+/** reference/consultar-pedido-parametros: GET /orders?charge_id=. */
+export async function orderDaCobranca(cobrancaId: string): Promise<string | null> {
+  if (!/^CHAR_[0-9A-Za-z_-]{1,64}$/.test(cobrancaId)) throw new Error(`Id de cobrança inválido: ${cobrancaId}`);
+  const { status, dados } = await chamar("GET", `/orders?charge_id=${cobrancaId}`);
+  if (status !== 200) throw new Error(`PagBank não achou a order da cobrança ${cobrancaId} (${status}).`);
+  const id = dados?.orders?.[0]?.id;
+  return typeof id === "string" ? id : null;
+}
+
+export type ContestacaoDoPagBank = {
+  id: string;
+  /** reference/objeto-chargeback: AWAITING_EVIDENCE, REVIEW_WITH_PAGBANK, SUBMITTED_ISSUER, APPROVED, DENIED, EXPIRED, CLOSED, WON, LOST. */
+  status: string;
+  valorCentavos: number;
+  prazo: string | null;
+  classificacao: string | null;
+  codigoMotivo: string | null;
+  /** reference/objeto-chargeback: `transaction.reference_id`. O exemplo da consulta traz nulo. */
+  pedidoId: string | null;
+  cliente: string | null;
+};
+
+/** reference/consultar-chargeback: GET /chargebacks/{id}. */
+export async function consultarChargeback(id: string): Promise<ContestacaoDoPagBank> {
+  if (!/^CBKS_[0-9A-Za-z_-]{1,64}$/.test(id)) throw new Error(`Id de contestação inválido: ${id}`);
+
+  const { status, dados: c } = await chamar("GET", `/chargebacks/${id}`);
+  if (status !== 200 || !c) throw new Error(`PagBank não achou a contestação ${id} (${status}).`);
+
+  const referencia = c.transaction?.reference_id;
+  return {
+    id: String(c.id),
+    status: String(c.status),
+    valorCentavos: Number(c.amount?.value ?? 0),
+    prazo: c.due_date ?? null,
+    classificacao: c.classification ?? null,
+    codigoMotivo: c.reason_code ?? null,
+    pedidoId: typeof referencia === "string" && UUID.test(referencia) ? referencia : null,
+    cliente: c.transaction?.customer_email ?? null,
+  };
+}
+
+export type NotificacaoLegada = { status: string | null; referencia: string | null; codigo: string | null; valorCentavos: number };
+
+/**
+ * reference/webhooks: GET {API antiga}/v3/transactions/notifications/{code}?email=&token=,
+ * com resposta em XML. O token vai na URL (é o que a documentação pede), então esta
+ * chamada nunca entra em log com a URL completa.
+ *
+ * SUPOSIÇÃO – validar no sandbox: `<reference>` traz o nosso `reference_id`.
+ * `null` se a API antiga não estiver configurada (PAGBANK_LEGACY_API_URL, PAGBANK_EMAIL).
+ */
+export async function consultarNotificacaoLegada(codigo: string): Promise<NotificacaoLegada | null> {
+  const base = process.env.PAGBANK_LEGACY_API_URL;
+  const email = process.env.PAGBANK_EMAIL;
+  if (!base || !email || !/^[A-Za-z0-9-]{1,36}$/.test(codigo)) return null;
+
+  const busca = new URLSearchParams({ email, token: token() });
+  const resposta = await fetch(`${base.replace(/\/$/, "")}/v3/transactions/notifications/${codigo}?${busca}`, {
+    headers: { "Content-Type": "application/xml" },
+    signal: AbortSignal.timeout(10_000),
+    cache: "no-store",
+  });
+  if (!resposta.ok) throw new Error(`PagBank não achou a notificação ${codigo} (${resposta.status}).`);
+
+  const xml = await resposta.text();
+  const campo = (nome: string) => xml.match(new RegExp(`<${nome}>([^<]*)</${nome}>`))?.[1]?.trim() ?? null;
+  return {
+    status: campo("status"),
+    referencia: campo("reference"),
+    codigo: campo("code"),
+    valorCentavos: Math.round(Number(campo("grossAmount") ?? 0) * 100),
+  };
+}
+
+/* ---- Autenticidade dos avisos ---- */
+
+let chavePublica: string | null = null;
+
+/**
+ * reference/validacao-de-autenticidade: GET /public-keys?type=webhook. O campo
+ * `public_key` vem em Base64, no formato X.509. `renovar` pega a nova depois de uma
+ * rotação de chave.
+ */
+async function chavePublicaDoWebhook(renovar = false): Promise<string | null> {
+  if (chavePublica && !renovar) return chavePublica;
+  const { status, dados } = await chamar("GET", "/public-keys?type=webhook");
+  if (status !== 200 || typeof dados?.public_key !== "string") return null;
+  const linhas = dados.public_key.match(/.{1,64}/g)?.join("\n");
+  chavePublica = `-----BEGIN PUBLIC KEY-----\n${linhas}\n-----END PUBLIC KEY-----\n`;
+  return chavePublica;
+}
+
+function algumaAssinaturaValida(assinaturas: string[], corpoCru: string, chave: string): boolean {
+  return assinaturas.some((assinatura) => {
+    try {
+      return verify("sha256", Buffer.from(corpoCru, "utf8"), chave, Buffer.from(assinatura, "base64"));
+    } catch {
+      return false;
+    }
+  });
+}
+
+export type AutenticidadeDoAviso = "ecdsa" | "token" | "invalida" | "ausente";
+
+/**
+ * Confere o aviso pelas duas formas documentadas:
+ *
+ *   - `x-payload-signature` (reference/validacao-de-autenticidade): ECDSA com
+ *     SHA-256 sobre os bytes do corpo, em Base64; pode vir mais de uma, separadas
+ *     por vírgula, e basta uma válida. É como vêm os eventos de preferência.
+ *   - `x-authenticity-token` (docs/confirmar-autenticidade-da-notificacao): SHA-256
+ *     de `{token}-{corpo cru}`.
+ *
+ * Mesmo um aviso forjado só faz o servidor ir à API, e um pagamento aprovado não se
+ * forja. A assinatura existe para ninguém usar o webhook como gatilho de consultas.
+ */
+export async function assinaturaDoWebhook(cabecalhos: Headers, corpoCru: string): Promise<AutenticidadeDoAviso> {
+  const assinada = cabecalhos.get("x-payload-signature");
+  if (assinada) {
+    const assinaturas = assinada.split(",").map((a) => a.trim()).filter(Boolean);
+    const chave = await chavePublicaDoWebhook().catch(() => null);
+    if (chave && algumaAssinaturaValida(assinaturas, corpoCru, chave)) return "ecdsa";
+    // Pode ser rotação de chave: a página manda consultar de novo.
+    const nova = await chavePublicaDoWebhook(true).catch(() => null);
+    return nova && algumaAssinaturaValida(assinaturas, corpoCru, nova) ? "ecdsa" : "invalida";
+  }
+
   const assinatura = cabecalhos.get("x-authenticity-token");
   if (!assinatura) return "ausente";
 
   const esperado = Buffer.from(createHash("sha256").update(`${token()}-${corpoCru}`).digest("hex"));
   const recebido = Buffer.from(assinatura.trim().toLowerCase());
-  return esperado.length === recebido.length && timingSafeEqual(esperado, recebido) ? "valida" : "invalida";
+  return esperado.length === recebido.length && timingSafeEqual(esperado, recebido) ? "token" : "invalida";
 }

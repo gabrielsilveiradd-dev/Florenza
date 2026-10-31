@@ -61,6 +61,25 @@ export type CobrancaParaDecidir = {
 export type SituacaoDaDisputa = "aberta" | "ganha" | "perdida" | null;
 
 /**
+ * reference/objeto-chargeback. DENIED (evidência rejeitada) ainda não encerra: o
+ * fim do caso vem em CLOSED ou LOST. EXPIRED é sem resposta dentro do prazo, ou
+ * seja, débito aceito.
+ */
+export function situacaoDaDisputa(status: string): Exclude<SituacaoDaDisputa, null> {
+  if (status === "APPROVED" || status === "WON") return "ganha";
+  if (status === "LOST" || status === "CLOSED" || status === "EXPIRED") return "perdida";
+  return "aberta";
+}
+
+/** A pior situação entre as contestações de um pedido. */
+export function situacaoDasDisputas(status: string[]): SituacaoDaDisputa {
+  const situacoes = status.map(situacaoDaDisputa);
+  if (situacoes.includes("aberta")) return "aberta";
+  if (situacoes.includes("perdida")) return "perdida";
+  return situacoes.length > 0 ? "ganha" : null;
+}
+
+/**
  * O estado a que as cobranças levam. Função pura: mesma resposta do PagBank, mesmo
  * estado — é isso que torna a reconciliação segura de rodar quantas vezes for.
  *
