@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BellRing, ChevronDown, CreditCard, Loader2, RefreshCw, Settings2, Undo2 } from "lucide-react";
-import { IntegracaoStatus } from "@/components/admin/IntegracaoStatus";
 import { SectionCard, Vazio } from "@/components/admin/Primitivos";
 import { formatarPreco, reaisParaCentavos } from "@/lib/admin/format";
 import { METODO_DE_PAGAMENTO, STATUS_DO_PAGAMENTO } from "@/lib/conta";
@@ -101,8 +100,6 @@ export function PagamentosSection({ dados, demo }: { dados: DadosDePagamentos; d
   return (
     <div className="flex flex-col gap-7">
       {erro && <div className="adm-erro" role="alert">{erro}</div>}
-
-      <IntegracaoStatus status={dados.integracao} demo={demo} />
 
       <SectionCard icone={BellRing} titulo={`Alertas (${dados.alertas.length})`}>
         {dados.alertas.length === 0 ? (

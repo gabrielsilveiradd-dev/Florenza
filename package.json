@@ -9,8 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "seed": "node tools/seed-catalogo.mjs",
-    "mapa": "node tools/gerar-mapa-brasil.mjs"
+    "seed": "node tools/seed-catalogo.mjs"
   },
   "dependencies": {
     "@number-flow/react": "^0.6.2",

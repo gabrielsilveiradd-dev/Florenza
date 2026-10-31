@@ -1,7 +1,7 @@
 /* Toda a agregação do dashboard num lugar só.
  *
  * Com o Supabase plugado, quem soma é o Postgres: as visões
- * vw_vendas_por_uf / _regiao / _mes / _cidade / vw_produtos_vendidos já chegam
+ * vw_vendas_por_uf / _regiao / _mes / vw_produtos_vendidos já chegam
  * prontas, e o painel só desenha. Somar no banco evita trazer milhares de
  * linhas de pedido pela rede para descobrir um total.
  *
@@ -13,7 +13,6 @@ import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { produtos as produtosLocais } from "@/lib/data/catalogo-local";
 import { PEDIDOS_DEMO, CLIENTES_DEMO, type PedidoDemo } from "@/lib/admin/dados-demo";
-import { COR_ORIGEM, ORDEM_ORIGEM, ROTULO_ORIGEM } from "@/lib/admin/format";
 import { REGIOES, UFS } from "@/lib/geo/ufs";
 
 /** Status que contam como venda — mesma regra de vw_pedidos_confirmados. */
@@ -40,9 +39,7 @@ export type DashboardData = {
   mapa: LinhaUF[];
   regioes: { regiao: string; pedidos: number; totalCentavos: number }[];
   meses: { rotulo: string; pedidos: number; totalCentavos: number }[];
-  cidades: { cidade: string; uf: string | null; pedidos: number; totalCentavos: number }[];
   maisVendidos: { sku: string; nome: string; unidades: number; totalCentavos: number }[];
-  origens: { origem: string; rotulo: string; quantidade: number; cor: string }[];
 };
 
 const inicioDoMes = () => {
@@ -50,7 +47,7 @@ const inicioDoMes = () => {
   return new Date(agora.getFullYear(), agora.getMonth(), 1);
 };
 
-/** Ordena por faturamento e corta — usado em cidades e produtos. */
+/** Ordena por faturamento e corta. */
 const topN = <T extends { totalCentavos: number }>(lista: T[], n: number) =>
   [...lista].sort((a, b) => b.totalCentavos - a.totalCentavos).slice(0, n);
 
@@ -105,20 +102,6 @@ function agregarDemo(): DashboardData {
     };
   });
 
-  const porCidade = new Map<string, { cidade: string; uf: string | null; pedidos: number; totalCentavos: number }>();
-  for (const p of confirmados) {
-    const chave = `${p.cidade ?? "Não informada"}|${p.uf ?? ""}`;
-    const atual = porCidade.get(chave) ?? {
-      cidade: p.cidade ?? "Não informada",
-      uf: p.uf,
-      pedidos: 0,
-      totalCentavos: 0,
-    };
-    atual.pedidos += 1;
-    atual.totalCentavos += p.total_centavos;
-    porCidade.set(chave, atual);
-  }
-
   const porSku = new Map<string, { sku: string; nome: string; unidades: number; totalCentavos: number }>();
   for (const p of confirmados) {
     for (const item of p.itens) {
@@ -128,9 +111,6 @@ function agregarDemo(): DashboardData {
       porSku.set(item.sku, atual);
     }
   }
-
-  const contagemOrigem = new Map<string, number>();
-  for (const p of confirmados) contagemOrigem.set(p.origem, (contagemOrigem.get(p.origem) ?? 0) + 1);
 
   const lider = [...regioes].sort((a, b) => b.totalCentavos - a.totalCentavos)[0];
 
@@ -147,14 +127,7 @@ function agregarDemo(): DashboardData {
     mapa,
     regioes,
     meses,
-    cidades: topN([...porCidade.values()], 5),
     maisVendidos: topN([...porSku.values()], 8),
-    origens: ORDEM_ORIGEM.filter((o) => (contagemOrigem.get(o) ?? 0) > 0).map((o) => ({
-      origem: o,
-      rotulo: ROTULO_ORIGEM[o],
-      quantidade: contagemOrigem.get(o) ?? 0,
-      cor: COR_ORIGEM[o],
-    })),
   };
 }
 
@@ -165,31 +138,23 @@ async function agregarSupabase(): Promise<DashboardData> {
   const supabase = await createClient();
   const desde = inicioDoMes().toISOString();
 
-  const [porUF, porRegiao, porMes, porCidade, maisVendidos, doMes, clientesNovos, pecas] =
+  const [porUF, porRegiao, porMes, maisVendidos, doMes, clientesNovos, pecas] =
     await Promise.all([
       supabase.from("vw_vendas_por_uf").select("uf, uf_nome, regiao, pedidos, total_centavos"),
       supabase.from("vw_vendas_por_regiao").select("regiao, pedidos, total_centavos"),
       supabase.from("vw_vendas_por_mes").select("rotulo, pedidos, total_centavos"),
       supabase
-        .from("vw_vendas_por_cidade")
-        .select("cidade, uf, pedidos, total_centavos")
-        .order("total_centavos", { ascending: false })
-        .limit(5),
-      supabase
         .from("vw_produtos_vendidos")
         .select("sku, nome, unidades, total_centavos")
         .order("total_centavos", { ascending: false })
         .limit(8),
-      supabase.from("vw_pedidos_confirmados").select("id, total_centavos, origem").gte("created_at", desde),
+      supabase.from("vw_pedidos_confirmados").select("id, total_centavos").gte("created_at", desde),
       supabase.from("vw_clientes").select("id", { count: "exact", head: true }).gte("created_at", desde),
       supabase.from("produtos").select("id", { count: "exact", head: true }).eq("ativo", true),
     ]);
 
   const pedidosMes = doMes.data ?? [];
   const faturamentoMes = pedidosMes.reduce((s, p) => s + (p.total_centavos ?? 0), 0);
-
-  const contagemOrigem = new Map<string, number>();
-  for (const p of pedidosMes) contagemOrigem.set(p.origem, (contagemOrigem.get(p.origem) ?? 0) + 1);
 
   const regioes = (porRegiao.data ?? []).map((r) => ({
     regiao: r.regiao as string,
@@ -221,23 +186,11 @@ async function agregarSupabase(): Promise<DashboardData> {
       pedidos: Number(m.pedidos),
       totalCentavos: Number(m.total_centavos),
     })),
-    cidades: (porCidade.data ?? []).map((c) => ({
-      cidade: c.cidade as string,
-      uf: c.uf as string | null,
-      pedidos: Number(c.pedidos),
-      totalCentavos: Number(c.total_centavos),
-    })),
     maisVendidos: (maisVendidos.data ?? []).map((p) => ({
       sku: p.sku as string,
       nome: p.nome as string,
       unidades: Number(p.unidades),
       totalCentavos: Number(p.total_centavos),
-    })),
-    origens: ORDEM_ORIGEM.filter((o) => (contagemOrigem.get(o) ?? 0) > 0).map((o) => ({
-      origem: o,
-      rotulo: ROTULO_ORIGEM[o],
-      quantidade: contagemOrigem.get(o) ?? 0,
-      cor: COR_ORIGEM[o],
     })),
   };
 }

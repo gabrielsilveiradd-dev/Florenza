@@ -127,12 +127,20 @@ sobre banco velho quebra a página de pedidos.
    endereço a cada checkout. Opcionais em `.env.local.example`.
 6. **Redeploy**: variável nova só vale em build novo. Vale também para ligar ou desligar
    a flag, porque a home, o rodapé e os termos são gerados no build.
-7. Painel → **Pagamentos → Status da integração**: "Testar token", "Testar criação de
-   checkout" e "Ligar avisos de contestação" precisam dar OK.
+7. Entre em `/admin` com a conta de admin, abra o console do navegador (F12) e rode:
+
+   ```js
+   await (await fetch("/api/admin/pagbank/integracao", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "token" }) })).json()
+   ```
+
+   Repita com `acao: "checkout"` (cria e inativa um checkout de R$ 1,00, sem cobrar nada)
+   e com `acao: "preferencias"` (liga os avisos de contestação). As três respostas precisam
+   trazer `ok: true`.
 8. Ponha `PAGBANK_ENABLED=true`, faça redeploy e siga o roteiro de
    [docs/pagbank-homologacao.md](docs/pagbank-homologacao.md). **Comece pelo caso 0**:
    ele decide se a conferência sem webhook funciona.
-9. Peça a homologação, com os logs exportados pelo painel. Com a liberação: troque
+9. Peça a homologação, com os logs de `/api/admin/pagbank/logs?formato=json&dias=30`
+   (abra o endereço logado como admin). Com a liberação: troque
    `PAGBANK_TOKEN` e `PAGBANK_API_URL` pelos de produção, ponha `PAGBANK_ENV=production`
    e faça redeploy.
 

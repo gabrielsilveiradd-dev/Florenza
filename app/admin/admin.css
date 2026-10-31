@@ -296,16 +296,7 @@
 }
 .adm-erro { margin-top: 12px; font-size: 12.5px; color: #a3312c; }
 
-/* ---------- Mapa ---------- */
-.adm-mapa { width: 100%; height: auto; display: block; }
-.adm-mapa__uf {
-  stroke: var(--ivory);
-  stroke-width: 1;
-  transition: opacity .2s;
-  cursor: pointer;
-}
-.adm-mapa__uf:hover { opacity: .78; }
-.adm-mapa__uf.is-apagada { cursor: default; }
+/* ---------- Dica dos gráficos ---------- */
 .adm-mapa__dica {
   position: absolute;
   pointer-events: none;
@@ -320,14 +311,6 @@
 .adm-mapa__dica-uf { font-family: var(--font-serif); font-size: 14px; color: var(--ink); }
 .adm-mapa__dica-linha { font-size: 11px; color: var(--ink-dim); margin-top: 3px; }
 
-.adm-escala { display: flex; align-items: center; gap: 8px; }
-.adm-escala__faixa {
-  width: 120px;
-  height: 8px;
-  background: linear-gradient(90deg, var(--ivory-soft), var(--gold-ink));
-  border: 1px solid var(--hairline);
-}
-
 /* ---------- Responsivo ---------- */
 @media (max-width: 640px) {
   .adm { padding: calc(var(--nav-h) + 24px) 18px 64px; }
@@ -337,7 +320,7 @@
 }
 
 /* ==========================================================================
-   ACRÉSCIMOS — ficha do pedido, edição do catálogo, cupons e ligações.
+   ACRÉSCIMOS — ficha do pedido, edição do catálogo e cupons.
    Nada acima foi alterado. Cores: tokens, e os mesmos tons de status e de
    erro que este arquivo já usa.
    ========================================================================== */
@@ -431,12 +414,6 @@ a.adm-botao { text-decoration: none; }
 .adm-foto:focus-within img,
 .adm-foto:focus-within .adm-foto__vazia { outline: 2px solid rgba(212, 185, 115, .45); outline-offset: 1px; }
 
-/* ---------- Ligações da loja ---------- */
-.adm-ligacoes { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin: 0; padding: 0; list-style: none; }
-.adm-ligacao { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--hairline); background: var(--ivory); }
-.adm-ligacao .adm-tag { margin-top: 2px; }
-.adm-ligacao p { margin: 0; }
-
 /* ---------- Aba Pagamentos ---------- */
 .adm-tag--disputa   { border-color: rgba(163,49,44,.6); background: rgba(163,49,44,.1); color: #a3312c; }
 .adm-tag--estornado { border-color: rgba(168,118,15,.6); background: rgba(168,118,15,.1); color: #a8760f; }
@@ -450,5 +427,3 @@ a.adm-botao { text-decoration: none; }
 .adm-pag__historico { display: grid; gap: 7px; font-size: 12px; }
 .adm-pag__historico time { color: var(--ink-dim); margin-right: 8px; font-variant-numeric: tabular-nums; }
 .adm-alerta { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; padding: 10px 12px; margin-bottom: 8px; border: 1px solid rgba(163,49,44,.35); border-radius: 8px; background: rgba(163,49,44,.05); font-size: 12.5px; line-height: 1.5; }
-.adm-integracao { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
-.adm-integracao__resultado { margin-top: 12px; font-size: 12.5px; line-height: 1.55; }

@@ -11,7 +11,6 @@ npm run build    # A VERIFICAÇÃO REAL antes de commitar — é ela que roda o 
 npm run lint
 npm test         # vitest: pagamento, com o banco simulado em PGlite
 npm run seed     # gera supabase/seed-catalogo.sql das fichas locais
-npm run mapa     # regera lib/geo/brasil-uf.ts da malha do IBGE
 python tools/importar-aneis-formatura.py   # fotos originais -> WebP em public/produtos/
 ```
 
@@ -104,8 +103,6 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 
 ## Gráficos e animações
 
-- Mapa do Brasil: **SVG inline** de `lib/geo/brasil-uf.ts`, versionado. Sem biblioteca de mapa, sem rede em runtime. Coroplético em **raiz quadrada** do faturamento — linear, o estado líder apaga o resto do país.
-- A paleta categórica de `lib/admin/format.ts` foi conferida por script; ao mexer, rode o validador (o comando está no comentário do arquivo).
 - Todo gráfico precisa de **estado vazio textual** — gráfico vazio parece defeito.
 - Reveals GSAP em `components/Reveal.tsx`, **sem alterar parâmetro**: duração, easing e gatilho são a assinatura do site.
 - `VideoAutoplay.tsx` pausa vídeo fora da viewport — três decoders travam o celular.

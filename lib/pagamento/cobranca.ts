@@ -29,7 +29,7 @@ export async function abrirCobranca({ urlBase, ...e }: EntradaDaCobranca): Promi
       await registrarAlerta(
         null,
         `alerta:checkout-${erro.http}:${new Date().toISOString().slice(0, 10)}`,
-        `O PagBank recusou a abertura de cobrança (${erro.http}). Os clientes não conseguem pagar online: veja o Status da integração, ou desligue PAGBANK_ENABLED.`,
+        `O PagBank recusou a abertura de cobrança (${erro.http}). Os clientes não conseguem pagar online: confira PAGBANK_TOKEN e a liberação da conta, ou desligue PAGBANK_ENABLED.`,
         urlPublicaDoSite()
       ).catch((falha) => console.error("[pagamento] alerta não gravado:", falha));
     }

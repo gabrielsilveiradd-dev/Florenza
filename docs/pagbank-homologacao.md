@@ -16,16 +16,15 @@ indicado em [Solicitar homologação](https://developer.pagbank.com.br/docs/soli
 
 - [ ] Migrations `20261031130000` a `20261031130300` aplicadas (DEPLOY.md, passo 5).
 - [ ] Variáveis na Vercel, com `PAGBANK_ENV=sandbox` e `PAGBANK_ENABLED=true`.
-- [ ] Painel → Pagamentos → **Status da integração**: "Testar token" e "Testar criação de
-      checkout" dão OK.
-- [ ] "Ligar avisos de contestação" dá OK.
+- [ ] Testes `token`, `checkout` e `preferencias` (este liga os avisos de contestação)
+      respondem `ok: true`, pelo console do navegador (DEPLOY.md, passo 5, item 7).
 - [ ] Roteiro de teste abaixo concluído no sandbox.
 - [ ] Cada item marcado `SUPOSIÇÃO – validar no sandbox` no código (`git grep "SUPOSIÇÃO"`)
       conferido, com o resultado anotado aqui.
 
 ## O que enviar
 
-- [ ] Logs de sandbox: Painel → Pagamentos → **Exportar logs (JSON)**, ou
+- [ ] Logs de sandbox: abra, logado como admin,
       `/api/admin/pagbank/logs?formato=json&dias=30&ambiente=sandbox`.
 - [ ] Logs de produção, se a primeira chamada já tiver sido tentada:
       `...&ambiente=production`. Um 403 nesse log é a evidência para a pergunta 1.
@@ -54,10 +53,10 @@ pedido, a aba Pagamentos e o log.
 | 7 | Webhook repetido | Reenvie o mesmo corpo para a URL de aviso | Resposta `repetido: true`; uma linha só em `payment_events`; nenhum e-mail a mais |
 | 8 | Estorno parcial | Painel → Estornar, com metade do valor | "Estornado em parte", valor e autor no histórico |
 | 9 | Estorno total | Painel → Estornar o restante | "Estornado"; pergunta ou aplica a regra de estoque, uma vez só |
-| 10 | Contestação | Cartão de teste de chargeback ([guia](https://developer.pagbank.com.br/docs/chargeback)), com o caso "Ligar avisos" feito | "Em contestação", alerta no painel, e-mail ou n8n para a equipe |
+| 10 | Contestação | Cartão de teste de chargeback ([guia](https://developer.pagbank.com.br/docs/chargeback)), com o teste `preferencias` feito | "Em contestação", alerta no painel, e-mail ou n8n para a equipe |
 | 11 | Evento desconhecido | Envie corpo `{"id":"XPTO"}` assinado com a URL de aviso | Alerta "tipo desconhecido" no painel |
 | 12 | Flag desligada | `PAGBANK_ENABLED=false` e redeploy | Checkout fecha pelo WhatsApp, sem erro; pedidos abertos seguem sendo conferidos |
-| 13 | Teste do 403 | `PAGBANK_ENV=production` antes da liberação, sem clientes no site | "Testar criação de checkout" mostra o 403 explicado, e o log guarda a resposta |
+| 13 | Teste do 403 | `PAGBANK_ENV=production` antes da liberação, sem clientes no site | O teste `checkout` responde com o 403 explicado, e o log guarda a resposta |
 
 ## Perguntas para o suporte
 

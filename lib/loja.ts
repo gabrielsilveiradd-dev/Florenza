@@ -73,9 +73,8 @@ export function linkWhatsAppDoCliente(telefone: string | null, mensagem: string)
  *
  * Até 14/09/2026 era erro — mesmo raciocínio de lib/supabase/config.ts. Virou
  * aviso por decisão de publicar a loja nova antes de ter os dados em mãos.
- * Enquanto faltarem, as páginas legais mostram "a preencher" e o quadro
- * "Ligações da loja" do painel lista o que falta. A lei continua exigindo esses
- * dados à vista: preencher é pendência de abertura, não detalhe.
+ * Enquanto faltarem, as páginas legais mostram "a preencher". A lei continua
+ * exigindo esses dados à vista: preencher é pendência de abertura, não detalhe.
  */
 if (process.env.VERCEL_ENV === "production" && camposDaLojaPendentes().length > 0) {
   console.warn(

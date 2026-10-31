@@ -27,10 +27,6 @@ export function ambientePagBank(): AmbientePagBank {
   return process.env.PAGBANK_ENV === "production" ? "production" : "sandbox";
 }
 
-export function pagBankEmTeste(): boolean {
-  return ambientePagBank() === "sandbox";
-}
-
 /** A URL precisa bater com o ambiente: token de um lado e URL de outro só dá erro confuso. */
 export function urlDaApiCoerente(url: string, ambiente: AmbientePagBank): boolean {
   return ambiente === "sandbox" ? url.includes("sandbox") : !url.includes("sandbox");

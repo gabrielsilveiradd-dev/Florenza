@@ -4,8 +4,9 @@ import { pagBankApiUrl, urlPublicaDoSite } from "@/lib/pagamento/config";
 import { ativarAvisosDePosVenda, testarCriacaoDeCheckout, testarToken } from "@/lib/pagamento/integracao";
 
 /**
- * Os botões da página "Status da integração". Precisa de token e URL, não da flag:
- * é justamente com a loja desligada que se testa antes de ligar.
+ * Os testes da homologação, chamados pelo console do navegador (DEPLOY.md, passo 5).
+ * Precisa de token e URL, não da flag: é justamente com a loja desligada que se
+ * testa antes de ligar.
  */
 export async function POST(request: Request) {
   const acesso = await exigirAdmin();

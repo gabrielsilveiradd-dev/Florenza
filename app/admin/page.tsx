@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  BadgeDollarSign, CreditCard, Gem, LayoutDashboard, MapPin, Package, PlugZap, ReceiptText,
+  BadgeDollarSign, CreditCard, Gem, LayoutDashboard, MapPin, Package, ReceiptText,
   ShieldAlert, Ticket, TriangleAlert, Users, Wallet,
 } from "lucide-react";
-import { SectionCard, StatCard } from "@/components/admin/Primitivos";
+import { StatCard } from "@/components/admin/Primitivos";
 import { VendasSection } from "@/components/admin/VendasSection";
 import { PedidosSection } from "@/components/admin/PedidosSection";
 import { ClientesSection } from "@/components/admin/ClientesSection";
@@ -18,9 +18,6 @@ import {
 } from "@/lib/admin/listas";
 import { formatarPreco } from "@/lib/admin/format";
 import { carregarPagamentosAdmin } from "@/lib/admin/pagamentos";
-import { avisosConfigurados } from "@/lib/avisos";
-import { camposDaLojaPendentes } from "@/lib/loja";
-import { pagBankEmTeste, pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -42,79 +39,6 @@ const ABAS = [
 ] as const;
 
 type AbaId = (typeof ABAS)[number]["id"];
-
-/**
- * O que está ligado e o que não está, dito na aba onde faz diferença.
- *
- * Só booleanos saem daqui — nenhum valor de variável de ambiente chega à tela.
- * Serve para a equipe não descobrir pelo cliente que o aviso de pedido não
- * chegava, ou que o PagBank ainda estava no ambiente de teste.
- */
-function LigacoesDaLoja() {
-  const avisos = avisosConfigurados();
-  const online = pagamentoOnlineAtivo();
-  const faltam = camposDaLojaPendentes();
-
-  const itens = [
-    {
-      rotulo: "Pagamento online",
-      ok: online && !pagBankEmTeste(),
-      selo: online ? (pagBankEmTeste() ? "Teste" : "Ligado") : "Desligado",
-      detalhe: online
-        ? pagBankEmTeste()
-          ? "PagBank no ambiente de TESTE — nenhum pagamento é real."
-          : "PagBank recebendo Pix e cartão."
-        : "Pedidos ficam aguardando pagamento e o acerto é por WhatsApp. Detalhes na aba Pagamentos.",
-    },
-    {
-      rotulo: "Aviso de pedido novo (e-mail)",
-      ok: avisos.emailParaLoja,
-      selo: avisos.emailParaLoja ? "Ligado" : "Desligado",
-      detalhe: avisos.emailParaLoja
-        ? "A loja recebe um e-mail a cada pedido e a cada pagamento confirmado."
-        : "Sem aviso: confira esta aba para ver pedidos novos.",
-    },
-    {
-      rotulo: "E-mail para o cliente",
-      ok: avisos.emailParaCliente,
-      selo: avisos.emailParaCliente ? "Ligado" : "Desligado",
-      detalhe: avisos.emailParaCliente
-        ? "O cliente recebe o resumo do pedido e a confirmação do pagamento."
-        : "O cliente acompanha só pela página do pedido.",
-    },
-    {
-      rotulo: "Webhook (n8n / WhatsApp)",
-      ok: avisos.webhook,
-      selo: avisos.webhook ? "Ligado" : "Desligado",
-      detalhe: avisos.webhook ? "Cada pedido novo é enviado ao fluxo configurado." : "Nenhum fluxo externo recebe os pedidos.",
-    },
-    {
-      rotulo: "Dados da loja",
-      ok: faltam.length === 0,
-      selo: faltam.length === 0 ? "Completos" : "Incompletos",
-      detalhe:
-        faltam.length === 0
-          ? "CNPJ, endereço e contatos à vista no rodapé e nas políticas."
-          : `Faltam em lib/loja.ts: ${faltam.join(", ")}. Sem eles o site não publica em produção.`,
-    },
-  ];
-
-  return (
-    <SectionCard icone={PlugZap} titulo="Ligações da loja">
-      <ul className="adm-ligacoes">
-        {itens.map((i) => (
-          <li className="adm-ligacao" key={i.rotulo}>
-            <span className={`adm-tag ${i.ok ? "adm-tag--pago" : "adm-tag--aguardando"}`}>{i.selo}</span>
-            <div>
-              <p className="adm-lista__nome">{i.rotulo}</p>
-              <p className="adm-lista__meta">{i.detalhe}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </SectionCard>
-  );
-}
 
 export default async function PaginaAdmin({
   searchParams,
@@ -239,12 +163,7 @@ export default async function PaginaAdmin({
         </div>
       )}
 
-      {aba === "pedidos" && (
-        <div className="flex flex-col gap-7">
-          <LigacoesDaLoja />
-          <PedidosSection pedidos={pedidos} demo={demo} />
-        </div>
-      )}
+      {aba === "pedidos" && <PedidosSection pedidos={pedidos} demo={demo} />}
       {aba === "pagamentos" && <PagamentosSection dados={pagamentos} demo={demo} />}
       {aba === "catalogo" && <CatalogoSection produtos={produtos} categorias={categorias} demo={demo} />}
       {aba === "cupons" && <CuponsSection cupons={cupons} demo={demo} />}

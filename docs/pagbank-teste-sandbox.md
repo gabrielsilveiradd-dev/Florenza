@@ -13,8 +13,8 @@ resultado, porque ele alimenta a homologação ([checklist](pagbank-homologacao.
 2. Tenha uma conta de cliente no site e uma conta de admin no painel.
 3. Pegue os cartões de teste em
    [Ambientes disponíveis](https://developer.pagbank.com.br/docs/ambientes-disponiveis).
-4. Painel → Pagamentos → Status da integração: "Testar token" e "Testar criação de
-   checkout" precisam dar OK.
+4. Os testes `token` e `checkout` precisam responder `ok: true`, pelo console do navegador
+   (`DEPLOY.md`, passo 5, item 7).
 
 Consulta útil no SQL Editor, depois de cada teste:
 
@@ -37,7 +37,7 @@ select e.created_at, e.origem, e.tipo, e.assinatura, e.recurso_id, e.processado_
 
 **Confirma, anote:**
 
-- [ ] Em Pagamentos → Exportar logs (JSON), a resposta de `GET /checkouts/{id}` traz o campo
+- [ ] Em `/api/admin/pagbank/logs?formato=json&dias=30`, logado como admin, a resposta de `GET /checkouts/{id}` traz o campo
       `orders`. **Se não trouxer, pare aqui:** os testes 3 e 4 não vão funcionar, e o pedido
       não expira. Veja a pergunta 2 da homologação.
 - [ ] A coluna `assinatura` do evento diz `ecdsa` ou `token`. Se disser

@@ -4,7 +4,7 @@ import {
 } from "@/lib/pagamento/pagbank";
 
 /**
- * OS TESTES DA PÁGINA "STATUS DA INTEGRAÇÃO". Cada um responde em português o que o
+ * OS TESTES DA HOMOLOGAÇÃO (DEPLOY.md, PASSO 5). Cada um responde em português o que o
  * código HTTP quer dizer para quem está tentando pôr a loja no ar.
  */
 
