@@ -395,9 +395,9 @@ insert into public.produtos
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
    alt, aros, estoque, ativo)
 values
-  ('002', 'alianca-petala', 'aliancas-ouro', 'Aliança Pétala',
+  ('002', 'alianca-petala', 'aliancas-ouro', 'Linha Tradicional Meia Cana 2.5mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 2.5, 'ouro',
-   'Par fino e abaulado, polido por inteiro: o desenho tradicional na medida mais delicada. Peso aproximado do par: 1,7 g.', 189000, '/produtos/ouro/002.webp', '/produtos/ouro/002-sm.webp',
+   'Meia cana polida por inteiro: o desenho da linha tradicional na medida mais delicada. Peso aproximado do par: 1,7 g.', 189000, '/produtos/ouro/002.webp', '/produtos/ouro/002-sm.webp',
    '/produtos/ouro/002-mao.webp', '/produtos/ouro/002-mao-sm.webp', NULL,
    2, 10, true)
 on conflict (sku) do update set
@@ -414,9 +414,9 @@ insert into public.produtos
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
    alt, aros, estoque, ativo)
 values
-  ('003', 'alianca-essence-ouro', 'aliancas-ouro', 'Aliança Essence',
+  ('003', 'alianca-essence-ouro', 'aliancas-ouro', 'Linha Tradicional Meia Cana 3mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 3, 'ouro',
-   'O clássico abaulado e polido, em três milímetros: linhas puras e atemporais. Peso aproximado do par: 2,3 g.', 249000, '/produtos/ouro/003.webp', '/produtos/ouro/003-sm.webp',
+   'Meia cana polida em três milímetros: o clássico da linha tradicional, simples e atemporal. Peso aproximado do par: 2,3 g.', 249000, '/produtos/ouro/003.webp', '/produtos/ouro/003-sm.webp',
    '/produtos/ouro/003-mao.webp', '/produtos/ouro/003-mao-sm.webp', NULL,
    2, 10, true)
 on conflict (sku) do update set
@@ -433,9 +433,9 @@ insert into public.produtos
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
    alt, aros, estoque, ativo)
 values
-  ('005', 'alianca-nobre', 'aliancas-ouro', 'Aliança Nobre',
+  ('005', 'alianca-nobre', 'aliancas-ouro', 'Linha Tradicional Meia Cana 4mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 4, 'ouro',
-   'Quatro milímetros de ouro abaulado e polido, com mais presença no dedo. Peso aproximado do par: 3,7 g.', 396900, '/produtos/ouro/005.webp', '/produtos/ouro/005-sm.webp',
+   'Meia cana polida em quatro milímetros: a linha tradicional com mais presença no dedo. Peso aproximado do par: 3,7 g.', 396900, '/produtos/ouro/005.webp', '/produtos/ouro/005-sm.webp',
    '/produtos/ouro/005-mao.webp', '/produtos/ouro/005-mao-sm.webp', NULL,
    2, 10, true)
 on conflict (sku) do update set
@@ -471,9 +471,9 @@ insert into public.produtos
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
    alt, aros, estoque, ativo)
 values
-  ('033', 'alianca-raio', 'aliancas-ouro', 'Aliança Raio',
+  ('033', 'alianca-raio', 'aliancas-ouro', 'Linha Trabalhada 4mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 4, 'ouro',
-   'Riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.', 319000, '/produtos/ouro/033.webp', '/produtos/ouro/033-sm.webp',
+   'Peça da linha trabalhada: riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.', 319000, '/produtos/ouro/033.webp', '/produtos/ouro/033-sm.webp',
    '/produtos/ouro/033-mao.webp', '/produtos/ouro/033-mao-sm.webp', NULL,
    2, 10, true)
 on conflict (sku) do update set
@@ -834,7 +834,7 @@ insert into public.produtos
 values
   ('9013', 'alianca-serena', 'aliancas-prata', 'Aliança Serena',
    'Prata 950', NULL, NULL, NULL, 5, 'prata',
-   'Aro abaulado e polido, sem relevo — o desenho mais simples da linha.', 11500, '/produtos/prata/9013.webp', '/produtos/prata/9013-sm.webp',
+   'Aro polido, sem relevo — o desenho mais simples da linha.', 11500, '/produtos/prata/9013.webp', '/produtos/prata/9013-sm.webp',
    NULL, NULL, NULL,
    2, 10, true)
 on conflict (sku) do update set

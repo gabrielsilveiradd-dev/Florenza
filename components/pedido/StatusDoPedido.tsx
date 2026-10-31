@@ -35,7 +35,7 @@ function dicaDaEtapa(chave: string, pagamentoOnline: boolean): string {
     case "pago":
       return "Recebemos o valor e a sua peça entra em preparo.";
     case "em_producao":
-      return "A peça está sendo preparada à mão para o envio.";
+      return "A peça está sendo preparada em maquinário para o envio.";
     case "enviado":
       return "Despachada. O código de rastreio aparece aqui.";
     default:

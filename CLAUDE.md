@@ -100,6 +100,7 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 - `vercel.json` fixa `framework: "nextjs"` e **não é enfeite**: com o preset em "Other" a Vercel descarta o `.next`, publica `public/` como estático e **toda página dá 404**.
 - `lib/supabase/config.ts` **estoura** se `VERCEL_ENV === "production"` sem as chaves — senão a loja real serviria o catálogo do repositório em silêncio, com build verde.
 - Sem chaves em `.env.local` o site abre em modo demonstração. Não é plano B de produção.
+- `/api/manter-ativo`: o Vercel Cron chama uma vez por dia, com `CRON_SECRET`, para o Supabase gratuito não pausar. Hobby aceita só cron diário, e criar vários para burlar isso fere as regras da Vercel.
 
 ## Gráficos e animações
 
@@ -121,4 +122,5 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 - Sem os tipos gerados do banco, há casts em `lib/admin/listas.ts` e `lib/conta-servidor.ts`.
 - `supabase/aplicar-tudo.sql` está desatualizado (não tem as migrations de 14/09/2026) — use `db push`.
 - Projeto em us-east-2, não São Paulo (~120 ms a mais por consulta).
+- **Vercel Hobby é só para uso não comercial:** loja que vende ou cobra exige o plano Pro.
 - Pense duas vezes antes de commitar mídia.

@@ -49,7 +49,7 @@ function etapas(pagamentoOnline: boolean) {
     {
       numero: "04",
       titulo: "Acompanhe e receba",
-      texto: "A peça é preparada à mão, e cada etapa aparece na sua conta.",
+      texto: "A peça é preparada em maquinário, e cada etapa aparece na sua conta.",
     },
   ];
 }
