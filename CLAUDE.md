@@ -110,7 +110,7 @@ Toda migration nova: cabeçalho em pt-BR com **o porquê**; idempotente; `enable
 
 ## Pendências
 
-- "Entrar com Google" exige habilitar o provedor em Authentication → Providers.
+- "Entrar com Google" **ligado em 03/11/2026** (Authentication → Providers → Google, com o cliente OAuth do Google Cloud). Falta só confirmar em produção, já que o fluxo PKCE só volta no mesmo navegador que iniciou.
 - PagBank: código pronto mas **nunca testado contra a API real**, falta a conta — token, segredos no Vault e roteiro de `docs/pagbank-homologacao.md` (DEPLOY.md, passo 5). A conferência sem webhook depende do campo `orders` de `GET /checkouts/{id}`, ainda suposição.
 - O faturamento do painel (`vw_pedidos_confirmados`) conta pedido estornado, a menos que seja cancelado.
 - **Frete fictício no ar** (desde 16/09/2026) até escolher transportadora: o cliente paga os valores do bloco 10 de `antes-de-abrir.sql`.
