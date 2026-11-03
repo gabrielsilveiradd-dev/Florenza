@@ -350,12 +350,16 @@ desmarcada.
 Nenhum destes bloqueia o lançamento, mas é melhor você saber antes de mostrar
 para alguém:
 
-- **Entrar com Google.** O botão está na tela `/entrar`, mas o provedor ainda
-  não foi ligado. Para ativar: Supabase → **Authentication → Providers →
-  Google**, com o Client ID e o Secret de um projeto no Google Cloud, e a URL de
-  retorno `https://jydcgsxzinrguounnmpi.supabase.co/auth/v1/callback`. Enquanto
-  não estiver ligado, o botão avisa e manda usar e-mail e senha — ninguém fica
-  travado.
+- **Entrar com Google — ligado em 03/11/2026.** O provedor foi ativado em
+  Supabase → **Authentication → Providers → Google**, com o Client ID e o Secret
+  de um cliente OAuth no Google Cloud, e a URL de retorno
+  `https://jydcgsxzinrguounnmpi.supabase.co/auth/v1/callback` nas "URIs de
+  redirecionamento autorizados" do Google. Nas "Origens JavaScript" do Google vão
+  os endereços do site (`https://florenza-virid.vercel.app` e, para testar,
+  `http://localhost:3000`), **sem barra no fim**. Testado localmente; falta
+  confirmar em produção. O fluxo é PKCE: só volta logado no mesmo navegador que
+  iniciou — diferente dos links de e-mail, que usam `token_hash` e abrem em
+  qualquer lugar.
 - **Pagamento online, enquanto o PagBank não for ligado.** O código está
   pronto; sem as credenciais ou sem `PAGBANK_ENABLED=true`, o pedido nasce em
   "aguardando pagamento" e o combinado é por WhatsApp. Passo 5 lá em cima.
