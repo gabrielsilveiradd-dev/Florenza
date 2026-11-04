@@ -203,7 +203,7 @@ Outros detalhes do e-mail:
   | Template | `href` do botão | No painel |
   |---|---|---|
   | Reset password | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery` | trocado em 17/09/2026 |
-  | Confirm sign up | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email` | **falta**: ainda usa `{{ .ConfirmationURL }}` |
+  | Confirm sign up | `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email` | trocado em 03/11/2026 (botão e link "use este link") |
 
   `{{ .RedirectTo }}` é o `/auth/callback?next=…` que o site mandou, então o link
   volta para o endereço onde a pessoa estava (site no ar ou localhost). Por isso
@@ -223,6 +223,56 @@ O template "Reset password" já fala da tela de nova senha (`/conta/nova-senha`,
 publicada em 16/09/2026): assunto "Crie uma nova senha na Florenza", botão "Criar
 nova senha". Desde 17/09/2026, avisa só que o link funciona uma vez e que vale o
 e-mail mais recente. O aviso de "mesmo navegador" saiu junto com a troca do `href`.
+
+### 8. Quando o domínio próprio ficar pronto (Cloudflare + Resend)
+
+Mudança de rumo decidida em 03/11/2026: com domínio próprio na Cloudflare, os
+e-mails de conta deixam o SMTP do Gmail (passo 7) e passam a sair pelo **Resend**
+— mesmo serviço dos avisos de pedido, sem o risco de ban do Gmail e sem senha de
+app que morre. Troque `SEUDOMINIO` pelo domínio de verdade em tudo abaixo.
+
+**Pré-requisito:** o domínio tem de estar **Verified** no Resend. Enquanto estiver
+"Pending", nada aqui funciona de verdade, porque o Resend sem domínio verificado só
+entrega para o e-mail da própria conta. Faça esta ordem:
+
+1. **Verificar o domínio no Resend.** Resend → **Domains → Add Domain** →
+   `SEUDOMINIO`. Ele gera os registros (MX, um TXT de SPF e três CNAME de DKIM).
+   Na Cloudflare, adicione-os **com a nuvem cinza (proxy OFF / "DNS only")** —
+   proxy ligado quebra a verificação. Espere o Resend mostrar **Verified**.
+2. **SMTP do Supabase → Resend.** Supabase → **Authentication → Emails → SMTP
+   Settings**:
+   - Host `smtp.resend.com`, porta `465`.
+   - **Username** `resend`, **Password** = a `RESEND_API_KEY` (Resend → API Keys).
+   - **Sender email** `nao-responda@SEUDOMINIO`, **Sender name** "Florenza Joalheria".
+   - Salve. Isto **destrava o cadastro por e-mail/senha**, que até aqui dá erro 500
+     apontando para o Gmail morto. Em **Rate Limits**, confira o teto de e-mails/hora.
+3. **`NEXT_PUBLIC_SITE_URL` na Vercel.** Settings → Environment Variables (Production):
+   troque o valor para `https://SEUDOMINIO`, sem barra no fim. **Redeploy** — a home,
+   o rodapé e os termos leem essa URL no build.
+4. **URL Configuration do Supabase.** Authentication → **URL Configuration**:
+   - **Site URL** = `https://SEUDOMINIO` (sem barra no fim).
+   - **Redirect URLs**: adicione `https://SEUDOMINIO/**`. Mantenha o
+     `https://florenza-virid.vercel.app/**` e o `http://localhost:3000/**` — não
+     custa, e o localhost é o que deixa testar aqui.
+5. **Origens do Google.** Google Cloud → APIs e Serviços → Credenciais → o cliente
+   OAuth → **Origens JavaScript autorizadas**: adicione `https://SEUDOMINIO`
+   (sem barra). A URI de redirecionamento **não muda** — continua a do Supabase.
+6. **Avisos de pedido ao cliente.** Na Vercel, troque `AVISO_EMAIL_REMETENTE` de
+   `Florenza <onboarding@resend.dev>` para `Florenza <pedidos@SEUDOMINIO>`, e
+   **redeploy**. Aí o e-mail de confirmação de pedido passa a chegar ao **cliente**,
+   não só à loja (antes o remetente de teste só entregava na conta do Resend).
+7. **E-mail de contato (opcional).** Se o domínio tiver caixa, padronize
+   `LOJA.email` em `lib/loja.ts` para `contato@SEUDOMINIO`. Para só **receber** sem
+   manter caixa, a Cloudflare tem **Email Routing** grátis, que encaminha
+   `contato@SEUDOMINIO` para o seu e-mail pessoal (enviar continua pelo Resend).
+8. **Testar, nesta ordem, no domínio novo:**
+   - Cadastro com um e-mail qualquer → o e-mail de confirmação chega e o link abre
+     o site (não localhost). Se não chegar, o motivo está em **Logs → Auth**, linha
+     `/signup`.
+   - "Esqueci minha senha" → o link leva a `/conta/nova-senha` e a troca funciona.
+   - "Entrar com Google" **em produção** → volta logado.
+
+Feito isso, o SMTP do Gmail do passo 7 pode ser abandonado — fica como plano B.
 
 ---
 
