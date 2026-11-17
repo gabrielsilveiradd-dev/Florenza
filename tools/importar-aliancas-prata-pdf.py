@@ -48,8 +48,8 @@ PAGINAS = {
     "9002": (19, 0, 20),  # 8mm, R$ 690
     "9018": (21, 0, 22),  # trio com solitário, R$ 490
     "9001": (23, 0, 24),  # 4mm friso dourado e coração, R$ 279
-    # Mesmo desenho da foto antiga da 9005 (diamantada, coração vazado). O PDF
-    # de preços marca esse desenho como R$ 299; a ficha da 9005 diz R$ 399.
+    # Mesmo desenho da foto antiga da 9005 (diamantada, coração vazado).
+    # Preço do par confirmado pela loja em 17/11/2026: R$ 399.
     "9005": (25, 0, 26),  # 4mm diamantada, friso dourado
     "9007": (27, 0, 28),  # 6mm, R$ 369
     "9006": (29, 0, 30),  # 6mm friso dourado, R$ 399
