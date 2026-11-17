@@ -29,7 +29,7 @@ indicado em [Solicitar homologação](https://developer.pagbank.com.br/docs/soli
 - [ ] Logs de produção, se a primeira chamada já tiver sido tentada:
       `...&ambiente=production`. Um 403 nesse log é a evidência para a pergunta 1.
 - [ ] Os dados da conta: e-mail da conta vendedora, razão social e CNPJ.
-- [ ] Endereço do webhook: `https://florenza-virid.vercel.app/api/pagbank/webhook`.
+- [ ] Endereço do webhook: `https://florenza.blog/api/pagbank/webhook`.
 
 **Os logs vão mascarados** (CPF, e-mail, telefone, nome e endereço) e sem token ou dados
 de cartão. Se o PagBank exigir os valores completos, veja a pergunta 6 antes de enviar

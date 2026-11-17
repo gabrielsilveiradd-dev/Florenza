@@ -107,7 +107,7 @@ sobre banco velho quebra a página de pedidos.
    ```sql
    select vault.create_secret('SEGREDO-DOS-PAGAMENTOS', 'florenza_pagamentos');
    select vault.create_secret('SEGREDO-DO-AGENDAMENTO', 'florenza_job_pagbank');
-   select vault.create_secret('https://florenza-virid.vercel.app/api/pagbank/reconciliar', 'florenza_job_url');
+   select vault.create_secret('https://florenza.blog/api/pagbank/reconciliar', 'florenza_job_url');
    ```
 5. Na Vercel → **Settings → Environment Variables**, em Production:
 
@@ -120,7 +120,7 @@ sobre banco velho quebra a página de pedidos.
    | `PAGBANK_URL_SECRET` | um terceiro segredo aleatório, de 32 caracteres ou mais |
    | `PAGBANK_JOB_SECRET` | o `florenza_job_pagbank` do item 4 |
    | `PAGAMENTO_SEGREDO_BANCO` | o `florenza_pagamentos` do item 4 |
-   | `NEXT_PUBLIC_SITE_URL` | `https://florenza-virid.vercel.app`, sem barra no fim |
+   | `NEXT_PUBLIC_SITE_URL` | `https://florenza.blog`, sem barra no fim |
 
    Nenhuma delas leva `NEXT_PUBLIC_` além da última: com o prefixo, o valor iria parar no
    navegador. O webhook de pagamento não se configura em painel, porque o site informa o
