@@ -193,7 +193,8 @@ const formatura = (
 });
 
 /**
- * As 14 alianças de prata que entraram pela pasta `alianças de prata/`.
+ * As alianças de prata 950: 14 vieram da pasta `alianças de prata/` (agosto)
+ * e 5 do catálogo "Site" de novembro/2026.
  *
  * Mesma ideia do `formatura()` acima: a ficha é sempre a mesma forma, então o
  * que varia entra por parâmetro. Aqui as colunas de pedra são nulas e quem
@@ -207,9 +208,25 @@ const formatura = (
  * `aliancas-prata` tem `filtroCampo: null`, então nada é filtrado por ele
  * hoje; a coluna existe para o dia em que for.
  */
+/**
+ * Peças com foto na mão (`<sku>-mao.webp`), vindas do catálogo "Site" de
+ * novembro/2026 por tools/importar-aliancas-prata-pdf.py. As outras
+ * (9003, 9004, 9008, 9010) não estavam nele e seguem só com a foto antiga.
+ */
+const PRATA_COM_FOTO_NA_MAO = new Set([
+  "9001", "9002", "9005", "9006", "9007", "9009", "9011", "9012", "9013",
+  "9014", "9015", "9016", "9017", "9018", "9019",
+]);
+
 const fotoPrata = (sku: string) => ({
   imagemUrl: `/produtos/prata/${sku}.webp`,
   imagemSmUrl: `/produtos/prata/${sku}-sm.webp`,
+  ...(PRATA_COM_FOTO_NA_MAO.has(sku)
+    ? {
+        imagemUsoUrl: `/produtos/prata/${sku}-mao.webp`,
+        imagemUsoSmUrl: `/produtos/prata/${sku}-mao-sm.webp`,
+      }
+    : {}),
 });
 
 const prata = (
@@ -419,34 +436,60 @@ export const produtos: Produto[] = [
   // Descrições escritas a partir da foto, uma a uma. O que o nome do arquivo
   // não dizia (o desenho da peça) foi olhado; o que ele dizia (código, teor,
   // largura, preço) foi lido pelo importador e não redigitado aqui.
-  prata("9001", "alianca-lumen", "Aliança Lumen", 4,
+  //
+  // NOMES (17/11/2026, a pedido da loja): seguem as etiquetas do PDF de preços
+  // "Alianças prata 950". Por isso há nomes repetidos com preços diferentes —
+  // a etiqueta não distingue o desenho, e quem diferencia é a foto e a
+  // descrição. Os slugs antigos ficam: trocar quebraria link já compartilhado.
+  prata("9001", "alianca-lumen", "Aliança Prata 950 4mm Friso Banho Dourado", 4,
     "Friso em banho dourado sobre aro polido, com coração vazado em uma das peças.", 27900),
-  prata("9002", "alianca-vertice", "Aliança Vértice", 8,
-    "Oito milímetros de prata polida, riscada por dois frisos paralelos.", 69000),
-  prata("9003", "alianca-enlace", "Aliança Enlace", 5,
+  prata("9002", "alianca-vertice", "Aliança Prata 950 8mm", 8,
+    "Oito milímetros de prata polida, riscada por frisos paralelos.", 69000),
+  prata("9003", "alianca-enlace", "Aliança Prata 950 5mm", 5,
     "Bordas diamantadas e centro polido, com coração vazado em uma das peças.", 39000),
-  prata("9004", "alianca-solar", "Aliança Solar", 4,
+  prata("9004", "alianca-solar", "Aliança Prata 950 4mm Friso Banho Dourado", 4,
     "Aro diamantado cortado por friso dourado, com coração em banho dourado.", 29900),
-  prata("9005", "alianca-aurora", "Aliança Aurora", 4,
+  prata("9005", "alianca-aurora", "Aliança Prata 950 4mm Friso Banho Dourado", 4,
     "Textura diamantada intensa, friso dourado ao centro e coração vazado.", 39900),
-  prata("9006", "alianca-meridiano", "Aliança Meridiano", 6,
+  prata("9006", "alianca-meridiano", "Aliança Prata 950 6mm Friso Banho Dourado", 6,
     "Seis milímetros polidos, com friso em banho dourado percorrendo o centro.", 39900),
-  prata("9007", "alianca-duo", "Aliança Duo", 6,
+  prata("9007", "alianca-duo", "Aliança Prata 950 6mm", 6,
     "Par em contraste: um aro diamantado, outro polido, ambos com borda fosca.", 36900),
-  prata("9008", "alianca-chanfro", "Aliança Chanfro", 3,
+  prata("9008", "alianca-chanfro", "Aliança Chanfrada Prata 950 3mm", 3,
     "Aro chanfrado que alterna prata polida e banho rosé.", 15900),
-  prata("9009", "alianca-cintila", "Aliança Cintila", 3,
-    "Par fino inteiramente diamantado, com um friso polido ao centro.", 22000),
-  prata("9010", "alianca-rose", "Aliança Rosé", 3,
+  prata("9009", "alianca-cintila", "Aliança Prata 950 3mm", 3,
+    "Par fino inteiramente diamantado, com frisos polidos.", 22000),
+  prata("9010", "alianca-rose", "Aliança Prata 950 3mm", 3,
     "Chanfro bicolor: prata polida de um lado, banho rosé do outro.", 14900),
-  prata("9011", "alianca-nevoa", "Aliança Névoa", 3,
-    "Superfície diamantada com um friso polido correndo ao centro.", 15900),
-  prata("9012", "alianca-sol-e-lua", "Aliança Sol e Lua", 4,
+  prata("9011", "alianca-nevoa", "Aliança Prata 950 3mm", 3,
+    "Superfície diamantada com borda polida.", 15900),
+  prata("9012", "alianca-sol-e-lua", "Aliança Prata 950 4mm", 4,
     "Par com sol e lua gravados, um símbolo em cada aliança.", 39000),
-  prata("9013", "alianca-serena", "Aliança Serena", 5,
-    "Aro polido, sem relevo — o desenho mais simples da linha.", 11500),
-  prata("9014", "alianca-martelada", "Aliança Martelada", 4,
-    "Superfície martelada, com brilho irregular que muda conforme a luz.", 14900),
+  // Era anunciada com 5mm (nome do arquivo de agosto); a etiqueta e a foto de
+  // novembro mostram 2mm.
+  prata("9013", "alianca-serena", "Aliança Prata 950 2mm", 2,
+    "Aro fino e polido, sem relevo — o desenho mais simples da linha.", 11500),
+  prata("9014", "alianca-martelada", "Aliança Prata 950 4mm", 4,
+    "Aro reto e polido, de bordas vivas.", 14900),
+
+  // ---------- Prata 950, catálogo de novembro/2026 ----------
+  // Fotos do PDF "Site"; nome, largura e preço da etiqueta do PDF de preços.
+  prata("9015", "alianca-prata-950-3mm-riscadinha", "Aliança Prata 950 3mm Riscadinha", 3,
+    "Superfície riscada em linhas finas, com bordas polidas.", 16900),
+  prata("9016", "alianca-prata-950-3mm-diamantada", "Aliança Prata 950 3mm", 3,
+    "Par em textura diamantada, com bordas polidas.", 15900),
+  prata("9017", "alianca-prata-950-3mm-frisos", "Aliança Prata 950 3mm", 3,
+    "Textura riscada cortada por dois frisos polidos.", 24900),
+  // O preço é do TRIO (duas alianças e o solitário). Fica fora da vitrine
+  // (`ativo: false`) até decidir a venda: com `aros: 2`, o site ofereceria
+  // "uma unidade" pela metade do trio, R$ 245, o que não corresponde a nada.
+  {
+    ...prata("9018", "alianca-prata-950-4mm-com-solitario", "Aliança Prata 950 4mm + Anel Solitário", 4,
+      "Trio: o par de alianças com friso central e um anel solitário com zircônia.", 49000),
+    ativo: false,
+  },
+  prata("9019", "alianca-prata-950-7mm-gravacao-a-laser", "Aliança Prata 950 7mm com Gravação a Laser", 7,
+    "Sete milímetros com os nomes gravados a laser na lateral. Escreva os nomes em Observações, no fechamento do pedido.", 129000),
 ];
 
 /* ---------- Por que preço em centavos ----------
