@@ -9,7 +9,7 @@ import {
   buscarCategoria, buscarProduto, formatarPreco, linhaDoMaterial, listarTodosOsProdutos,
 } from "@/lib/catalogo";
 import { linkWhatsApp } from "@/lib/loja";
-import { precoDaUnidade } from "@/lib/aros";
+import { precoDaUnidade, rotuloDoConjunto, vendeUnidade } from "@/lib/aros";
 import { pagamentoOnlineAtivo } from "@/lib/pagamento/config";
 
 import "../produto.css";
@@ -83,7 +83,9 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
     ...(produto.larguraMm != null
       ? ([["Largura", `${produto.larguraMm} mm`]] as Array<[string, string]>)
       : []),
-    ...(produto.aros === 2 ? ([["Venda", "Par ou unidade"]] as Array<[string, string]>) : []),
+    ...(produto.aros === 2
+      ? ([["Venda", vendeUnidade(produto) ? "Par ou unidade" : "Só o trio completo"]] as Array<[string, string]>)
+      : []),
   ];
 
   return (
@@ -127,9 +129,9 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
             <p className="pdp__material">{linhaDoMaterial(produto)}</p>
             <p className="pdp__preco">
               {formatarPreco(produto.precoCentavos)}
-              {produto.aros === 2 && <span className="pdp__preco-par"> o par</span>}
+              {rotuloDoConjunto(produto) && <span className="pdp__preco-par"> o {rotuloDoConjunto(produto)}</span>}
             </p>
-            {produto.aros === 2 && (
+            {vendeUnidade(produto) && (
               <p className="pdp__preco-unidade">
                 ou {formatarPreco(precoDaUnidade(produto.precoCentavos))} cada aliança
               </p>
@@ -154,11 +156,14 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                   nome: produto.nome,
                   precoCentavos: produto.precoCentavos,
                   imagemUrl: produto.imagemUrl,
-                  estoque: produto.estoque,
+                  // O trio baixa 2 do estoque, como o par, e não tem unidade:
+                  // com uma aliança só, para ele é sem estoque.
+                  estoque: rotuloDoConjunto(produto) === "trio" && produto.estoque < 2 ? 0 : produto.estoque,
                   aros: produto.aros,
                 }}
+                conjunto={produto.conjunto}
               />
-              {produto.estoque <= 0 ? (
+              {produto.estoque <= 0 || (rotuloDoConjunto(produto) === "trio" && produto.estoque < 2) ? (
                 <p className="pdp__estoque">
                   Esta peça está sem unidades no momento.{" "}
                   {whatsapp ? (
@@ -172,7 +177,9 @@ export default async function PaginaProduto({ params }: { params: Promise<{ slug
                 </p>
               ) : produto.estoque <= 2 ? (
                 <p className="pdp__estoque">
-                  {produto.aros === 2
+                  {rotuloDoConjunto(produto) === "trio"
+                    ? "Último trio disponível."
+                    : produto.aros === 2
                     ? produto.estoque === 1
                       ? "Última aliança disponível: só dá para comprar a unidade."
                       : "Restam 2 alianças disponíveis."

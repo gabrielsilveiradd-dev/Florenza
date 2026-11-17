@@ -28,6 +28,24 @@ export function medidasDoAro(aro: number): { circunferencia: number; diametro: s
 }
 
 /**
+ * O que o preço de uma peça de dois aros compra (`produtos.conjunto`): o par,
+ * que também se vende por unidade, ou o trio (par + solitário), que só se vende
+ * inteiro. Quem recusa a unidade do trio é o banco (trigger em `pedido_itens`);
+ * aqui é só para a tela não oferecer.
+ */
+export type Conjunto = "par" | "trio";
+
+/** A peça oferece "uma aliança" pela metade? Só peça de dois aros vendida em par. */
+export function vendeUnidade(produto: { aros: number; conjunto?: Conjunto | null }): boolean {
+  return produto.aros === 2 && (produto.conjunto ?? "par") === "par";
+}
+
+/** "par", "trio" — o que vai ao lado do preço — ou `null` para peça de um aro. */
+export function rotuloDoConjunto(produto: { aros: number; conjunto?: Conjunto | null }): Conjunto | null {
+  return produto.aros === 2 ? produto.conjunto ?? "par" : null;
+}
+
+/**
  * Preço de UMA aliança de uma peça vendida em par: metade do preço do par.
  * Centavo ímpar arredonda para cima, para duas unidades nunca saírem mais baratas
  * que o par. É cortesia para a tela: quem cobra é `criar_pedido()`, com a mesma conta.

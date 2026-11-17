@@ -49,7 +49,8 @@ export default function TermosDeCompra() {
         </li>
         <li>
           As alianças são anunciadas pelo valor do par e também podem ser compradas por unidade, pela
-          metade desse valor.
+          metade desse valor. A exceção são as peças anunciadas como trio (par de alianças com anel
+          solitário), vendidas só completas, pelo valor do trio.
         </li>
         <li>Há um limite de 10 unidades por peça em cada pedido.</li>
       </ul>

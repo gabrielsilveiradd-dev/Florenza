@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BotaoComprar } from "@/components/BotaoComprar";
 import { SeletorDeAro } from "@/components/SeletorDeAro";
 import { formatarPreco } from "@/lib/admin/format";
-import { precoDaUnidade } from "@/lib/aros";
+import { precoDaUnidade, vendeUnidade, type Conjunto } from "@/lib/aros";
 import type { ItemCarrinho } from "@/lib/carrinho";
 
 /**
@@ -20,12 +20,17 @@ import type { ItemCarrinho } from "@/lib/carrinho";
  * Aliança tem a escolha entre o par, com dois seletores, um para cada pessoa, e
  * uma aliança só, com um seletor e metade do preço. O preço aqui é só para a
  * tela: quem cobra é `criar_pedido()`.
+ *
+ * O trio (`conjunto = "trio"`) tem os dois seletores e nenhuma escolha: só se
+ * vende inteiro, e o banco recusa a unidade dele.
  */
 export function ComprarComMedida({
   produto,
+  conjunto,
   className,
 }: {
   produto: Omit<ItemCarrinho, "quantidade" | "tamanho" | "tamanhoPar">;
+  conjunto?: Conjunto;
   className: string;
 }) {
   const [aro, setAro] = useState<number | null>(null);
@@ -33,10 +38,11 @@ export function ComprarComMedida({
   const [avisar, setAvisar] = useState(false);
   // O estoque conta alianças: com uma só, não há par para vender.
   const semPar = produto.estoque < 2;
-  const [unidade, setUnidade] = useState(semPar);
+  const vendidaEmPar = vendeUnidade({ aros: produto.aros, conjunto });
+  const [unidade, setUnidade] = useState(semPar && vendidaEmPar);
 
-  const vendidaEmPar = produto.aros === 2;
-  const par = vendidaEmPar && !unidade;
+  // Dois seletores: o par escolhido, ou o trio, que não tem outra opção.
+  const par = produto.aros === 2 && !(vendidaEmPar && unidade);
   const falta = produto.aros >= 1 && (aro === null || (par && aroPar === null));
 
   return (

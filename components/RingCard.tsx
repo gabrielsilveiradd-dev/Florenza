@@ -6,6 +6,7 @@ import {
   type Categoria,
   type Produto,
 } from "@/lib/catalogo";
+import { rotuloDoConjunto } from "@/lib/aros";
 
 /**
  * O card da vitrine. Reproduz elemento por elemento os dois formatos que
@@ -118,13 +119,15 @@ export function RingCard({
         <div className="ringCard__foot">
           <span className="ringCard__price">
             {formatarPreco(produto.precoCentavos)}
-            {produto.aros === 2 && <span className="ringCard__par"> o par</span>}
+            {rotuloDoConjunto(produto) && <span className="ringCard__par"> o {rotuloDoConjunto(produto)}</span>}
             {/* Avisa antes de a pessoa se apegar à peça. Só nas últimas
                 unidades: em estoque cheio isso viraria pressão de venda, que
                 não é o tom da casa. */}
             {produto.estoque > 0 && produto.estoque <= 2 && (
               <span className="ringCard__restam">
-                {produto.aros === 2
+                {rotuloDoConjunto(produto) === "trio"
+                  ? produto.estoque === 2 ? "último trio" : null
+                  : produto.aros === 2
                   ? produto.estoque === 1 ? "última aliança" : "restam 2 alianças"
                   : produto.estoque === 1 ? "última peça" : "restam 2"}
               </span>

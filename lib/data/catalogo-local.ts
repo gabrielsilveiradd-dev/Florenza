@@ -49,6 +49,13 @@ export type Produto = {
    * de prata há avulsas e pares.
    */
   aros: number;
+  /**
+   * Em peça de dois aros, o que o preço compra: o par (que também se vende por
+   * unidade) ou o trio (par + solitário, só inteiro). Ausente = par. Ver
+   * `vendeUnidade` em lib/aros.ts. Literal aqui, e não o tipo de lá, porque os
+   * scripts de tools/ importam este arquivo direto no Node.
+   */
+  conjunto?: "par" | "trio";
   estoque: number;
   ativo: boolean;
 };
@@ -372,15 +379,15 @@ export const produtos: Produto[] = [
     "Meia cana polida em três milímetros: o clássico da linha tradicional, simples e atemporal. Peso aproximado do par: 2,3 g.", PRECO_OURO["003"]),
   ouro("005", "alianca-nobre", "Linha Tradicional Meia Cana 4mm", 4,
     "Meia cana polida em quatro milímetros: a linha tradicional com mais presença no dedo. Peso aproximado do par: 3,7 g.", PRECO_OURO["005"]),
-  ouro("033E", "alianca-brisa", "Aliança Brisa", 3,
+  ouro("033E", "alianca-brisa", "Linha Trabalhada 3mm", 3,
     "Riscas diamantadas em diagonal entre bordas polidas, na versão de três milímetros. Peso aproximado do par: 2,0 g.", PRECO_OURO["033E"]),
   ouro("033", "alianca-raio", "Linha Trabalhada 4mm", 4,
     "Peça da linha trabalhada: riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.", PRECO_OURO["033"]),
-  ouro("034", "alianca-onda", "Aliança Onda", 5,
+  ouro("034", "alianca-onda", "Linha Trabalhada 5mm", 5,
     "Perfil côncavo, diamantado em diagonal, com bordas polidas que emolduram o brilho. Peso aproximado do par: 3,4 g.", PRECO_OURO["034"]),
-  ouro("ESC3", "alianca-linear", "Aliança Linear", 3,
+  ouro("ESC3", "alianca-linear", "Linha Reta 3mm", 3,
     "Aro reto e polido, de perfil escravo: o ouro sem curva nem relevo. Peso aproximado do par: 2 g.", PRECO_OURO.ESC3),
-  ouro("6BVL", "alianca-esplendor", "Aliança Esplendor", 6,
+  ouro("6BVL", "alianca-esplendor", "Linha Trabalhada 6mm 40 pedras zircônia", 6,
     "Par com frisos paralelos; a aliança feminina traz duas fileiras de zircônias, 40 pedras ao todo. Peso aproximado do par: 7,0 g.", PRECO_OURO["6BVL"], true),
   // Página 17 do catálogo veio sem legenda: código, largura e peso a confirmar.
   ouro("X", "alianca-celeste", "Aliança Celeste", null,
@@ -480,13 +487,13 @@ export const produtos: Produto[] = [
     "Par em textura diamantada, com bordas polidas.", 15900),
   prata("9017", "alianca-prata-950-3mm-frisos", "Aliança Prata 950 3mm", 3,
     "Textura riscada cortada por dois frisos polidos.", 24900),
-  // O preço é do TRIO (duas alianças e o solitário). Fica fora da vitrine
-  // (`ativo: false`) até decidir a venda: com `aros: 2`, o site ofereceria
-  // "uma unidade" pela metade do trio, R$ 245, o que não corresponde a nada.
+  // O preço é do TRIO (duas alianças e o solitário), e ele só se vende inteiro
+  // (decisão da loja, 17/11/2026: não há preço para a unidade). Dois aros: o
+  // solitário segue a medida do Aro 1.
   {
     ...prata("9018", "alianca-prata-950-4mm-com-solitario", "Aliança Prata 950 4mm + Anel Solitário", 4,
-      "Trio: o par de alianças com friso central e um anel solitário com zircônia.", 49000),
-    ativo: false,
+      "Trio: o par de alianças com friso central e um anel solitário com zircônia. O solitário segue a medida do Aro 1.", 49000),
+    conjunto: "trio",
   },
   prata("9019", "alianca-prata-950-7mm-gravacao-a-laser", "Aliança Prata 950 7mm com Gravação a Laser", 7,
     "Sete milímetros com os nomes gravados a laser na lateral. Escreva os nomes em Observações, no fechamento do pedido.", 129000),

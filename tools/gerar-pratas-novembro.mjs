@@ -37,11 +37,12 @@ const linhas = prata
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
    alt, aros, estoque, ativo)
-values
-  (${txt(p.sku)}, ${txt(p.slug)}, 'aliancas-prata', ${txt(p.nome)}, ${txt(p.metal)}, NULL, NULL, NULL,
-   ${num(p.larguraMm)}, ${txt(p.material)}, ${txt(p.descricao)}, ${p.precoCentavos},
-   ${txt(p.imagemUrl)}, ${txt(p.imagemSmUrl)}, ${txt(p.imagemUsoUrl)}, ${txt(p.imagemUsoSmUrl)},
-   ${txt(p.alt)}, ${p.aros}, ${p.estoque}, ${p.ativo ? "true" : "false"})
+select
+  ${txt(p.sku)}, ${txt(p.slug)}, 'aliancas-prata', ${txt(p.nome)}, ${txt(p.metal)}, NULL, NULL, NULL,
+  ${num(p.larguraMm)}, ${txt(p.material)}, ${txt(p.descricao)}, ${p.precoCentavos},
+  ${txt(p.imagemUrl)}, ${txt(p.imagemSmUrl)}, ${txt(p.imagemUsoUrl)}, ${txt(p.imagemUsoSmUrl)},
+  ${txt(p.alt)}, ${p.aros}, ${p.estoque}, ${p.ativo ? "true" : "false"}
+where exists (select 1 from public.categorias where slug = 'aliancas-prata')
 on conflict (sku) do update set
   -- Peça que já existe: muda nome, descrição, largura e fotos. Preço, estoque,
   -- slug e ativo ficam como estão no banco (podem ter sido ajustados no painel).
@@ -72,6 +73,9 @@ const sql = `-- ================================================================
 -- COMO RODAR: \`npx supabase db push --linked\`, DEPOIS que o deploy com as
 -- fotos terminou (a lição de reativar-prata-apos-deploy.sql) — confira antes
 -- que https://florenza.blog/produtos/prata/9019.webp abre. Seguro rodar de novo.
+--
+-- Banco novo (testes, aplicar-tudo.sql): a categoria vem do seed, depois das
+-- migrations. Sem ela, nada é inserido — por isso o \`where exists\`.
 --
 -- Sem tabela, view ou função nova: nada a acrescentar em RLS ou grants.
 -- ============================================================================

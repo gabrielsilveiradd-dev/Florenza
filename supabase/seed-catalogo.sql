@@ -89,13 +89,13 @@ on conflict (categoria_slug, slug) do update set
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3001', 'anel-citrino-arabesco', 'aneis-formatura', 'Anel Citrino Arabesco',
    'Ouro 18K (750)', 'Citrino', 'amarela', 'Redonda', NULL, NULL,
    'Citrino redondo cercado por um halo de diamantes, sobre um aro largo com arabescos em alto relevo.', 349000, '/produtos/formatura/3001.webp', '/produtos/formatura/3001-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -103,18 +103,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3002', 'anel-rubi-bicolor', 'aneis-formatura', 'Anel Rubi Bicolor',
    'Ouro 18K (750)', 'Rubi', 'vermelha', 'Oval', NULL, NULL,
    'Rubi oval em halo de diamantes, com ombros em ouro branco cravejado que abrem contraste sobre o aro amarelo.', 349000, '/produtos/formatura/3002.webp', '/produtos/formatura/3002-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -122,18 +122,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3003', 'anel-esmeralda-leque', 'aneis-formatura', 'Anel Esmeralda Leque',
    'Ouro 18K (750)', 'Esmeralda', 'verde', 'Redonda', NULL, NULL,
    'Esmeralda redonda sustentada por garras altas, com diamantes abertos em leque sobre um aro largo e polido.', 349000, '/produtos/formatura/3003.webp', '/produtos/formatura/3003-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -141,18 +141,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3004', 'anel-safira-floral', 'aneis-formatura', 'Anel Safira Floral',
    'Ouro 18K (750)', 'Safira azul', 'azul', 'Redonda', NULL, NULL,
    'Safira azul em halo margarida, com folhas gravadas à mão nas laterais do aro.', 349000, '/produtos/formatura/3004.webp', '/produtos/formatura/3004-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -160,18 +160,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3005', 'anel-safira-negra-arabesco', 'aneis-formatura', 'Anel Safira Negra',
    'Ouro 18K (750)', 'Safira negra', 'negra', 'Oval', NULL, NULL,
    'Pedra negra oval em halo de diamantes, entre arabescos vazados nas laterais do aro.', 299000, '/produtos/formatura/3005.webp', '/produtos/formatura/3005-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -179,18 +179,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3010', 'anel-safira-navete', 'aneis-formatura', 'Anel Safira Navete',
    'Ouro 18K (750)', 'Safira azul', 'azul', 'Navete', NULL, NULL,
    'Safira em lapidação navete, contornada por diamantes, sobre aro duplo que se abre em V.', 210000, '/produtos/formatura/3010.webp', '/produtos/formatura/3010-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -198,18 +198,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3184', 'anel-esmeralda-navete', 'aneis-formatura', 'Anel Esmeralda Navete',
    'Ouro 18K (750)', 'Esmeralda', 'verde', 'Navete', NULL, NULL,
    'Esmeralda navete em halo de diamantes, sobre aro duplo em V — o desenho mais leve da linha.', 226000, '/produtos/formatura/3184.webp', '/produtos/formatura/3184-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -217,18 +217,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3185', 'anel-safira-oval', 'aneis-formatura', 'Anel Safira Oval',
    'Ouro 18K (750)', 'Safira azul', 'azul', 'Oval', NULL, NULL,
    'Safira oval em halo cravejado, com galeria vazada que deixa a luz atravessar a pedra.', 242000, '/produtos/formatura/3185.webp', '/produtos/formatura/3185-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -236,18 +236,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3187', 'anel-rubi-classico', 'aneis-formatura', 'Anel Rubi Clássico',
    'Ouro 18K (750)', 'Rubi', 'vermelha', 'Oval', NULL, NULL,
    'Rubi oval em halo de diamantes sobre aro fino e liso: o desenho clássico do anel de formatura.', 242000, '/produtos/formatura/3187.webp', '/produtos/formatura/3187-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -255,18 +255,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3514', 'anel-topazio-princesa', 'aneis-formatura', 'Anel Topázio Princesa',
    'Ouro 18K (750)', 'Topázio azul-londres', 'azul', 'Princesa', NULL, NULL,
    'Topázio azul em lapidação princesa, com halo quadrado de diamantes sobre aro duplo.', 226000, '/produtos/formatura/3514.webp', '/produtos/formatura/3514-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -274,18 +274,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3517', 'anel-rubi-aro-duplo', 'aneis-formatura', 'Anel Rubi Aro Duplo',
    'Ouro 18K (750)', 'Rubi', 'vermelha', 'Redonda', NULL, NULL,
    'Rubi redondo em halo de diamantes, elevado por uma galeria de garras sobre aro duplo.', 242000, '/produtos/formatura/3517.webp', '/produtos/formatura/3517-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -293,18 +293,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3537', 'anel-turmalina-navete', 'aneis-formatura', 'Anel Turmalina Navete',
    'Ouro 18K (750)', 'Turmalina rosa', 'rosa', 'Navete', NULL, NULL,
    'Turmalina rosa navete em halo de diamantes, com ombros cravejados que seguem até a base do aro.', 314000, '/produtos/formatura/3537.webp', '/produtos/formatura/3537-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -312,18 +312,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3538', 'anel-topazio-oval', 'aneis-formatura', 'Anel Topázio Oval',
    'Ouro 18K (750)', 'Topázio azul', 'azul', 'Oval', NULL, NULL,
    'Topázio azul oval em halo de diamantes, sobre aro com frisos gravados nas laterais.', 317900, '/produtos/formatura/3538.webp', '/produtos/formatura/3538-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -331,18 +331,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3539', 'anel-agua-marinha-halo', 'aneis-formatura', 'Anel Água-marinha',
    'Ouro 18K (750)', 'Água-marinha', 'azul', 'Redonda', NULL, NULL,
    'Água-marinha redonda em halo de diamantes, sobre aro com frisos gravados nas laterais.', 317900, '/produtos/formatura/3539.webp', '/produtos/formatura/3539-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -350,18 +350,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('3555', 'anel-turmalina-princesa', 'aneis-formatura', 'Anel Turmalina Princesa',
    'Ouro 18K (750)', 'Turmalina rosa', 'rosa', 'Princesa', NULL, NULL,
    'Turmalina rosa em lapidação princesa, com halo quadrado de diamantes e aro cravejado.', 290000, '/produtos/formatura/3555.webp', '/produtos/formatura/3555-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -369,18 +369,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9257', 'anel-rubi-entrelacado', 'aneis-formatura', 'Anel Rubi Entrelaçado',
    'Ouro 18K (750)', 'Rubi', 'vermelha', 'Oval', NULL, NULL,
    'Rubi oval em halo de diamantes, sobre aro entrelaçado — a peça mais imponente da categoria.', 418000, '/produtos/formatura/9257.webp', '/produtos/formatura/9257-sm.webp',
    NULL, NULL, NULL,
-   1, 5, true)
+   1, 'par', 5, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -388,18 +388,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('002', 'alianca-petala', 'aliancas-ouro', 'Linha Tradicional Meia Cana 2.5mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 2.5, 'ouro',
    'Meia cana polida por inteiro: o desenho da linha tradicional na medida mais delicada. Peso aproximado do par: 1,7 g.', 189000, '/produtos/ouro/002.webp', '/produtos/ouro/002-sm.webp',
    '/produtos/ouro/002-mao.webp', '/produtos/ouro/002-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -407,18 +407,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('003', 'alianca-essence-ouro', 'aliancas-ouro', 'Linha Tradicional Meia Cana 3mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 3, 'ouro',
    'Meia cana polida em três milímetros: o clássico da linha tradicional, simples e atemporal. Peso aproximado do par: 2,3 g.', 249000, '/produtos/ouro/003.webp', '/produtos/ouro/003-sm.webp',
    '/produtos/ouro/003-mao.webp', '/produtos/ouro/003-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -426,18 +426,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('005', 'alianca-nobre', 'aliancas-ouro', 'Linha Tradicional Meia Cana 4mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 4, 'ouro',
    'Meia cana polida em quatro milímetros: a linha tradicional com mais presença no dedo. Peso aproximado do par: 3,7 g.', 396900, '/produtos/ouro/005.webp', '/produtos/ouro/005-sm.webp',
    '/produtos/ouro/005-mao.webp', '/produtos/ouro/005-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -445,18 +445,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
-  ('033E', 'alianca-brisa', 'aliancas-ouro', 'Aliança Brisa',
+  ('033E', 'alianca-brisa', 'aliancas-ouro', 'Linha Trabalhada 3mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 3, 'ouro',
    'Riscas diamantadas em diagonal entre bordas polidas, na versão de três milímetros. Peso aproximado do par: 2,0 g.', 219000, '/produtos/ouro/033e.webp', '/produtos/ouro/033e-sm.webp',
    '/produtos/ouro/033e-mao.webp', '/produtos/ouro/033e-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -464,18 +464,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('033', 'alianca-raio', 'aliancas-ouro', 'Linha Trabalhada 4mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 4, 'ouro',
    'Peça da linha trabalhada: riscas diamantadas em diagonal correndo entre duas bordas polidas. Peso aproximado do par: 3,0 g.', 319000, '/produtos/ouro/033.webp', '/produtos/ouro/033-sm.webp',
    '/produtos/ouro/033-mao.webp', '/produtos/ouro/033-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -483,18 +483,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
-  ('034', 'alianca-onda', 'aliancas-ouro', 'Aliança Onda',
+  ('034', 'alianca-onda', 'aliancas-ouro', 'Linha Trabalhada 5mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 5, 'ouro',
    'Perfil côncavo, diamantado em diagonal, com bordas polidas que emolduram o brilho. Peso aproximado do par: 3,4 g.', 399000, '/produtos/ouro/034.webp', '/produtos/ouro/034-sm.webp',
    '/produtos/ouro/034-mao.webp', '/produtos/ouro/034-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -502,18 +502,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
-  ('ESC3', 'alianca-linear', 'aliancas-ouro', 'Aliança Linear',
+  ('ESC3', 'alianca-linear', 'aliancas-ouro', 'Linha Reta 3mm',
    'Ouro 18K (750)', NULL, NULL, NULL, 3, 'ouro',
    'Aro reto e polido, de perfil escravo: o ouro sem curva nem relevo. Peso aproximado do par: 2 g.', 219900, '/produtos/ouro/esc3.webp', '/produtos/ouro/esc3-sm.webp',
    '/produtos/ouro/esc3-mao.webp', '/produtos/ouro/esc3-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -521,18 +521,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
-  ('6BVL', 'alianca-esplendor', 'aliancas-ouro', 'Aliança Esplendor',
+  ('6BVL', 'alianca-esplendor', 'aliancas-ouro', 'Linha Trabalhada 6mm 40 pedras zircônia',
    'Ouro 18K (750) + Zircônias', NULL, NULL, NULL, 6, 'ouro-zirconias',
    'Par com frisos paralelos; a aliança feminina traz duas fileiras de zircônias, 40 pedras ao todo. Peso aproximado do par: 7,0 g.', 789000, '/produtos/ouro/6bvl.webp', '/produtos/ouro/6bvl-sm.webp',
    '/produtos/ouro/6bvl-mao.webp', '/produtos/ouro/6bvl-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -540,18 +540,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('X', 'alianca-celeste', 'aliancas-ouro', 'Aliança Celeste',
    'Ouro 18K (750) + Zircônias', NULL, NULL, NULL, NULL, 'ouro-zirconias',
    'Par com frisos largos; a aliança feminina tem duas fileiras de zircônias e um ponto de luz ao centro.', 0, '/produtos/ouro/x.webp', '/produtos/ouro/x-sm.webp',
    '/produtos/ouro/x-mao.webp', '/produtos/ouro/x-mao-sm.webp', NULL,
-   2, 0, true)
+   2, 'par', 0, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -559,18 +559,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('P301', 'alianca-elo', 'aliancas-prata', 'Aliança Elo',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Design minimalista com acabamento diagonal texturizado.', 34900, '/modelosalianca/3mmprata.png', NULL,
    NULL, NULL, 'Aliança Elo, prata 950, 3mm, acabamento diagonal texturizado',
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -578,18 +578,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('P601', 'alianca-eter', 'aliancas-prata', 'Aliança Éter',
    'Prata 950', NULL, NULL, NULL, 6, 'prata',
    'Friso dourado e detalhe de coração ao centro.', 54900, '/modelosalianca/6mmprata.png', NULL,
    NULL, NULL, 'Aliança Éter, prata 950, 6mm, friso dourado e detalhe de coração',
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -597,18 +597,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9001', 'alianca-lumen', 'aliancas-prata', 'Aliança Prata 950 4mm Friso Banho Dourado',
    'Prata 950', NULL, NULL, NULL, 4, 'prata',
    'Friso em banho dourado sobre aro polido, com coração vazado em uma das peças.', 27900, '/produtos/prata/9001.webp', '/produtos/prata/9001-sm.webp',
    '/produtos/prata/9001-mao.webp', '/produtos/prata/9001-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -616,18 +616,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9002', 'alianca-vertice', 'aliancas-prata', 'Aliança Prata 950 8mm',
    'Prata 950', NULL, NULL, NULL, 8, 'prata',
    'Oito milímetros de prata polida, riscada por frisos paralelos.', 69000, '/produtos/prata/9002.webp', '/produtos/prata/9002-sm.webp',
    '/produtos/prata/9002-mao.webp', '/produtos/prata/9002-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -635,18 +635,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9003', 'alianca-enlace', 'aliancas-prata', 'Aliança Prata 950 5mm',
    'Prata 950', NULL, NULL, NULL, 5, 'prata',
    'Bordas diamantadas e centro polido, com coração vazado em uma das peças.', 39000, '/produtos/prata/9003.webp', '/produtos/prata/9003-sm.webp',
    NULL, NULL, NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -654,18 +654,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9004', 'alianca-solar', 'aliancas-prata', 'Aliança Prata 950 4mm Friso Banho Dourado',
    'Prata 950', NULL, NULL, NULL, 4, 'prata',
    'Aro diamantado cortado por friso dourado, com coração em banho dourado.', 29900, '/produtos/prata/9004.webp', '/produtos/prata/9004-sm.webp',
    NULL, NULL, NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -673,18 +673,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9005', 'alianca-aurora', 'aliancas-prata', 'Aliança Prata 950 4mm Friso Banho Dourado',
    'Prata 950', NULL, NULL, NULL, 4, 'prata',
    'Textura diamantada intensa, friso dourado ao centro e coração vazado.', 39900, '/produtos/prata/9005.webp', '/produtos/prata/9005-sm.webp',
    '/produtos/prata/9005-mao.webp', '/produtos/prata/9005-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -692,18 +692,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9006', 'alianca-meridiano', 'aliancas-prata', 'Aliança Prata 950 6mm Friso Banho Dourado',
    'Prata 950', NULL, NULL, NULL, 6, 'prata',
    'Seis milímetros polidos, com friso em banho dourado percorrendo o centro.', 39900, '/produtos/prata/9006.webp', '/produtos/prata/9006-sm.webp',
    '/produtos/prata/9006-mao.webp', '/produtos/prata/9006-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -711,18 +711,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9007', 'alianca-duo', 'aliancas-prata', 'Aliança Prata 950 6mm',
    'Prata 950', NULL, NULL, NULL, 6, 'prata',
    'Par em contraste: um aro diamantado, outro polido, ambos com borda fosca.', 36900, '/produtos/prata/9007.webp', '/produtos/prata/9007-sm.webp',
    '/produtos/prata/9007-mao.webp', '/produtos/prata/9007-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -730,18 +730,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9008', 'alianca-chanfro', 'aliancas-prata', 'Aliança Chanfrada Prata 950 3mm',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Aro chanfrado que alterna prata polida e banho rosé.', 15900, '/produtos/prata/9008.webp', '/produtos/prata/9008-sm.webp',
    NULL, NULL, NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -749,18 +749,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9009', 'alianca-cintila', 'aliancas-prata', 'Aliança Prata 950 3mm',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Par fino inteiramente diamantado, com frisos polidos.', 22000, '/produtos/prata/9009.webp', '/produtos/prata/9009-sm.webp',
    '/produtos/prata/9009-mao.webp', '/produtos/prata/9009-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -768,18 +768,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9010', 'alianca-rose', 'aliancas-prata', 'Aliança Prata 950 3mm',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Chanfro bicolor: prata polida de um lado, banho rosé do outro.', 14900, '/produtos/prata/9010.webp', '/produtos/prata/9010-sm.webp',
    NULL, NULL, NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -787,18 +787,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9011', 'alianca-nevoa', 'aliancas-prata', 'Aliança Prata 950 3mm',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Superfície diamantada com borda polida.', 15900, '/produtos/prata/9011.webp', '/produtos/prata/9011-sm.webp',
    '/produtos/prata/9011-mao.webp', '/produtos/prata/9011-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -806,18 +806,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9012', 'alianca-sol-e-lua', 'aliancas-prata', 'Aliança Prata 950 4mm',
    'Prata 950', NULL, NULL, NULL, 4, 'prata',
    'Par com sol e lua gravados, um símbolo em cada aliança.', 39000, '/produtos/prata/9012.webp', '/produtos/prata/9012-sm.webp',
    '/produtos/prata/9012-mao.webp', '/produtos/prata/9012-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -825,18 +825,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9013', 'alianca-serena', 'aliancas-prata', 'Aliança Prata 950 2mm',
    'Prata 950', NULL, NULL, NULL, 2, 'prata',
    'Aro fino e polido, sem relevo — o desenho mais simples da linha.', 11500, '/produtos/prata/9013.webp', '/produtos/prata/9013-sm.webp',
    '/produtos/prata/9013-mao.webp', '/produtos/prata/9013-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -844,18 +844,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9014', 'alianca-martelada', 'aliancas-prata', 'Aliança Prata 950 4mm',
    'Prata 950', NULL, NULL, NULL, 4, 'prata',
    'Aro reto e polido, de bordas vivas.', 14900, '/produtos/prata/9014.webp', '/produtos/prata/9014-sm.webp',
    '/produtos/prata/9014-mao.webp', '/produtos/prata/9014-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -863,18 +863,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9015', 'alianca-prata-950-3mm-riscadinha', 'aliancas-prata', 'Aliança Prata 950 3mm Riscadinha',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Superfície riscada em linhas finas, com bordas polidas.', 16900, '/produtos/prata/9015.webp', '/produtos/prata/9015-sm.webp',
    '/produtos/prata/9015-mao.webp', '/produtos/prata/9015-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -882,18 +882,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9016', 'alianca-prata-950-3mm-diamantada', 'aliancas-prata', 'Aliança Prata 950 3mm',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Par em textura diamantada, com bordas polidas.', 15900, '/produtos/prata/9016.webp', '/produtos/prata/9016-sm.webp',
    '/produtos/prata/9016-mao.webp', '/produtos/prata/9016-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -901,18 +901,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9017', 'alianca-prata-950-3mm-frisos', 'aliancas-prata', 'Aliança Prata 950 3mm',
    'Prata 950', NULL, NULL, NULL, 3, 'prata',
    'Textura riscada cortada por dois frisos polidos.', 24900, '/produtos/prata/9017.webp', '/produtos/prata/9017-sm.webp',
    '/produtos/prata/9017-mao.webp', '/produtos/prata/9017-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -920,18 +920,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9018', 'alianca-prata-950-4mm-com-solitario', 'aliancas-prata', 'Aliança Prata 950 4mm + Anel Solitário',
    'Prata 950', NULL, NULL, NULL, 4, 'prata',
-   'Trio: o par de alianças com friso central e um anel solitário com zircônia.', 49000, '/produtos/prata/9018.webp', '/produtos/prata/9018-sm.webp',
+   'Trio: o par de alianças com friso central e um anel solitário com zircônia. O solitário segue a medida do Aro 1.', 49000, '/produtos/prata/9018.webp', '/produtos/prata/9018-sm.webp',
    '/produtos/prata/9018-mao.webp', '/produtos/prata/9018-mao-sm.webp', NULL,
-   2, 10, false)
+   2, 'trio', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -939,18 +939,18 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 insert into public.produtos
   (sku, slug, categoria_slug, nome, metal, pedra, cor_pedra, lapidacao, largura_mm, material,
    descricao, preco_centavos, imagem_url, imagem_sm_url, imagem_uso_url, imagem_uso_sm_url,
-   alt, aros, estoque, ativo)
+   alt, aros, conjunto, estoque, ativo)
 values
   ('9019', 'alianca-prata-950-7mm-gravacao-a-laser', 'aliancas-prata', 'Aliança Prata 950 7mm com Gravação a Laser',
    'Prata 950', NULL, NULL, NULL, 7, 'prata',
    'Sete milímetros com os nomes gravados a laser na lateral. Escreva os nomes em Observações, no fechamento do pedido.', 129000, '/produtos/prata/9019.webp', '/produtos/prata/9019-sm.webp',
    '/produtos/prata/9019-mao.webp', '/produtos/prata/9019-mao-sm.webp', NULL,
-   2, 10, true)
+   2, 'par', 10, true)
 on conflict (sku) do update set
   slug = excluded.slug, categoria_slug = excluded.categoria_slug, nome = excluded.nome,
   metal = excluded.metal, pedra = excluded.pedra, cor_pedra = excluded.cor_pedra,
@@ -958,7 +958,7 @@ on conflict (sku) do update set
   descricao = excluded.descricao, preco_centavos = excluded.preco_centavos,
   imagem_url = excluded.imagem_url, imagem_sm_url = excluded.imagem_sm_url,
   imagem_uso_url = excluded.imagem_uso_url, imagem_uso_sm_url = excluded.imagem_uso_sm_url,
-  alt = excluded.alt, aros = excluded.aros;
+  alt = excluded.alt, aros = excluded.aros, conjunto = excluded.conjunto;
 
 
 -- ---------------------------------------------------------------------------
